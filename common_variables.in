@@ -1,0 +1,63 @@
+# Common variables for all 'makefile's
+
+# Global Declarations
+C_COMPILER = gcc -fPIC
+CC_COMPILER = g++ -fPIC
+F77_COMPILER = g77 -fPIC
+
+C_LINKER = gcc
+CC_LINKER = g++
+F77_LINKER = g77
+
+AR = ar
+
+RANLIB = ranlib
+
+FLAGS = -O5
+#FLAGS = -O5 -Wall
+#FLAGS = -g 
+#FLAGS = -fast -tp amd64
+#FLAGS = -pg 
+
+LIBFLAGS = rvu
+
+LIBRARIES =
+
+LINKS =
+
+# Directories
+MAIN_DIR = ../Main
+UTILITIES_DIR = ../Utilities
+GRAPHCOLORING_DIR = ../GraphColoring
+BIPARTITEGRAPHBICOLORING_DIR = ../BipartiteGraphBicoloring
+BIPARTITEGRAPHPARTIALCOLORING_DIR = ../BipartiteGraphPartialColoring
+RECOVERY_DIR = ../Recovery
+
+INCLUDES = -I$(GRAPHCOLORING_DIR) -I$(BIPARTITEGRAPHBICOLORING_DIR) -I$(BIPARTITEGRAPHPARTIALCOLORING_DIR) -I$(UTILITIES_DIR) -I$(MAIN_DIR) -I$(RECOVERY_DIR)
+
+#VPATH = 
+
+INSTALL_DIR = ../
+
+# Common header files. These are the files that make always needs to check for changes
+COMMON_HEADER_FILES = \
+	$(MAIN_DIR)/Definitions.h \
+	$(MAIN_DIR)/ColPackHeaders.h \
+	$(UTILITIES_DIR)/StringTokenizer.h \
+	$(UTILITIES_DIR)/DisjointSets.h \
+	$(UTILITIES_DIR)/File.h \
+	$(UTILITIES_DIR)/current_time.h \
+	$(UTILITIES_DIR)/Pause.h \
+	$(UTILITIES_DIR)/Timer.h \
+	$(UTILITIES_DIR)/command_line_parameter_processor.h \
+	$(UTILITIES_DIR)/extra.h \
+	
+
+# Default rules
+.SUFFIXES:
+.SUFFIXES: .h .c .cc .cpp .f .o
+#.h.o: ; echo "*****.h*****"; $(C_COMPILER) $(FLAGS) -c $*.c $(INCLUDES)
+.c.o: ; $(C_COMPILER) $(FLAGS) -c $*.c $(INCLUDES)
+.cc.o: ; $(CC_COMPILER) $(FLAGS) -c $*.cc  $(INCLUDES)
+.cpp.o: ; $(CC_COMPILER) $(FLAGS) -c $*.cpp  $(INCLUDES)
+.f.o: ; $(F77_COMPILER) $(FLAGS) -c $*.f  $(INCLUDES)

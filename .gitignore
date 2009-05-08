@@ -1,0 +1,26 @@
+.*
+*.*~
+*.py~
+*.pyc
+*.txt
+*.png
+*.svg
+*.dot
+*.o
+*.os
+*.a
+*.so
+*.eps
+*~
+*.tex
+Doxyfile
+build
+*.log
+
+
+setup.py
+SConstruct
+
+# EXCEPTIONS
+!README
+!.gitignore
