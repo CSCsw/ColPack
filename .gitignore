@@ -17,6 +17,8 @@ Doxyfile
 build
 *.log
 
+*.exe
+
 build
 setup.py
 SConstruct
