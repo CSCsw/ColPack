@@ -20,6 +20,7 @@
 
 //Special pause that work on both Windows and UNIX for both C and C++
 #include<iostream>
+#include <stdio.h>
 
 using namespace std;
 
