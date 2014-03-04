@@ -1,7 +1,7 @@
-ACLOCAL_AMFLAGS = ${ACLOCAL_FLAGS}
+ACLOCAL_AMFLAGS = ${ACLOCAL_FLAGS} -I m4
 COLPACK_COMMON_FLAGS = $(EXTRA_FLAGS)  -O5  
 
-INCLUDES =  $(COLPACK_COMMON_FLAGS) \
+AM_CPPFLAGS =  $(COLPACK_COMMON_FLAGS) \
 		-I$(top_srcdir)/Main \
 		-I$(top_srcdir)/Utilities \
 		-I$(top_srcdir)/BipartiteGraphPartialColoring \
@@ -17,8 +17,7 @@ endif
 LDADD = libColPack.la
 AM_DEFAULT_SOURCE_EXT = .cpp
 
-noinst_bin_PROGRAMS = ColPack
-noinst_bindir = $(abs_top_builddir)/progs
+noinst_PROGRAMS = ColPack
 lib_LTLIBRARIES = libColPack.la
 pkginclude_HEADERS = \
 			Utilities/CoutLock.h Utilities/command_line_parameter_processor.h  \

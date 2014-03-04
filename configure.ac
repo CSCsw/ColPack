@@ -20,17 +20,19 @@
 
 define([COLPACK_VER], [1])
 define([COLPACK_SUB], [0])
-define([COLPACK_LVL], [8])
+define([COLPACK_LVL], [9])
 
 
-AC_INIT(ColPack, COLPACK_VER.COLPACK_SUB.COLPACK_LVL, agebreme@purdue.edu, ColPack, http://www.cscapes.org/coloringpage/)
-#LT_INIT
-AC_PREREQ(2.57)
-AM_INIT_AUTOMAKE([1.10 no-define])
+AC_INIT([ColPack],[COLPACK_VER.COLPACK_SUB.COLPACK_LVL],[agebreme@purdue.edu],[ColPack],[http://www.cscapes.org/coloringpage/])
+AC_PREREQ([2.57])
+AC_CONFIG_SRCDIR([Main/ColPackHeaders.h])
+AC_CONFIG_MACRO_DIR([m4])
+AM_INIT_AUTOMAKE([1.10 no-define subdir-objects -Wall])
 AC_CONFIG_HEADERS(config.h)
 AC_PROG_CXX
 AC_CONFIG_FILES(Makefile)
-AC_PROG_LIBTOOL
+AM_PROG_AR
+LT_INIT
 
 AC_MSG_CHECKING(Build examples)
 AC_ARG_ENABLE([examples],
