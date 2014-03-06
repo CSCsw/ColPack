@@ -67,7 +67,7 @@ int main()
   double** J;
   //double* s;
   //int p_H_dir, p_H_indir;
-  int tape_stats[11];
+  size_t tape_stats[11];
   int num;
   FILE *fp_JP;
 
