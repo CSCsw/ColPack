@@ -22,8 +22,6 @@
 
 #include "CoutLock.h"
 
-using namespace std;
-
 namespace ColPack
 {
 #ifdef _OPENMP
