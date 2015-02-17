@@ -66,8 +66,8 @@ Configuration:
   Source code location:             `pwd`
   Install path:                     ${prefix}
   
-  CFLAGS:                           ${ac_colpack_cflags}
-  CXXFLAGS:                         ${ac_colpack_cxxflags}
+  CFLAGS:                           ${CFLAGS}
+  CXXFLAGS:                         ${CXXFLAGS}
 
   Use OpenMP:                       ${openmp}
   Build examples:                   ${examples}
