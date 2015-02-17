@@ -20,10 +20,10 @@
 
 define([COLPACK_VER], [1])
 define([COLPACK_SUB], [0])
-define([COLPACK_LVL], [8])
+define([COLPACK_LVL], [9])
 
 
-AC_INIT(ColPack, COLPACK_VER.COLPACK_SUB.COLPACK_LVL, agebreme@purdue.edu, ColPack, http://www.cscapes.org/coloringpage/)
+AC_INIT(ColPack, COLPACK_VER.COLPACK_SUB.COLPACK_LVL, assefaw@eecs.wsu.edu, ColPack, http://cscapes.cs.purdue.edu/coloringpage/)
 #LT_INIT
 AC_PREREQ(2.57)
 AM_INIT_AUTOMAKE([1.10 no-define])
