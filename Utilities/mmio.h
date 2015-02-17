@@ -100,7 +100,7 @@ int mm_is_valid(MM_typecode matcode);		/* too complex for a macro */
 								    		I(nteger)	K(kew)
 
  ***********************************************************************/
-/*
+
 #define MM_MTX_STR		"matrix"
 #define MM_ARRAY_STR	"array"
 #define MM_DENSE_STR	"array"
@@ -114,21 +114,6 @@ int mm_is_valid(MM_typecode matcode);		/* too complex for a macro */
 #define MM_HERM_STR		"hermitian"
 #define MM_SKEW_STR		"skew-symmetric"
 #define MM_PATTERN_STR  "pattern"
-*/
-
-#define MM_MTX_STR      kMMStrings[0]
-#define MM_ARRAY_STR	kMMStrings[1]
-#define MM_DENSE_STR	kMMStrings[2]
-#define MM_COORDINATE_STR kMMStrings[3] 
-#define MM_SPARSE_STR	kMMStrings[4]
-#define MM_COMPLEX_STR	kMMStrings[5]
-#define MM_REAL_STR     kMMStrings[6]
-#define MM_INT_STR      kMMStrings[7]
-#define MM_GENERAL_STR  kMMStrings[8]
-#define MM_SYMM_STR     kMMStrings[9]
-#define MM_HERM_STR	kMMStrings[10]
-#define MM_SKEW_STR	kMMStrings[11]
-#define MM_PATTERN_STR  kMMStrings[12]
 
 /*  high level routines */
 

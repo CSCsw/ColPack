@@ -14,21 +14,6 @@
 
 #include "mmio.h"
 
-
-const char* kMMStrings[] = {"matrix",
-                      "array",
-                      "array",
-                      "coordinate",
-                      "coordinate",
-                      "complex",
-                      "real",
-                      "integer",
-                      "general",
-                      "symmetric",
-                      "hermitian",
-                      "skew-symmetric",
-                      "pattern"};
-
 int mm_read_unsymmetric_sparse(const char *fname, int *M_, int *N_, int *nz_,
                 double **val_, int **I_, int **J_)
 {
