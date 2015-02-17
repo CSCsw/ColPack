@@ -20,8 +20,6 @@
 
 #include "Definitions.h"
 
-using namespace std;
-
 #ifndef MATRIXDEALLOCATION_H
 #define MATRIXDEALLOCATION_H
 

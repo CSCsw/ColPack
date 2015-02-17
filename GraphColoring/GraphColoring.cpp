@@ -675,6 +675,7 @@ namespace ColPack
 			cout<<endl;
 						
 		}
+		return (_TRUE);
 	}
 	
 	int GraphColoring::PrintPotentialHub(map< int, int> *PotentialHub_Private, int i_thread_num, pair<int, int> pii_ColorCombination) {
@@ -696,6 +697,7 @@ namespace ColPack
 			cout<<endl;
 						
 		}
+		return (_TRUE);
 	}
 	
 		
@@ -1129,6 +1131,7 @@ namespace ColPack
 			pii_pair.second = mii_iter->second; // if pii_pair.second < -1, then mii_iter->first is a leaf and its hub can be calculated as [-(pii_pair.second+2)]
 			Vertex2ColorCombination_Private[i_thread_num][ mii_iter->first ].push_back(pii_pair);
 		}
+		return (_TRUE);
 	}
 
 	
@@ -1325,6 +1328,7 @@ namespace ColPack
 				if( i_ElementCount >= i_MaxElementsOfCombination) break;
 			}
 		}
+		return (_TRUE);
 	}
 	
 	int GraphColoring::PrintAllColorCombination(map< pair<int, int>, Colors2Edge_Value , lt_pii>* Colors2Edge_Private, int i_MaxNumThreads, int i_MaxNumOfCombination, int i_MaxElementsOfCombination) {
@@ -1565,7 +1569,8 @@ namespace ColPack
 		// Note: Theoratically, the locks should have been released in the reverse order.Hope this won't cause any problem
 		for(;mib_itr != D1Colors[i_thread_num].end(); mib_itr++) {
 			cout<<flush<<"\t color "<<mib_itr->first<<"; count "<<mib_itr->second<<endl;
-		}								
+		}
+		return (_TRUE);								
 	}
 	
 	int GraphColoring::PrintForbiddenColors(map<int, bool>* mip_ForbiddenColors,int i_thread_num) {
@@ -1575,6 +1580,7 @@ namespace ColPack
 			cout<< itr->first<<", ";
 		}
 		cout<<endl;
+		return (_TRUE);
 	}
 	
 	int GraphColoring::PrintSubGraph(map< int, map<int,bool> > *graph) {
@@ -1588,7 +1594,7 @@ namespace ColPack
 			}
 			cout<<endl;
 		}
-
+		return (_TRUE);
 	}
 	
 	int GraphColoring::PrintVertexD1NeighborAndColor(int VertexIndex, int excludedVertex) {
@@ -1861,6 +1867,7 @@ namespace ColPack
 			}
 			cout<<endl;
 		}
+		return (_TRUE);
 	}
 	
 	int GraphColoring::BuildForbiddenColors(int i_MaxNumThreads, int i_thread_num, int i_CurrentVertex, map<int, bool>* mip_ForbiddenColors, map<int, int>* D1Colors, vector<  map <int, int > > *Vertex2ColorCombination) {
@@ -1937,6 +1944,7 @@ namespace ColPack
 				}
 				
 			}
+		return (_TRUE);
 	}
 	
 	int GraphColoring::StarColoring_serial2() {
@@ -2275,6 +2283,7 @@ namespace ColPack
 				}
 			}
 		}
+		return (_TRUE);
 	}
 	
 	int GraphColoring::PrintVertex2ColorCombination_raw (vector<  map <int, int > > *Vertex2ColorCombination) {
@@ -2286,6 +2295,7 @@ namespace ColPack
 				cout<<"\t Vertex2ColorCombination["<< i <<"][] "<<mii_iter->second<<" c "<<mii_iter->first<<endl;
 			}
 		}
+		return (_TRUE);
 	}
 	
 
@@ -3255,7 +3265,7 @@ namespace ColPack
 					{
 						for(l=m_vi_Vertices[m_vi_Edges[k]]; l<m_vi_Vertices[STEP_UP(m_vi_Edges[k])]; l++)
 						{
-							if((m_vi_Edges[l] == m_vi_Edges[j]))
+							if (m_vi_Edges[l] == m_vi_Edges[j])
 							{
 								continue;
 							}
@@ -3372,7 +3382,7 @@ namespace ColPack
 					{
 						for(l=m_vi_Vertices[m_vi_Edges[k]]; l<m_vi_Vertices[STEP_UP(m_vi_Edges[k])]; l++)
 						{
-							if((m_vi_Edges[l] == m_vi_Edges[j]))
+							if (m_vi_Edges[l] == m_vi_Edges[j] )
 							{
 								continue;
 							}
