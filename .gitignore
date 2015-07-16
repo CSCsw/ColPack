@@ -1,0 +1,14 @@
+*.o
+*.Po
+*.Plo
+*.lo
+*.la
+*.lai
+*.so
+*.a
+*.exe
+build
+.svn
+*~
+*.bak*
+
