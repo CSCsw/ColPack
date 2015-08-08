@@ -37,7 +37,7 @@ LT_INIT
 
 AC_MSG_CHECKING(Build examples)
 AC_ARG_ENABLE([examples],
-     [  --enable-examples    Build examples],
+     [AS_HELP_STRING([--enable-examples],[Build examples])],
      [case "${enableval}" in
        yes) examples=true ;;
        no)  examples=false ;;
@@ -47,7 +47,7 @@ AC_ARG_ENABLE([examples],
 
 AC_MSG_CHECKING(OpenMP)
 AC_ARG_ENABLE([openmp],
-     [  --enable-openmp    Enable OpenMP],
+     [AS_HELP_STRING([--enable-openmp],[Enable OpenMP])],
      [case "${enableval}" in
        yes) openmp=true ;;
        no)  openmp=false ;;
