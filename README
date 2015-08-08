@@ -1,5 +1,14 @@
 ColPack's Doxygen documentation is available here:
-http://www.cscapes.org/dox/ColPack/html/index.html
+http://cscapes.cs.purdue.edu/coloringpage/software.htm
 
 ColPack's project home page:
-http://www.cscapes.org/coloringpage/
+http://cscapes.cs.purdue.edu/coloringpage/
+
+Ubuntu Build Instructions
+=========================
+In the `ColPack` directory run the following:
+
+    autoreconf -vif
+    ./configure --prefix=/path/to/install/
+    make -j 4   #Where "4" is the number of cores on your machine
+    make install

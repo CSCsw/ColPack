@@ -23,11 +23,12 @@ define([COLPACK_SUB], [0])
 define([COLPACK_LVL], [9])
 
 
-AC_INIT([ColPack],[COLPACK_VER.COLPACK_SUB.COLPACK_LVL],[agebreme@purdue.edu],[ColPack],[http://www.cscapes.org/coloringpage/])
+AC_INIT([ColPack],[COLPACK_VER.COLPACK_SUB.COLPACK_LVL],[assefaw@eecs.wsu.edu],[ColPack],[http://cscapes.cs.purdue.edu/coloringpage/])
 AC_PREREQ([2.57])
 AC_CONFIG_SRCDIR([Main/ColPackHeaders.h])
 AC_CONFIG_MACRO_DIR([m4])
 AM_INIT_AUTOMAKE([1.10 no-define subdir-objects -Wall])
+AM_SILENT_RULES([yes])
 AC_CONFIG_HEADERS(config.h)
 AC_PROG_CXX
 AC_CONFIG_FILES(Makefile)
@@ -68,10 +69,9 @@ Configuration:
   Source code location:             `pwd`
   Install path:                     ${prefix}
   
-  CFLAGS:                           ${ac_colpack_cflags}
-  CXXFLAGS:                         ${ac_colpack_cxxflags}
+  CFLAGS:                           ${CFLAGS}
+  CXXFLAGS:                         ${CXXFLAGS}
 
   Use OpenMP:                       ${openmp}
   Build examples:                   ${examples}
 "
-

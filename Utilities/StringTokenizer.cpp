@@ -233,12 +233,12 @@ namespace ColPack
 
 	  string DelimiterSubString;
 
-	  if((TokenStringLength == 0))
+	  if (TokenStringLength == 0)
 	  {
 		return(NULL);
 	  }
 
-	  if(DelimiterStringLength == 0)
+	  if (DelimiterStringLength == 0)
 	  {
 		return(InputString);
 	  }

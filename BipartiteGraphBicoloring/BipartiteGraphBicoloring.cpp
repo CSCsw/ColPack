@@ -1423,7 +1423,7 @@ namespace ColPack
 
 					i_EdgeID = m_mimi2_VertexEdgeMap[i_PresentVertex][i_NeighboringVertex];
 
-					if((vi_EdgeCodes[i_EdgeID] == 2))
+					if (vi_EdgeCodes[i_EdgeID] == 2)
 					{
 						continue;
 					}

@@ -200,7 +200,6 @@ namespace ColPack
 				
 			}
 		}
-		/*
 		if(numOfNonZeros_count != g->GetEdgeCount()) {
 			cout<<"**Something fishing going on"<<endl;
 			cout<<"numOfNonZeros_count="<<numOfNonZeros_count<<endl;
@@ -675,7 +674,7 @@ namespace ColPack
 		  }
 
 		  
-		  if(!(*dp2_JacobianValue)[i]==(*dp2_JacobianValue2)[i] ) {
+		  if((*dp2_JacobianValue)[i] != (*dp2_JacobianValue2)[i] ) {
 		    cout<<"i="<<i<<" (*dp2_JacobianValue)[i] ("<< (*dp2_JacobianValue)[i] <<")!=(*dp2_JacobianValue2)[i] ("<< (*dp2_JacobianValue2)[i] <<")"<<endl;
 		    fail_flag=true;
 		    break;
@@ -704,7 +703,7 @@ namespace ColPack
 		  }
 		  //cout<<"found j = "<<j<<endl;
 		  
-		  if( !(*dp2_JacobianValue)[i]==(*dp3_Value)[(*ip2_RowIndex)[i]][j]) {
+		  if( (*dp2_JacobianValue)[i] != (*dp3_Value)[(*ip2_RowIndex)[i]][j]) {
 		    cout<<"i="<<i<<" (*dp2_JacobianValue)[i] ("<< (*dp2_JacobianValue)[i] <<")!=(*dp3_Value)["<< (*ip2_RowIndex)[i] <<"]["<< (*ip2_ColumnIndex)[i] <<"] ("<<(*dp3_Value)[(*ip2_RowIndex)[i]][j]<<")"<<endl;
 		    fail_flag=true;
 		    break;

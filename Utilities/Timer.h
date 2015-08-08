@@ -34,7 +34,6 @@
 
 #endif
 
-using namespace std;
 
 #ifndef TIMER_H
 #define TIMER_H

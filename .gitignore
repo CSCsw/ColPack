@@ -1,9 +1,16 @@
+*.Plo
+*.Po
+*.a
+*.exe
 *.la
+*.lai
 *.lo
 *.o
+*.so
 .deps/
 .dirstamp
 .libs/
+.svn/
 /ColPack
 /INSTALL
 /Makefile
@@ -11,6 +18,7 @@
 /aclocal.m4
 /ar-lib
 /autom4te.cache/
+/build
 /compile
 /config.guess
 /config.h
