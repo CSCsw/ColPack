@@ -23,22 +23,19 @@ define([COLPACK_SUB], [0])
 define([COLPACK_LVL], [9])
 
 
-AC_INIT([ColPack],[COLPACK_VER.COLPACK_SUB.COLPACK_LVL],[assefaw@eecs.wsu.edu],[ColPack],[http://cscapes.cs.purdue.edu/coloringpage/])
-AC_PREREQ([2.57])
-AC_CONFIG_SRCDIR([Main/ColPackHeaders.h])
-AC_CONFIG_MACRO_DIR([m4])
-AM_INIT_AUTOMAKE([1.10 no-define subdir-objects -Wall])
-AM_SILENT_RULES([yes])
+AC_INIT(ColPack, COLPACK_VER.COLPACK_SUB.COLPACK_LVL, assefaw@eecs.wsu.edu, ColPack, http://cscapes.cs.purdue.edu/coloringpage/)
+#LT_INIT
+AC_PREREQ(2.57)
+AM_INIT_AUTOMAKE([1.10 no-define])
 AC_CONFIG_HEADERS(config.h)
 AC_PROG_CXX
-AX_CXXFLAGS_WARN_ALL
 AC_CONFIG_FILES(Makefile)
-AM_PROG_AR
-LT_INIT
+AC_PROG_LIBTOOL
+AM_SILENT_RULES([yes])
 
 AC_MSG_CHECKING(Build examples)
 AC_ARG_ENABLE([examples],
-     [AS_HELP_STRING([--enable-examples],[Build examples])],
+     [  --enable-examples    Build examples],
      [case "${enableval}" in
        yes) examples=true ;;
        no)  examples=false ;;
@@ -48,7 +45,7 @@ AC_ARG_ENABLE([examples],
 
 AC_MSG_CHECKING(OpenMP)
 AC_ARG_ENABLE([openmp],
-     [AS_HELP_STRING([--enable-openmp],[Enable OpenMP])],
+     [  --enable-openmp    Enable OpenMP],
      [case "${enableval}" in
        yes) openmp=true ;;
        no)  openmp=false ;;
@@ -76,3 +73,4 @@ Configuration:
   Use OpenMP:                       ${openmp}
   Build examples:                   ${examples}
 "
+

@@ -67,7 +67,7 @@ int main()
   double** J;
   //double* s;
   //int p_H_dir, p_H_indir;
-  size_t tape_stats[11];
+  int tape_stats[11];
   int num;
   FILE *fp_JP;
 
@@ -143,12 +143,12 @@ int main()
   //return 1;
 
   tapestats(tag_c,tape_stats);              // reading of tape statistics
-  printf("\n    independents   %ld\n",(long)tape_stats[0]);
-  printf("    dependents     %ld\n",(long)tape_stats[1]);
-  printf("    operations     %ld\n",(long)tape_stats[5]);
-  printf("    buffer size    %ld\n",(long)tape_stats[4]);
-  printf("    maxlive        %ld\n",(long)tape_stats[2]);
-  printf("    valstack size  %ld\n\n",(long)tape_stats[3]);
+  printf("\n    independents   %d\n",tape_stats[0]);
+  printf("    dependents     %d\n",tape_stats[1]);
+  printf("    operations     %d\n",tape_stats[5]);
+  printf("    buffer size    %d\n",tape_stats[4]);
+  printf("    maxlive        %d\n",tape_stats[2]);
+  printf("    valstack size  %d\n\n",tape_stats[3]);
 
 
 //------------------------------------------------------------------------------------
@@ -360,8 +360,7 @@ void printmatint(char* kette, int n, int m, int** M)
 
 
 void printmatint_c(char* kette, int m,unsigned int** M)
-{ int i;
-  unsigned int j;
+{ int i,j;
 
   printf("%s \n",kette);
   for (i=0;i<m;i++)
