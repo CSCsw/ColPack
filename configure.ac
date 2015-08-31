@@ -27,7 +27,7 @@ AC_INIT([ColPack],[COLPACK_VER.COLPACK_SUB.COLPACK_LVL],[assefaw@eecs.wsu.edu],[
 AC_PREREQ([2.57])
 AC_CONFIG_SRCDIR([Main/ColPackHeaders.h])
 AC_CONFIG_MACRO_DIR([m4])
-AM_INIT_AUTOMAKE([1.10 no-define subdir-objects -Wall])
+AM_INIT_AUTOMAKE([foreign 1.10 no-define subdir-objects -Wall])
 AM_SILENT_RULES([yes])
 AC_CONFIG_HEADERS(config.h)
 AC_PROG_CXX
