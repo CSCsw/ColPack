@@ -6,3 +6,6 @@ compiler:
 
 before_script:
   - autoreconf -fi
+
+script:
+  - ./configure && make && make check
