@@ -2,3 +2,7 @@ language: cpp
 
 compiler:
   - gcc
+
+
+before_script:
+  - autoreconf -fi
