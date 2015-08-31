@@ -50,12 +50,10 @@ int main(int argc, char ** argv)
 	//* 1. Check Star Bicoloring Coloring result
 	cout<<"Check Star Bicoloring Coloring result ... "<<endl;
 	g->CheckStarBicoloring();
-	Pause();
 	//*/
 
 	//* 2. Print coloring results
 	g->PrintVertexBicoloringMetrics();
-	Pause();
 	//*/
 
 	//* 3. Get the list of colorID of colored vertices (in this case, the left side of the bipartite graph)
@@ -67,7 +65,6 @@ int main(int argc, char ** argv)
 
 	//Print Partial Colors
 	g->PrintVertexBicolors();
-	Pause();
 	//*/
 
 	//* 4. Get seed matrix
@@ -83,13 +80,11 @@ int main(int argc, char ** argv)
 	if(i_LeftSeedRowCount>0 && i_LeftSeedColumnCount > 0){
 	  printf("Left Seed matrix %d x %d \n", i_LeftSeedRowCount, i_LeftSeedColumnCount);
 	  displayMatrix(LeftSeed, i_LeftSeedRowCount, i_LeftSeedColumnCount, 1);
-	  Pause();
 	}
 
 	if(i_RightSeedRowCount>0 && i_RightSeedColumnCount > 0) {
 	  printf("Right Seed matrix %d x %d \n", i_RightSeedRowCount, i_RightSeedColumnCount);
 	  displayMatrix(RightSeed, i_RightSeedRowCount, i_RightSeedColumnCount, 1);
-	  Pause();
 	}
 	//*/
 

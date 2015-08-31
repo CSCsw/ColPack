@@ -74,8 +74,13 @@ libColPack_la_SOURCES = \
 ColPack_SOURCES = \
 			Main/Main.cpp 
 
+TESTS = \
+  SampleDrivers/Basic/color_bipartite_graph_using_BipartiteGraphBicoloringInterface \
+  SampleDrivers/Basic/color_bipartite_graph_using_BipartiteGraphPartialColoringInterface \
+  SampleDrivers/Basic/color_graph_using_GraphColoringInterface \
+  SampleDrivers/Basic/Generate_seed_matrix_for_Hessian \
+  SampleDrivers/Basic/Generate_seed_matrix_for_Jacobian
 
-if EXAMPLES
 examplesdir = ${prefix}/examples
 basic_examplesdir = ${examplesdir}/Basic
 basic_examples_PROGRAMS = \
@@ -85,6 +90,7 @@ basic_examples_PROGRAMS = \
 			SampleDrivers/Basic/Generate_seed_matrix_for_Hessian \
 			SampleDrivers/Basic/Generate_seed_matrix_for_Jacobian
 
+if EXAMPLES
 ADIC_examplesdir = ${examplesdir}/Matrix_Compression_and_Recovery/ADIC
 ADIC_examples_PROGRAMS = \
 			SampleDrivers/Matrix_Compression_and_Recovery/ADIC/01_Column_compression_and_recovery_for_Jacobian_return_ADIC_Format 

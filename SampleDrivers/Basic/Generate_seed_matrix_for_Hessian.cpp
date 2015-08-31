@@ -71,8 +71,6 @@ int main()
 	}
 	//END SECTION
 
-	Pause();
-
 	//GraphColoringInterface * g = new GraphColoringInterface();
 	delete g;
 	g = NULL;

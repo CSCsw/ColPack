@@ -51,12 +51,10 @@ int main(int argc, char ** argv)
 	cout<<"Check Partial Distance Two coloring result ... "<<endl;
 	if(g->CheckPartialDistanceTwoColoring() == _FALSE) cout<<" FAILED"<<endl;
 	else cout<<" SUCCEEDED"<<endl;
-	Pause();
 	//*/
 
 	//* 2. Print coloring results
 	g->PrintPartialColoringMetrics();
-	Pause();
 	//*/
 
 	//* 3. Get the list of colorID of colored vertices (in this case, the left side of the bipartite graph)
@@ -65,7 +63,6 @@ int main(int argc, char ** argv)
 
 	//Print Partial Colors
 	g->PrintPartialColors();
-	Pause();
 	//*/
 
 	/* 4. Get seed matrix
@@ -76,7 +73,6 @@ int main(int argc, char ** argv)
 	//Display Seed
 	printf("Seed matrix %d x %d \n", i_SeedRowCount, i_SeedColumnCount);
 	displayMatrix(Seed, i_SeedRowCount, i_SeedColumnCount, 1);
-	Pause();
 	//*/
 
 	delete g;

@@ -50,12 +50,10 @@ int main(int argc, char ** argv)
 	/* 1. Check DISTANCE_TWO coloring result
 	cout<<"Check DISTANCE_TWO coloring result"<<endl;
 	g->CheckDistanceTwoColoring();
-	Pause();
 	//*/
 
 	//* 2. Print coloring results
 	g->PrintVertexColoringMetrics();
-	Pause();
 	//*/
 
 	//* 3. Get the list of colorID of vertices
@@ -65,7 +63,6 @@ int main(int argc, char ** argv)
 	//Display vector of VertexColors
 	printf("vector of VertexColors (size %d) \n", (int)vi_VertexColors.size());
 	displayVector(&vi_VertexColors[0], vi_VertexColors.size(), 1);
-	Pause();
 	//*/
 
 	/* 4. Get seed matrix
@@ -76,7 +73,6 @@ int main(int argc, char ** argv)
 	//Display Seed
 	printf("Seed matrix %d x %d \n", i_SeedRowCount, i_SeedColumnCount);
 	displayMatrix(Seed, i_SeedRowCount, i_SeedColumnCount, 1);
-	Pause();
 	//*/
 
 	delete g;
@@ -101,18 +97,15 @@ int main(int argc, char ** argv)
 		return _FALSE;
 	}
 	cout<<"Done with ReadAdjacencyGraph()"<<endl;
-	//Pause();
 
 	//(Distance-2)Color the graph using "LARGEST_FIRST" Ordering. Other coloring and ordering can also be used.
 	g->Coloring("DISTANCE_TWO", "LARGEST_FIRST");
 	cout<<"Done with Coloring()"<<endl;
-	//Pause();
 
 	//Print coloring results
 	g->PrintVertexColoringMetrics();
 	cout<<"Done with PrintVertexColoringMetrics()"<<endl;
 	delete g;
-	//Pause();
 
 	return _TRUE;
 }
