@@ -1,5 +1,3 @@
-[![Build Status](https://travis-ci.org/CSCsw/ColPack.svg?branch=master)](https://travis-ci.org/CSCsw/ColPack)
-
 ColPack's Doxygen documentation is available here:
 http://cscapes.cs.purdue.edu/coloringpage/software.htm
 
@@ -9,7 +7,7 @@ http://cscapes.cs.purdue.edu/coloringpage/
 CMake Build Instructions
 =========================
 1. Get CMake (https://cmake.org/)
-2. In the 'ColPack' directory run:
+2. In the 'ColPack' directory run: <br />
 	mkdir build <br />
 	cd build <br />
 	cmake .. <br />
