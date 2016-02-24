@@ -158,7 +158,7 @@ namespace ColPack
 		  va_end(ap); /*cleanup*/
 		  return;
 		}
-#ifdef	_COLPACK_CHECKPOINT_	
+#ifdef	_COLPACK_CHECKPOINT_
 		string s_OutputFile = "-ColPack_debug.mtx";
 		s_OutputFile = "BipartiteGraphBicoloringInterface-InternalBPGraph"+s_OutputFile;
 		WriteMatrixMarket(s_OutputFile);

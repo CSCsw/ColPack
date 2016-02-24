@@ -86,7 +86,7 @@ namespace ColPack
 		void GetOrderedVertices(vector<int> &output);
 
 		void PrintVertexOrdering();
-		
+
 		double GetVertexOrderingTime();
 	};
 }

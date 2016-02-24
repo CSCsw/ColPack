@@ -48,7 +48,7 @@ namespace ColPack
 		- If the size of Intersect_set > 0 => VertexIndex1 and VertexIndex2 are Distance-2 neighbor
 		*/
 		bool AreD2Neighbor(int VertexIndex1, int VertexIndex2);
-		
+
 		bool operator==(const GraphCore &other) const;
 		bool areEqual(const GraphCore &other, bool structureOnly = 1) const;
 
@@ -97,7 +97,7 @@ namespace ColPack
 
 		void GetVertices(vector<int> &output) const;
 		vector <int>* GetVerticesPtr(){ return &m_vi_Vertices; }
-		
+
 		void GetEdges(vector<int> &output) const;
 		vector <int>* GetEdgesPtr(){ return &m_vi_Edges; }
 

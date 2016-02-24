@@ -7,7 +7,7 @@ AM_CPPFLAGS =  $(COLPACK_COMMON_FLAGS) \
 		-I$(top_srcdir)/BipartiteGraphPartialColoring \
 		-I$(top_srcdir)/BipartiteGraphBicoloring \
 		-I$(top_srcdir)/GraphColoring \
-		-I$(top_srcdir)/Recovery 
+		-I$(top_srcdir)/Recovery
 AM_LDFLAGS = $(COLPACK_COMMON_FLAGS)
 
 if ENABLE_OPENMP
@@ -69,10 +69,10 @@ libColPack_la_SOURCES = \
 			Recovery/JacobianRecovery1D.cpp \
 			Recovery/RecoveryCore.cpp \
 			Recovery/JacobianRecovery2D.cpp \
-			Recovery/HessianRecovery.cpp 
+			Recovery/HessianRecovery.cpp
 
 ColPack_SOURCES = \
-			Main/Main.cpp 
+			Main/Main.cpp
 
 
 
@@ -90,7 +90,7 @@ TESTS = ${basic_examples_PROGRAMS}
 if EXAMPLES
 ADIC_examplesdir = ${examplesdir}/Matrix_Compression_and_Recovery/ADIC
 ADIC_examples_PROGRAMS = \
-			SampleDrivers/Matrix_Compression_and_Recovery/ADIC/01_Column_compression_and_recovery_for_Jacobian_return_ADIC_Format 
+			SampleDrivers/Matrix_Compression_and_Recovery/ADIC/01_Column_compression_and_recovery_for_Jacobian_return_ADIC_Format
 
 ADOLC_examplesdir = ${examplesdir}/Matrix_Compression_and_Recovery/ADOL-C
 ADOLC_examples_PROGRAMS = \
@@ -105,9 +105,9 @@ ADOLC_examples_PROGRAMS = \
 			SampleDrivers/Matrix_Compression_and_Recovery/ADOL-C/09_Bidirectional_compression_and_recovery_for_Jacobian_return_Row_Compressed_Format \
 			SampleDrivers/Matrix_Compression_and_Recovery/ADOL-C/10_Column_compression_and_recovery_for_Jacobian_return_Row_Compressed_Format__unmanaged_usermem \
 			SampleDrivers/Matrix_Compression_and_Recovery/ADOL-C/11_Compression_and_direct_recovery_for_Hessian_return_Row_Compressed_Format__unmanaged_usermem \
-			SampleDrivers/Matrix_Compression_and_Recovery/ADOL-C/12_Bidirectional_compression_and_recovery_for_Jacobian_return_Row_Compressed_Format__unmanaged_usermem 
+			SampleDrivers/Matrix_Compression_and_Recovery/ADOL-C/12_Bidirectional_compression_and_recovery_for_Jacobian_return_Row_Compressed_Format__unmanaged_usermem
 
 CSR_examplesdir = ${examplesdir}/Matrix_Compression_and_Recovery/CSR
 CSR_examples_PROGRAMS = \
-			SampleDrivers/Matrix_Compression_and_Recovery/CSR_input/01_Column_compression_and_recovery_for_Jacobian_CSR_input_return_Row_Compressed_Format 
+			SampleDrivers/Matrix_Compression_and_Recovery/CSR_input/01_Column_compression_and_recovery_for_Jacobian_CSR_input_return_Row_Compressed_Format
 endif

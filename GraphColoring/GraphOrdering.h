@@ -45,12 +45,12 @@ namespace ColPack
 		int GetMaxBackDegree();
 
 		int OrderVertices(string s_OrderingVariant);
-		
+
 		/// Test and make sure that the ordering is valid. Return 0 if the ordering is invalid, 1 if the ordering is valid.
 		/** This routine will test for:
 		- Duplicated vertices. If there is no duplicated vertex, this ordering is probably ok.
 		- Invalid vertex #. The vertex # should be between 0 and ordering.size()
-		
+
 		Actually make a call to "bool isValidOrdering(vector<int> & ordering, int offset = 0);"
 		*/
 		int CheckVertexOrdering();

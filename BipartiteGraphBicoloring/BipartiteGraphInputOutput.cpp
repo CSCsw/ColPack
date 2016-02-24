@@ -113,34 +113,34 @@ namespace ColPack
 			cout<<"Error creating file: \""<<s_OutputFile<<"\""<<endl;
 			exit(1);
 		}
-		
+
 		int max = m_vi_LeftVertices.size()-1;
-		
+
 		out<<"%%MatrixMarket matrix coordinate real general"<<endl;
-		
+
 		out<<GetLeftVertexCount()<<" "<<GetRightVertexCount()<<" "<< GetEdgeCount()<<endl;
-		
+
 		for(int i = 0; i<max;i++) {
 		  for(int j = m_vi_LeftVertices[i]; j < m_vi_LeftVertices[i+1]; j++) {
 		    out<<i+1<<" "<<m_vi_Edges[j]+1;
 		    out<<endl;
 		  }
 		}
-		
+
 		return 0;
 	}
-	
+
 	int BipartiteGraphInputOutput::ReadMatrixMarketBipartiteGraph(string s_InputFile)
 	{
 		bool b_symmetric;
-		
+
 		istringstream in2;
 		int entry_counter = 0, num_of_entries = 0, nz_counter=0;
 		bool value_not_specified = false;
 		int i_LineCount = _TRUE;
 
 		int i, j;
-		
+
 
 		int i_RowCount, i_ColumnCount;
 
@@ -186,7 +186,7 @@ namespace ColPack
 		    printf("Could not process Matrix Market banner.\n");
 		    exit(1);
 		}
-		
+
 		if(mm_is_symmetric(matcode)) {
 		  b_symmetric = true;
 		}
@@ -262,7 +262,7 @@ namespace ColPack
 				value_not_specified=false;
 				in2>>i_LeftVertex>>i_RightVertex>>d_Value;
 				entry_counter++;
-				if(d_Value == -999999999. && in2.eof()) {		
+				if(d_Value == -999999999. && in2.eof()) {
 				  // "d_Value" entry is not specified
 				  value_not_specified = true;
 				}
@@ -500,7 +500,7 @@ namespace ColPack
 		{
 			cout<<"Found File "<<m_s_InputFile<<endl;
 		}
-		
+
 		int i_Dummy, i, j;
 		int num;
 		int nnz;
@@ -508,31 +508,31 @@ namespace ColPack
 		istringstream iin;
 		vector< vector<int> > vvi_LeftVertexAdjacency, vvi_RightVertexAdjacency;
 		vector<int> vi_ColumnStartPointers;
-		
+
 		//ignore the first line, which is the tittle and key
 		getline(in, line);
-		
+
 		// Get line 2
 		int TOTCRD; // (ignored) Total number of lines excluding header
 		int PTRCRD; // (ignored) Number of lines for pointers
 		int INDCRD; // (ignored) Number of lines for row (or variable) indices
 		int VALCRD; // (ignored) Number of lines for numerical values. VALCRD == 0 if no values is presented
 		int RHSCRD; // (ignored) Number of lines for right-hand sides. RHSCRD == 0 if no right-hand side data is presented
-		
+
 		getline(in, line);
 		iin.clear();
 		iin.str(line);
 		iin >> TOTCRD >> PTRCRD >> INDCRD >> VALCRD >> RHSCRD;
-		
+
 		// Get line 3
 		string MXTYPE; //Matrix type. We only accept: (R | P) (*) (A)
 		int NROW; // Number of rows (or left vertices)
 		int NCOL; // Number of columns (or  right vertices)
-		int NNZERO; // (ignored) Number of nonzeros 
+		int NNZERO; // (ignored) Number of nonzeros
 			    // in case of symmetric matrix, it is the number of nonzeros IN THE UPPER TRIANGULAR including the diagonal
-		int NELTVL; // (ignored) Number of elemental matrix entries (zero in the case of assembled matrices) 
+		int NELTVL; // (ignored) Number of elemental matrix entries (zero in the case of assembled matrices)
 		bool b_symmetric; // true if this matrix is symmetric (MXTYPE[1] == 'S'), false otherwise.
-		
+
 		getline(in, line);
 		iin.clear();
 		iin.str(line);
@@ -549,13 +549,13 @@ namespace ColPack
 		  b_symmetric = true;
 		}
 		else b_symmetric = false;
-		
+
 		// Ignore line 4 for now
 		getline(in, line);
-		
+
 		//If the right-hand side data is presented, ignore the 5th header line
 		if(RHSCRD) getline(in, line);
-		
+
 		m_vi_LeftVertices.clear();
 		m_vi_LeftVertices.resize(NROW+1, _UNKNOWN);
 		m_vi_RightVertices.clear();
@@ -566,12 +566,12 @@ namespace ColPack
 		vvi_RightVertexAdjacency.resize(NCOL);
 		vi_ColumnStartPointers.clear();
 		vi_ColumnStartPointers.resize(NCOL+1);
-		
-		// get the 2nd data block: column start pointers		
+
+		// get the 2nd data block: column start pointers
 		for(int i=0; i<NCOL+1; i++) {
 		  in>> vi_ColumnStartPointers[i];
 		}
-		
+
 		//populate vvi_LeftVertexAdjacency & vvi_RightVertexAdjacency
 		nnz = 0;
 		for(i=0; i<NCOL; i++) {
@@ -581,7 +581,7 @@ namespace ColPack
 		    vvi_RightVertexAdjacency[i].push_back(num);
 		    vvi_LeftVertexAdjacency[num].push_back(i);
 		    nnz++;
-		    
+
 		    if(b_symmetric && num != i) {
 		      vvi_RightVertexAdjacency[num].push_back(i);
 		      vvi_LeftVertexAdjacency[i].push_back(num);
@@ -589,7 +589,7 @@ namespace ColPack
 		    }
 		  }
 		}
-		
+
 		m_vi_Edges.clear();
 		m_vi_Edges.resize(2*nnz, _UNKNOWN);
 		//populate the m_vi_LeftVertices and their edges at the same time
@@ -598,23 +598,23 @@ namespace ColPack
 		  for(j=0; j<vvi_LeftVertexAdjacency[i].size();j++) {
 		    m_vi_Edges[m_vi_LeftVertices[i]+j] = vvi_LeftVertexAdjacency[i][j];
 		  }
-		  
+
 		  m_vi_LeftVertices[i+1] = m_vi_LeftVertices[i]+vvi_LeftVertexAdjacency[i].size();
 		}
-		
+
 		//populate the m_vi_RightVertices and their edges at the same time
 		m_vi_RightVertices[0]=m_vi_LeftVertices[NROW];
 		for(i=0; i<NCOL; i++) {
 		  for(j=0; j<vvi_RightVertexAdjacency[i].size();j++) {
 		    m_vi_Edges[m_vi_RightVertices[i]+j] = vvi_RightVertexAdjacency[i][j];
 		  }
-		  
+
 		  m_vi_RightVertices[i+1] = m_vi_RightVertices[i]+vvi_RightVertexAdjacency[i].size();
 		}
-		
+
 		return 0;
 	}
-	
+
 	//Public Function 2258;3258
 	int BipartiteGraphInputOutput::ReadGenericMatrixBipartiteGraph(string s_InputFile)
 	{
@@ -925,7 +925,7 @@ namespace ColPack
 	  int i;
 	  unsigned int j;
 	  map< int,vector<int> > colList;
-	  
+
 	  m_vi_LeftVertices.clear();
 	  m_vi_LeftVertices.reserve(i_RowCount+1);
 	  m_vi_RightVertices.clear();
@@ -945,7 +945,7 @@ namespace ColPack
 	    //PrintBipartiteGraph ();
 	    //Pause();
 	  }
-	  	  
+
 	  //for(i=0; i < i_RowCount; i++) {
 	//	  for(j=1; j <= uip2_JacobianSparsityPattern[i][0]; j++) {
 	//		  m_vi_Edges.push_back(uip2_JacobianSparsityPattern[i][j]);
@@ -965,11 +965,11 @@ namespace ColPack
 		  m_vi_RightVertices.push_back(m_vi_Edges.size());
 	  }
 
-	  CalculateVertexDegrees();	  
+	  CalculateVertexDegrees();
 
 	  return (_TRUE);
 	}
-	
+
 	int BipartiteGraphInputOutput::BuildBPGraphFromADICFormat(std::list<std::set<int> > *  lsi_SparsityPattern, int i_ColumnCount) {
 	  int i;
 	  unsigned int j;
@@ -981,16 +981,16 @@ namespace ColPack
 	  m_vi_RightVertices.clear();
 	  m_vi_RightVertices.reserve(i_ColumnCount+1);
 	  m_vi_Edges.clear();
-	  
+
 	  m_vi_LeftVertices.push_back(0); // equivalent to m_vi_LeftVertices.push_back(m_vi_Edges.size());
-	  
+
 	  int rowIndex=-1, colIndex=-1;
 	  std::list<std::set<int> >::iterator valsetlistiter = (*lsi_SparsityPattern).begin();
-	  
+
 	  for (; valsetlistiter != (*lsi_SparsityPattern).end(); valsetlistiter++){
 	    rowIndex++;
 	    std::set<int>::iterator valsetiter = (*valsetlistiter).begin();
-	    
+
 	    for (; valsetiter != (*valsetlistiter).end() ; valsetiter++) {
 	      colIndex = *valsetiter;
 	      m_vi_Edges.push_back(colIndex);
@@ -999,7 +999,7 @@ namespace ColPack
 	    m_vi_LeftVertices.push_back(m_vi_Edges.size());
 	  }
 	  m_vi_Edges.reserve(2*m_vi_Edges.size());
-	  
+
 	  //put together the right vertices
 	  map< int,vector<int> >::iterator curr;
 	  m_vi_RightVertices.push_back(m_vi_Edges.size());

@@ -20,7 +20,7 @@ void toFileBiC(string baseDir, string stat_output_suffix, vector<string> Orderin
 
 void toFileBiPC(string baseDir, string stat_output_suffix, vector<string> Orderings, vector<string> Colorings, map<string, bool> stat_flags );
 
-/* Note: be careful when you work with MatrixMarket-format. 
+/* Note: be careful when you work with MatrixMarket-format.
 Look inside the file (1st line) to see whether the matrix is:
 - 'symmetric': use toFileStatisticForGraph()
 - 'general' (likely to be non-symmetric): use toFileStatisticForBipartiteGraph()

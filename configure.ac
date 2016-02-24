@@ -69,7 +69,7 @@ Configuration:
   Linker:                           ${LD}
   Source code location:             `pwd`
   Install path:                     ${prefix}
-  
+
   CFLAGS:                           ${CFLAGS}
   CXXFLAGS:                         ${CXXFLAGS}
 

@@ -79,7 +79,7 @@ namespace ColPack
 		If the input file contains only the graph structure, the value of b_getStructureOnly will be ignored
 		*/
 		int ReadMatrixMarketAdjacencyGraph(string s_InputFile, bool b_getStructureOnly = false);
-		
+
 		/// Write the structure of the graph into a file using Matrix Market format
 		/**
 		NOTES:
@@ -114,7 +114,7 @@ namespace ColPack
 
 		/// Read the entries of symmetric matrix in MeTiS format and build the corresponding adjacency graph.
 		int ReadMeTiSAdjacencyGraph(string s_InputFile);
-		
+
 		// TO BE DOCUMENTED
 		// ??? When do I need ReadMeTiSAdjacencyGraph2() instead of ReadMeTiSAdjacencyGraph() ?
 		//        probably need ReadMeTiSAdjacencyGraph2() when I need to read from a variant of MeTiS format

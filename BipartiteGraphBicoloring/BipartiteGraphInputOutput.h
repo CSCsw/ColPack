@@ -38,12 +38,12 @@ namespace ColPack
 	public:
 
 	  // -----INPUT FUNCTIONS-----
-		
+
 		// !!! TO BE DOCUMENTED
 		int BuildBPGraphFromADICFormat(std::list<std::set<int> > *  lsi_SparsityPattern, int i_ColumnCount);
 
 		/// Read the sparsity pattern of Jacobian matrix represented in zero-based indexing, 3-array variation CSR format and build a corresponding adjacency graph.
-		/** 
+		/**
 		Zero-based indexing, 3-array variation CSR format:
 		  http://software.intel.com/sites/products/documentation/hpc/mkl/webhelp/appendices/mkl_appA_SMSF.html#table_79228E147DA0413086BEFF4EFA0D3F04
 
@@ -152,7 +152,7 @@ namespace ColPack
 		void PrintBipartiteGraph();
 
 		void PrintVertexDegrees();
-		
+
 		/// Given a bipartite graph representation, build the corresponding compressed sparse row representation
 		/**
 		Postcondition:
@@ -167,7 +167,7 @@ namespace ColPack
 		/// Write the structure of the bipartite graph into a file using Matrix Market format
 		int WriteMatrixMarket(string s_OutputFile = "-ColPack_debug.mtx");
 
-		
+
 	private:
 
 		void CalculateVertexDegrees();

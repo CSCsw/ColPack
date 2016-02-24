@@ -207,60 +207,60 @@ namespace ColPack
 		cout << endl;
 		//*/
 	}
-	
+
 	bool GraphCore::operator==(const GraphCore &other) const {
 		// Check for self-assignment!
 		if (this == &other)      // Same object?
 		  return true;        // Yes, so the 2 objects are equal
-		  
+
 		//Compare vector<int> m_vi_Vertices; vector<int> m_vi_Edges; vector<double> m_vd_Values;
 		vector<int> other_Vertices, other_Edges;
 		vector<double> other_Values;
-		
+
 		other.GetVertices(other_Vertices);
 		other.GetEdges(other_Edges);
 		other.GetValues(other_Values);
-		
+
 		/*
 		if(m_vi_Vertices==other_Vertices) cout<<"m_vi_Vertices==other_Vertices"<<endl;
 		else  cout<<"m_vi_Vertices!=other_Vertices"<<endl;
-		
+
 		if(m_vi_Edges==other_Edges) cout<<"m_vi_Edges==other_Edges"<<endl;
 		else  cout<<"m_vi_Edges!=other_Edges"<<endl;
-		
+
 		if(m_vd_Values==other_Values) cout<<"m_vd_Values==other_Values"<<endl;
 		else  cout<<"m_vd_Values!=other_Values"<<endl;
 		//*/
-		
+
 		if(m_vi_Vertices==other_Vertices && m_vi_Edges==other_Edges && m_vd_Values==other_Values ) return true;
 		else return false;
 
 	}
-	
+
 	bool GraphCore::areEqual(const GraphCore &other, bool structureOnly) const {
 		// Check for self-assignment!
 		if (this == &other)      // Same object?
 		  return true;        // Yes, so the 2 objects are equal
-		  
+
 		//Compare vector<int> m_vi_Vertices; vector<int> m_vi_Edges; vector<double> m_vd_Values;
 		vector<int> other_Vertices, other_Edges;
 		vector<double> other_Values;
-		
+
 		other.GetVertices(other_Vertices);
 		other.GetEdges(other_Edges);
 		if (!structureOnly) other.GetValues(other_Values);
-		
+
 		/*
 		if(m_vi_Vertices==other_Vertices) cout<<"m_vi_Vertices==other_Vertices"<<endl;
 		else  cout<<"m_vi_Vertices!=other_Vertices"<<endl;
-		
+
 		if(m_vi_Edges==other_Edges) cout<<"m_vi_Edges==other_Edges"<<endl;
 		else  cout<<"m_vi_Edges!=other_Edges"<<endl;
-		
+
 		if(m_vd_Values==other_Values) cout<<"m_vd_Values==other_Values"<<endl;
 		else  cout<<"m_vd_Values!=other_Values"<<endl;
 		//*/
-		
+
 		if(!structureOnly) {
 		  if(m_vi_Vertices==other_Vertices && m_vi_Edges==other_Edges && m_vd_Values==other_Values ) return true;
 		  else return false;

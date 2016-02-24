@@ -88,7 +88,7 @@ namespace ColPack
 
 		return(_TRUE);
 	}
-	
+
 	int GraphOrdering::CheckVertexOrdering() {
 		return isValidOrdering(m_vi_OrderedVertices);
 	}
@@ -224,7 +224,7 @@ namespace ColPack
 		return(_TRUE);
 	}
 
-	int GraphOrdering::ColoringBasedOrdering(vector<int> &vi_VertexColors) 
+	int GraphOrdering::ColoringBasedOrdering(vector<int> &vi_VertexColors)
 	{
 
 		m_s_VertexOrderingVariant = "COLORING_BASED";
@@ -243,11 +243,11 @@ namespace ColPack
 
                 vvi_ColorGroups.clear();
                 vvi_ColorGroups.resize((unsigned) i_VertexCount); // reserve memory
- 
+
 		int i_HighestColor = _FALSE;
 
 		//Populate ColorGroups
-		for(int i=0; i < vi_VertexColors.size(); i++) 
+		for(int i=0; i < vi_VertexColors.size(); i++)
 		{
 			vvi_ColorGroups[vi_VertexColors[i]].push_back(i);
 
@@ -267,12 +267,12 @@ namespace ColPack
 					m_vi_OrderedVertices[count - 1] = vvi_ColorGroups[i][j];
 					count--;
 				}
-		
+
 				vvi_ColorGroups[i].clear();
 			}
 		}
 
-		if(count!=0) 
+		if(count!=0)
 		{
 			cout << "TROUBLE!!!"<<endl;
 			Pause();
@@ -395,7 +395,7 @@ namespace ColPack
                 i_VertexCount = STEP_DOWN((signed) m_vi_Vertices.size());
 
                 vi_InducedVertexDegree.clear();
-		vi_InducedVertexDegree.reserve((unsigned) i_VertexCount);		
+		vi_InducedVertexDegree.reserve((unsigned) i_VertexCount);
 
                 vvi_GroupedInducedVertexDegree.clear();
                 vvi_GroupedInducedVertexDegree.resize((unsigned) i_VertexCount);
@@ -411,17 +411,17 @@ namespace ColPack
                 {
 			//get vertex degree for each vertex
 			i_InducedVertexDegree = m_vi_Vertices[STEP_UP(i)] - m_vi_Vertices[i];
-			
+
 			//vi_InducedVertexDegree[i] = vertex degree of vertex i
 			vi_InducedVertexDegree.push_back(i_InducedVertexDegree);
-			
+
 			// vector vvi_GroupedInducedVertexDegree[i] = all the vertices with degree i
-			// for every new vertex with degree i, it will be pushed to the back of vector vvi_GroupedInducedVertexDegree[i]			
+			// for every new vertex with degree i, it will be pushed to the back of vector vvi_GroupedInducedVertexDegree[i]
 			vvi_GroupedInducedVertexDegree[i_InducedVertexDegree].push_back(i);
-			
-			//vi_VertexLocation[i] = location of vertex i in vvi_GroupedInducedVertexDegree[i_InducedVertexDegree]			
+
+			//vi_VertexLocation[i] = location of vertex i in vvi_GroupedInducedVertexDegree[i_InducedVertexDegree]
 			vi_VertexLocation.push_back(vvi_GroupedInducedVertexDegree[i_InducedVertexDegree].size() - 1);
-                        
+
 			//get max degree (i_HighestInducedVertexDegree)
 			if(i_HighestInducedVertexDegree < i_InducedVertexDegree)
                         {
@@ -435,7 +435,7 @@ namespace ColPack
                 i_SelectedVertexCount = _FALSE;
 
 		// just counting the number of vertices that we have worked with,
-		// stop when i_SelectedVertexCount == i_VertexCount, i.e. we have looked through all the vertices		
+		// stop when i_SelectedVertexCount == i_VertexCount, i.e. we have looked through all the vertices
 		while(i_SelectedVertexCount < i_VertexCount)
 		{
 			//pick the vertex with largest degree
@@ -453,7 +453,7 @@ namespace ColPack
 				else
 					i_HighestInducedVertexDegree--;
                         }
-			
+
 			//for every D1 neighbor of the i_SelectedVertex, decrease their degree by one and then update their position in vvi_GroupedInducedVertexDegree
 			// and vi_VertexLocation
 			for(i=m_vi_Vertices[i_SelectedVertex]; i<m_vi_Vertices[STEP_UP(i_SelectedVertex)]; i++)
@@ -464,7 +464,7 @@ namespace ColPack
                                 {
                                         continue;
                                 }
-			
+
 				// move the last element in this bucket to u's position to get rid of expensive erase operation
 				if(vvi_GroupedInducedVertexDegree[vi_InducedVertexDegree[u]].size() > 1)
 				{
@@ -487,7 +487,7 @@ namespace ColPack
 
 				// update vi_VertexLocation[u] since it has now been changed
                                 vi_VertexLocation[u] = vvi_GroupedInducedVertexDegree[vi_InducedVertexDegree[u]].size() - 1;
-			}	
+			}
 
 			//Mark the i_SelectedVertex as read (_UNKNOWN), so that we don't look at it again
 			vi_InducedVertexDegree[i_SelectedVertex] = _UNKNOWN;
@@ -496,14 +496,14 @@ namespace ColPack
 			m_vi_OrderedVertices.push_back(i_SelectedVertex);
 
 			//increment i_SelectedVertexCount
-			i_SelectedVertexCount = STEP_UP(i_SelectedVertexCount);			
+			i_SelectedVertexCount = STEP_UP(i_SelectedVertexCount);
 		}
 
 		// clear the buffers
 		vi_InducedVertexDegree.clear();
 		vi_VertexLocation.clear();
 		vvi_GroupedInducedVertexDegree.clear();
-	
+
 		return(_TRUE);
 	}
 		/*
@@ -729,7 +729,7 @@ namespace ColPack
 			// vector vvi_GroupedInducedVertexDegree[i] = all the vertices with degree i
 			// for every new vertex with degree i, it will be pushed to the back of vector vvi_GroupedInducedVertexDegree[i]
 			vvi_GroupedInducedVertexDegree[i_InducedVertexDegree].push_back(i);
-			
+
 			//vi_VertexLocation[i] = location of vertex i in vvi_GroupedInducedVertexDegree[i_InducedVertexDegree]
 			vi_VertexLocation.push_back(vvi_GroupedInducedVertexDegree[i_InducedVertexDegree].size() - 1);
 
@@ -749,7 +749,7 @@ namespace ColPack
 		// just counting the number of vertices that we have worked with,
 		// stop when i_SelectedVertexCount == i_VertexCount, i.e. we have looked through all the vertices
 		while(i_SelectedVertexCount < i_VertexCount)
-                {	
+                {
 			if(iMin != 0 && vvi_GroupedInducedVertexDegree[iMin - 1].size() != _FALSE)
 				iMin--;
 
@@ -800,7 +800,7 @@ namespace ColPack
 				// update vi_VertexLocation[u] since it has now been changed
                                 vi_VertexLocation[u] = vvi_GroupedInducedVertexDegree[vi_InducedVertexDegree[u]].size() - 1;
                         }
-			
+
 			//Mark the i_SelectedVertex as read, so that we don't look at it again
                         vi_InducedVertexDegree[i_SelectedVertex] = _UNKNOWN;
                         // insert i_SelectedVertex into m_vi_OrderedVertices
@@ -808,7 +808,7 @@ namespace ColPack
 			//increment i_SelectedVertexCount
                         i_SelectedVertexCount = STEP_UP(i_SelectedVertexCount);
 		}
-		
+
 		// clear the buffer
                 vi_InducedVertexDegree.clear();
                 vi_VertexLocation.clear();
@@ -927,7 +927,7 @@ namespace ColPack
 
 			for(i=m_vi_Vertices[i_SelectedVertex]; i<m_vi_Vertices[STEP_UP(i_SelectedVertex)]; i++)
 			{
-				u = m_vi_Edges[i];		
+				u = m_vi_Edges[i];
 
 				if(vi_InducedVertexDegrees[u] == _UNKNOWN)
 				{
@@ -943,13 +943,13 @@ namespace ColPack
 						vvi_GroupedInducedVertexDegree[vi_InducedVertexDegrees[u]][vi_VertexLocations[u]] = l;
 						vi_VertexLocations[l] = vi_VertexLocations[u];
 					}
-					
+
 					// remove last element from this bucket
 					vvi_GroupedInducedVertexDegree[vi_InducedVertexDegrees[u]].pop_back();
-					
+
 					// reduce degree of u by 1
 					vi_InducedVertexDegrees[u]--;
-					
+
 					// move u to appropriate bucket
 					vvi_GroupedInducedVertexDegree[vi_InducedVertexDegrees[u]].push_back(u);
 
@@ -978,13 +978,13 @@ namespace ColPack
 							vvi_GroupedInducedVertexDegree[vi_InducedVertexDegrees[v]][vi_VertexLocations[v]] = l;
 							vi_VertexLocations[l] = vi_VertexLocations[v];
 						}
-					
+
 						// remove last element from this bucket
 						vvi_GroupedInducedVertexDegree[vi_InducedVertexDegrees[v]].pop_back();
-					
+
 						// reduce degree of v by 1
 						vi_InducedVertexDegrees[v]--;
-					
+
 						// move v to appropriate bucket
 						vvi_GroupedInducedVertexDegree[vi_InducedVertexDegrees[v]].push_back(v);
 
@@ -1058,7 +1058,7 @@ namespace ColPack
 		i_SelectedVertex = _UNKNOWN;
 
 		i_HighestInducedVertexDegree = _FALSE;
-		
+
 		for(i=0; i<i_VertexCount; i++)
 		{
 			vi_IncludedVertices[i] = i;
@@ -1129,7 +1129,7 @@ namespace ColPack
 
 			for(i=m_vi_Vertices[i_SelectedVertex]; i<m_vi_Vertices[STEP_UP(i_SelectedVertex)]; i++)
 			{
-				u = m_vi_Edges[i];		
+				u = m_vi_Edges[i];
 
 				if(vi_InducedVertexDegrees[u] == _UNKNOWN)
 				{
@@ -1145,13 +1145,13 @@ namespace ColPack
 						vvi_GroupedInducedVertexDegree[vi_InducedVertexDegrees[u]][vi_VertexLocations[u]] = l;
 						vi_VertexLocations[l] = vi_VertexLocations[u];
 					}
-					
+
 					// remove last element from this bucket
 					vvi_GroupedInducedVertexDegree[vi_InducedVertexDegrees[u]].pop_back();
-					
+
 					// reduce degree of u by 1
 					vi_InducedVertexDegrees[u]--;
-		
+
 					// move u to appropriate bucket
 					vvi_GroupedInducedVertexDegree[vi_InducedVertexDegrees[u]].push_back(u);
 
@@ -1180,13 +1180,13 @@ namespace ColPack
 							vvi_GroupedInducedVertexDegree[vi_InducedVertexDegrees[v]][vi_VertexLocations[v]] = l;
 							vi_VertexLocations[l] = vi_VertexLocations[v];
 						}
-					
+
 						// remove last element from this bucket
 						vvi_GroupedInducedVertexDegree[vi_InducedVertexDegrees[v]].pop_back();
-					
+
 						// reduce degree of v by 1
 						vi_InducedVertexDegrees[v]--;
-					
+
 						// move v to appropriate bucket
 						vvi_GroupedInducedVertexDegree[vi_InducedVertexDegrees[v]].push_back(v);
 
@@ -1255,7 +1255,7 @@ namespace ColPack
 
                 i_IncidenceVertexDegree = _FALSE;
 
-		
+
 		// initilly push all the vertices into the first bucket assuming that IncidenceVertexDegree is all 0
 		vvi_GroupedIncidenceVertexDegree[i_IncidenceVertexDegree].reserve((unsigned) i_VertexCount); // ONLY FOR THE FIRST BUCKET SINCE WE KNOW in THIS case
 
@@ -1288,7 +1288,7 @@ namespace ColPack
 		m_vi_OrderedVertices.reserve((unsigned) i_VertexCount);
 
 		i_SelectedVertexCount = _FALSE;
-		
+
 		// NOW SWAP THE MAX DEGREE VERTEX WITH THE LAST VERTEX IN THE FIRST BUCKET
 		l = vvi_GroupedIncidenceVertexDegree[i_IncidenceVertexDegree].size() - 1;
 		v = vvi_GroupedIncidenceVertexDegree[i_IncidenceVertexDegree][l];
@@ -1297,7 +1297,7 @@ namespace ColPack
 
 		swap(vvi_GroupedIncidenceVertexDegree[i_IncidenceVertexDegree][vi_VertexLocation[i_HighestDegreeVertex]], vvi_GroupedIncidenceVertexDegree[i_IncidenceVertexDegree][l]);
 		swap(vi_VertexLocation[v], vi_VertexLocation[u]);
-		
+
 		int iMax = i_MaximumVertexDegree - 1;
 		// just counting the number of vertices that we have worked with,
 		// stop when i_SelectedVertexCount == i_VertexCount, i.e. we have looked through all the vertices
@@ -1307,7 +1307,7 @@ namespace ColPack
                         if(iMax != i_MaximumVertexDegree && vvi_GroupedIncidenceVertexDegree[iMax + 1].size() != _FALSE)
                                 iMax++;
 
-			//pick the vertex with maximum incidence degree			
+			//pick the vertex with maximum incidence degree
 			for(i=iMax; i>=0; i--)
                         {
                         	i_IncidenceVertexDegreeCount = (signed) vvi_GroupedIncidenceVertexDegree[i].size();
@@ -1369,7 +1369,7 @@ namespace ColPack
                 vi_IncidenceVertexDegree.clear();
                 vi_VertexLocation.clear();
                 vvi_GroupedIncidenceVertexDegree.clear();
-		
+
 		return(_TRUE);
 	}
 
@@ -1504,7 +1504,7 @@ namespace ColPack
 
 			for(i=m_vi_Vertices[i_SelectedVertex]; i<m_vi_Vertices[STEP_UP(i_SelectedVertex)]; i++)
 			{
-				u = m_vi_Edges[i];		
+				u = m_vi_Edges[i];
 
 				if(vi_InducedVertexDegrees[u] == _UNKNOWN)
 				{
@@ -1520,13 +1520,13 @@ namespace ColPack
 						vvi_GroupedInducedVertexDegree[vi_InducedVertexDegrees[u]][vi_VertexLocations[u]] = l;
 						vi_VertexLocations[l] = vi_VertexLocations[u];
 					}
-					
+
 					// remove last element from this bucket
 					vvi_GroupedInducedVertexDegree[vi_InducedVertexDegrees[u]].pop_back();
-					
+
 					// reduce degree of u by 1
 					vi_InducedVertexDegrees[u]++;
-					
+
 					// move u to appropriate bucket
 					vvi_GroupedInducedVertexDegree[vi_InducedVertexDegrees[u]].push_back(u);
 
@@ -1555,13 +1555,13 @@ namespace ColPack
 							vvi_GroupedInducedVertexDegree[vi_InducedVertexDegrees[v]][vi_VertexLocations[v]] = l;
 							vi_VertexLocations[l] = vi_VertexLocations[v];
 						}
-					
+
 						// remove last element from this bucket
 						vvi_GroupedInducedVertexDegree[vi_InducedVertexDegrees[v]].pop_back();
-					
+
 						// reduce degree of v by 1
 						vi_InducedVertexDegrees[v]++;
-					
+
 						// move v to appropriate bucket
 						vvi_GroupedInducedVertexDegree[vi_InducedVertexDegrees[v]].push_back(v);
 

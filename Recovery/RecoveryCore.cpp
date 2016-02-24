@@ -26,19 +26,19 @@ namespace ColPack
 {
 	RecoveryCore::RecoveryCore() {
 		//formatType = "UNKNOWN";
-		
+
 		//for ADOL-C Format (AF)
 		AF_available = false;
 		i_AF_rowCount = 0;
 		dp2_AF_Value = NULL;
-		
+
 		//for Sparse Solvers Format (SSF)
 		SSF_available = false;
 		i_SSF_rowCount = 0;
 		ip_SSF_RowIndex = NULL;
 		ip_SSF_ColumnIndex = NULL;
 		dp_SSF_Value = NULL;
-		
+
 		//for Coordinate Format (CF)
 		CF_available = false;
 		i_CF_rowCount = 0;
@@ -46,9 +46,9 @@ namespace ColPack
 		ip_CF_ColumnIndex = NULL;
 		dp_CF_Value = NULL;
 	}
-	
+
 	void RecoveryCore::reset() {
-		
+
 		//for ADOL-C Format (AF)
 		if (AF_available) {
 			//free_2DMatrix(dp2_AF_Value, i_AF_rowCount);
@@ -61,7 +61,7 @@ namespace ColPack
 			AF_available = false;
 			i_AF_rowCount = 0;
 		}
-		
+
 		//for Sparse Solvers Format (SSF)
 		if (SSF_available) {
 			//delete[] ip_SSF_RowIndex;
@@ -76,7 +76,7 @@ namespace ColPack
 			SSF_available = false;
 			i_SSF_rowCount = 0;
 		}
-		
+
 		//for Coordinate Format (CF)
 		if (CF_available) {
 			//do something
@@ -92,23 +92,23 @@ namespace ColPack
 			CF_available = false;
 			i_CF_rowCount = 0;
 		}
-		
+
 		//formatType = "UNKNOWN";
 	}
-	
+
 	RecoveryCore::~RecoveryCore() {
-		
+
 		//for ADOL-C Format (AF)
 		if (AF_available) {
 			//do something
 			//free_2DMatrix(dp2_AF_Value, i_AF_rowCount);
-			
+
 			for( int i=0; i < i_AF_rowCount; i++ ) {
 			    free( dp2_AF_Value[i] );
 			}
 			free( dp2_AF_Value );
 		}
-		
+
 		//for Sparse Solvers Format (SSF)
 		if (SSF_available) {
 			//do something
@@ -119,7 +119,7 @@ namespace ColPack
 			//delete[] dp_SSF_Value;
 			free(dp_SSF_Value);
 		}
-		
+
 		//for Coordinate Format (CF)
 		if (CF_available) {
 			//do something

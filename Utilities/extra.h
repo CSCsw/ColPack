@@ -104,11 +104,11 @@ int buildDotWithColor(ColPack::BipartiteGraphBicoloringInterface &g, vector<stri
 /// Read a Row Compressed Format file
 /** Read a Row Compressed Format file
 Line 1: <# of rows> <# of columns> <# of non-zeros>
-Line 2-(# of non-zeros + 1): <# of non-zeros in that row> <index of the 1st non-zero> <index of the 2nd non-zero> ... <index of the (# of non-zeros in that row)th non-zero> 
+Line 2-(# of non-zeros + 1): <# of non-zeros in that row> <index of the 1st non-zero> <index of the 2nd non-zero> ... <index of the (# of non-zeros in that row)th non-zero>
 */
 int ReadRowCompressedFormat(string s_InputFile, unsigned int *** uip3_SparsityPattern, int& rowCount, int& columnCount);
 
-/// Test and make sure that this is a valid ordering. 
+/// Test and make sure that this is a valid ordering.
 /** This routine will test for:
 - Duplicated vertices. If there is no duplicated vertex, this ordering is probably ok.
 - Invalid vertex #. The vertex # should be between 0 and ordering.size()
@@ -173,12 +173,12 @@ The last 4 parameters of this routine are output parameters (unsigned int *** ui
 */
 int ConvertMatrixMarketFormat2RowCompressedFormat(string s_InputFile, unsigned int *** uip3_SparsityPattern, double*** dp3_Value, int &rowCount, int &columnCount);
 
-/* !!! the documentation here may not be accurate 
+/* !!! the documentation here may not be accurate
 "zero-based indexing, 3-array variation CSR format (used by ADIC)"
 Does ADIC use zero-based indexing, 3-array variation CSR format any more?
 //*/
 /// Convert Row Compressed format (used by ADOL-C) to zero-based indexing, 3-array variation CSR format (used by ADIC)
-/** 
+/**
 Return 0 upon successful.
 */
 // !!! need to be fixed to accomodate dp2_Value parameter
@@ -237,7 +237,7 @@ int displayGraph(T &g,int i_RunInBackground = false, int filter = DOT) {
   vector<string> ListOfColors = getListOfColors("");
   string fileName = "/tmp/.";
   fileName = fileName + "ColPack_"+ itoa(ranNum)+"_"+itoa(seq)+".dot";
-  
+
   //build the dot file of the graph
   string m_s_VertexColoringVariant = g.GetVertexColoringVariant();
   if(m_s_VertexColoringVariant.empty() || m_s_VertexColoringVariant=="Unknown") {
@@ -247,7 +247,7 @@ int displayGraph(T &g,int i_RunInBackground = false, int filter = DOT) {
     //build dot file represents graph with color
     buildDotWithColor(g, ListOfColors, fileName);
   }
-  
+
   //display the graph using xdot
   string command;
   switch (filter) {
@@ -257,7 +257,7 @@ int displayGraph(T &g,int i_RunInBackground = false, int filter = DOT) {
     case FDP: command="xdot -f fdp "; break;
     default: command="xdot -f dot "; // case DOT
   }
-  
+
   command = command + fileName;
   if(i_RunInBackground) command = command + " &";
   int i_ReturnValue = system(command.c_str());
@@ -287,7 +287,7 @@ int diffArrays(T* array1, T* array2, int rowCount, bool compare_exact = 1, bool 
 	    }
 	  }
 	}
-	
+
 	return none_equal_count;
 }
 
@@ -296,14 +296,14 @@ template<class T>
 int diffVectors(vector<T> array1, vector<T> array2, bool compare_exact = 1, bool print_all = 0) {
 	double ratio = 0.;
 	int none_equal_count = 0;
-	
+
 	if(array1.size() != array2.size()) {
 	  cout<<"array1.size() "<<array1.size()<<" != array2.size()"<<array2.size()<<endl;
 	  none_equal_count++;
 	}
-	
+
 	int min_array_size = (array1.size() < array2.size())?array1.size():array2.size();
-	
+
 	for(int i = 0; i < min_array_size; i++) {
 	  if (compare_exact) {
 	    if(array1[i]!=array2[i]) { // found a difference
@@ -321,7 +321,7 @@ int diffVectors(vector<T> array1, vector<T> array2, bool compare_exact = 1, bool
 	    }
 	  }
 	}
-	
+
 	return none_equal_count;
 }
 

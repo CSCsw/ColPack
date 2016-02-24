@@ -55,7 +55,7 @@ namespace ColPack
 	{
 		return(m_s_InputFile);
 	}
-	
+
 	vector<int>* BipartiteGraphCore::GetLeftVerticesPtr()
 	{
 		return &m_vi_LeftVertices;
@@ -211,30 +211,30 @@ namespace ColPack
 	{
 		return(m_d_AverageVertexDegree);
 	}
-	
+
 	bool BipartiteGraphCore::operator==(const BipartiteGraphCore &other) const {
 		// Check for self-assignment!
 		if (this == &other)      // Same object?
 		  return true;        // Yes, so the 2 objects are equal
-		  
+
 		//Compare vector<int> m_vi_LeftVertices; vector<int> m_vi_RightVertices; vector<int> m_vi_Edges;
 		vector<int> other_LeftVertices, other_RightVertices, other_Edges;
-		
+
 		other.GetLeftVertices(other_LeftVertices);
 		other.GetRightVertices(other_RightVertices);
 		other.GetEdges(other_Edges);
-		
+
 		/*
 		if(m_vi_LeftVertices==other_LeftVertices) cout<<"m_vi_LeftVertices==other_LeftVertices"<<endl;
 		else  cout<<"m_vi_LeftVertices!=other_LeftVertices"<<endl;
-		
+
 		if(m_vi_Edges==other_Edges) cout<<"m_vi_Edges==other_Edges"<<endl;
 		else  cout<<"m_vi_Edges!=other_Edges"<<endl;
-		
+
 		if( m_vi_RightVertices==other_RightVertices) cout<<" m_vi_RightVertices==other_RightVertices"<<endl;
 		else  cout<<"m_vi_RightVertices!=other_RightVertices"<<endl;
 		//*/
-		
+
 		if(m_vi_LeftVertices==other_LeftVertices && m_vi_Edges==other_Edges && m_vi_RightVertices==other_RightVertices ) return true;
 		else return false;
 

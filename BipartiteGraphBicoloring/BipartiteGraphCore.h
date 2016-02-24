@@ -39,7 +39,7 @@ namespace ColPack
 		/// LeftVertexCount = RowVertexCount = m_vi_LeftVertices.size() -1
 		int GetLeftVertexCount();
 
-		
+
 		/// RightVertexCount = ColumnVertexCount = m_vi_RightVertices.size() -1
 		int GetColumnVertexCount();
 		/// RightVertexCount = ColumnVertexCount = m_vi_RightVertices.size() -1
@@ -69,22 +69,22 @@ namespace ColPack
 		vector<int> m_vi_Edges;
 
 		map< int, map<int, int> > m_mimi2_VertexEdgeMap;
-		
+
 
 	public:
-		
+
 		virtual ~BipartiteGraphCore(){}
 
 		virtual void Clear();
-		
+
 		string GetInputFile();
-		
+
 		vector<int>* GetLeftVerticesPtr() ;
 		vector<int>* GetRightVerticesPtr() ;
 
 		void GetRowVertices(vector<int> &output) const;
 		void GetLeftVertices(vector<int> &output) const;
-		
+
 		void GetColumnVertices(vector<int> &output) const;
 		void GetRightVertices(vector<int> &output) const;
 
@@ -92,7 +92,7 @@ namespace ColPack
 		unsigned int GetColumnIndices(unsigned int** ip2_ColumnIndex);
 
 		void GetEdges(vector<int> &output) const;
-		
+
 		void GetVertexEdgeMap(map< int, map<int, int> > &output);
 
 		int GetEdgeCount();
@@ -110,9 +110,9 @@ namespace ColPack
 		int GetMinimumVertexDegree();
 
 		double GetAverageRowVertexDegree();
-		
+
 		double GetAverageColumnVertexDegree();
-		
+
 		double GetAverageVertexDegree();
 	};
 }

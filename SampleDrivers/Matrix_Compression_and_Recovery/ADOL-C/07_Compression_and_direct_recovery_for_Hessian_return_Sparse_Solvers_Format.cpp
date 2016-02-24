@@ -133,7 +133,7 @@ int main()
 
 	delete ip1_ColorCount;
 	ip1_ColorCount = NULL;
-	
+
 	delete hr;
 	hr = NULL;
 

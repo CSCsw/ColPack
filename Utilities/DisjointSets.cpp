@@ -35,7 +35,7 @@ namespace ColPack
 
 	}
 
-	
+
 	//Public Constructor 4252
 	DisjointSets::DisjointSets(int li_SetSize)
 	{
@@ -43,24 +43,24 @@ namespace ColPack
 		p_vi_Nodes.resize((unsigned) li_SetSize, _UNKNOWN);
 	}
 
-	
+
 	//Public Destructor 4253
 	DisjointSets::~DisjointSets()
 	{
 		p_vi_Nodes.clear();
 	}
 
-	
+
 	//Public Function 4254
 	int DisjointSets::SetSize(int li_SetSize)
-	{ 
+	{
 		p_vi_Nodes.clear();
 		p_vi_Nodes.resize((unsigned) li_SetSize, _UNKNOWN);
 
 		return(_TRUE);
 	}
 
-	
+
 	//Public Function 4255
 	int DisjointSets::Count()
 	{
@@ -83,7 +83,7 @@ namespace ColPack
 		return(li_HeadCount);
 	}
 
-	
+
 	//Public Function 4256
 	int DisjointSets::Print()
 	{
@@ -112,7 +112,7 @@ namespace ColPack
 		return(_TRUE);
 	}
 
-	
+
 	//Public Function 4257
 	int DisjointSets::Find(int li_Node)
 	{
@@ -127,7 +127,7 @@ namespace ColPack
 	}
 
 
-	
+
 	//Public Function 4258
 	int DisjointSets::FindAndCompress(int li_Node)
 	{
@@ -169,15 +169,15 @@ namespace ColPack
 	}
 	//*/
 
-	
+
 	//Public Function 4260
 	int DisjointSets::UnionByRank(int li_SetOne, int li_SetTwo)
-	{  
+	{
 		if(li_SetOne == li_SetTwo)
 		{
 		return(_TRUE);
 		}
-	    
+
 		if(p_vi_Nodes[li_SetOne] == p_vi_Nodes[li_SetTwo])
 		{
 			p_vi_Nodes[li_SetOne]--;
@@ -194,12 +194,12 @@ namespace ColPack
 
 			p_vi_Nodes[li_SetOne] = li_SetTwo;
 		}
-	    
+
 		return(_TRUE);
 	}
 
 
-	
+
 	//Public Function 4261
 	int DisjointSets::UnionBySize(int li_SetOne, int li_SetTwo)
 	{
@@ -221,7 +221,7 @@ namespace ColPack
 			p_vi_Nodes[li_SetOne] = li_SetTwo;
 
 		}
-	    
+
 		return(_TRUE);
 	}
 

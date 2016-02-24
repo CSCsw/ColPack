@@ -17,14 +17,14 @@
     running "make clean && make -j EXTRA_FLAGS=-D_COLPACK_CHECKPOINT_". When the program is executed,
     ColPack library will generate a Matrix Market format file ColPack_input_graph.mtx in the same directory as the running program.
     If this does not work, you can also force ColPack to generate the file by calling g->WriteMatrixMarket()
-    with g is a GraphColoringInterface, BipartiteGraphPartialColoringInterface, or BipartiteGraphBicoloringInterface object 
+    with g is a GraphColoringInterface, BipartiteGraphPartialColoringInterface, or BipartiteGraphBicoloringInterface object
   Interface functions for ADIC partially developed
     BipartiteGraphPartialColoringInterface() now accepts input from ADIC (int i_type=SRC_MEM_ADIC)
       BipartiteGraphPartialColoringInterface(int i_type, std::list<std::set<int> >*  valsetlist, int rowCount)
       a bipartite graph can be built by calling:
 	BipartiteGraphPartialColoringInterface *g = new BipartiteGraphPartialColoringInterface(SRC_MEM_ADIC, &valsetlist, rowCount);
     add int JacobianRecovery1D::RecoverD2Cln_ADICFormat(
-							BipartiteGraphPartialColoringInterface* g, 
-							double** dp2_CompressedMatrix, 
-							std::list<std::set<int> >& lsi_SparsityPattern, 
+							BipartiteGraphPartialColoringInterface* g,
+							double** dp2_CompressedMatrix,
+							std::list<std::set<int> >& lsi_SparsityPattern,
 							std::list<std::vector<double> > &lvd_NewValue)

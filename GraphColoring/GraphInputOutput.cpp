@@ -129,20 +129,20 @@ namespace ColPack
 	{
 		return(m_s_InputFile);
 	}
-	
+
 	int GraphInputOutput::WriteMatrixMarket(string s_OutputFile, bool b_getStructureOnly) {
 		ofstream out (s_OutputFile.c_str());
 		if(!out) {
 			cout<<"Error creating file: \""<<s_OutputFile<<"\""<<endl;
 			exit(1);
 		}
-		
+
 		bool b_printValue = ( (!b_getStructureOnly) && (m_vd_Values.size()==m_vi_Edges.size()) );
 		int i_NumOfLines = 0;
 		int max = m_vi_Vertices.size()-1;
-		
+
 		out<<"%%MatrixMarket matrix coordinate real symmetric"<<endl;
-		
+
 		//Count i_NumOfLines
 		for(int i = 1; i<max;i++) {
 		  for(int j = m_vi_Vertices[i]; j < m_vi_Vertices[i+1]; j++) {
@@ -152,9 +152,9 @@ namespace ColPack
 		    }
 		  }
 		}
-		
+
 		out<<m_vi_Vertices.size()-1<<" "<<m_vi_Vertices.size()-1<<" "<< i_NumOfLines<<endl;
-		
+
 		out<<setprecision(10)<<scientific<<showpoint;
 		for(int i = 1; i<max;i++) {
 		  for(int j = m_vi_Vertices[i]; j < m_vi_Vertices[i+1]; j++) {
@@ -166,7 +166,7 @@ namespace ColPack
 		    }
 		  }
 		}
-		
+
 		return 0;
 	}
 
@@ -262,13 +262,13 @@ namespace ColPack
 			{
 				in2.clear();
 				in2.str(line);
-				
+
 				//value =-999999999;
 				//value_not_specified=false;
-				
+
 				in2 >> rowIndex >> colIndex >> value;
-				
-				/*if(value == -999999999 && in2.eof()) {		
+
+				/*if(value == -999999999 && in2.eof()) {
 				  // "value" entry is not specified
 				  value_not_specified = true;
 				  if(b_getValue) {
@@ -285,13 +285,13 @@ namespace ColPack
 
 				rowIndex--;
 				colIndex--;
-				
+
 				if(b_symmetric) {
 					if(rowIndex>colIndex) {
 						//cout<<"\t"<<setw(4)<<rowIndex<<setw(4)<<colIndex<<setw(4)<<nz_counter<<endl;
 						nodeList[rowIndex].push_back(colIndex);
 						nodeList[colIndex].push_back(rowIndex);
-						
+
 						if(b_getValue) {
 							//cout<<"Value = "<<value<<endl;
 							valueList[rowIndex].push_back(value);
@@ -312,7 +312,7 @@ namespace ColPack
 					if(rowIndex!=colIndex) {
 						//cout<<"\t"<<setw(4)<<rowIndex<<setw(4)<<colIndex<<setw(4)<<nz_counter<<endl;
 						nodeList[rowIndex].push_back(colIndex);
-						
+
 						if(b_getValue) {
 							//cout<<"Value = "<<value<<endl;
 							valueList[rowIndex].push_back(value);
@@ -322,7 +322,7 @@ namespace ColPack
 						continue;
 					}
 				}
-				
+
 			}
 			else
 			{
@@ -387,37 +387,37 @@ namespace ColPack
 		vector< vector<double> > vvd_Values;
 		vector<int> vi_ColumnStartPointers, vi_RowIndices;
 		vector<double> vd_Values;
-		
+
 		//ignore the first line, which is the tittle and key
 		getline(in, line);
-		
+
 		// Get line 2
 		int TOTCRD; // (ignored) Total number of lines excluding header
 		int PTRCRD; // (ignored) Number of lines for pointers
 		int INDCRD; // (ignored) Number of lines for row (or variable) indices
 		int VALCRD; // Number of lines for numerical values. VALCRD == 0 if no values is presented
 		int RHSCRD; // (ignored) Number of lines for right-hand sides. RHSCRD == 0 if no right-hand side data is presented
-		
+
 		getline(in, line);
 		iin.clear();
 		iin.str(line);
 		iin >> TOTCRD >> PTRCRD >> INDCRD >> VALCRD >> RHSCRD;
-		
+
 		// Get line 3
 		string MXTYPE; //Matrix type. We only accept: (R | P) (S | U) (A)
 		int NROW; // Number of rows (or left vertices)
 		int NCOL; // Number of columns (or  right vertices)
-		int NNZERO; // Number of nonzeros 
+		int NNZERO; // Number of nonzeros
 			    // in case of symmetric matrix, it is the number of nonzeros IN THE UPPER TRIANGULAR including the diagonal
-		int NELTVL; // (ignored) Number of elemental matrix entries (zero in the case of assembled matrices) 
+		int NELTVL; // (ignored) Number of elemental matrix entries (zero in the case of assembled matrices)
 		bool b_symmetric; // true if this matrix is symmetric (MXTYPE[1] == 'S'), false otherwise.
-		
+
 		getline(in, line);
 		iin.clear();
 		iin.str(line);
 		iin >> MXTYPE >> NROW >> NCOL >> NNZERO >> NELTVL;
 		// We only accept MXTYPE = (R|P)(S|U)A
-		if(MXTYPE[0] == 'C') { //Complex matrix 
+		if(MXTYPE[0] == 'C') { //Complex matrix
 		  cerr<<"ERR: Complex matrix format is not supported"<<endl;
 		  exit(-1);
 		}
@@ -431,7 +431,7 @@ namespace ColPack
 		    exit(-1);
 		  }
 		}
-		if(MXTYPE[2] == 'E') { //Elemental matrices (unassembled) 
+		if(MXTYPE[2] == 'E') { //Elemental matrices (unassembled)
 		  cerr<<"ERR: Elemental matrices (unassembled) format is not supported"<<endl;
 		  exit(-1);
 		}
@@ -444,10 +444,10 @@ namespace ColPack
 
 		// Ignore line 4 for now
 		getline(in, line);
-		
+
 		//If the right-hand side data is presented, ignore the 5th header line
 		if(RHSCRD) getline(in, line);
-		
+
 		//Initialize data structures
 		m_vi_Vertices.clear();
 		m_vi_Vertices.resize(NROW+1, _UNKNOWN);
@@ -461,19 +461,19 @@ namespace ColPack
 		vi_RowIndices.resize(NNZERO);
 		vd_Values.clear();
 		vd_Values.resize(NNZERO);
-		
-		// get the 2nd data block: column start pointers		
+
+		// get the 2nd data block: column start pointers
 		for(int i=0; i<NCOL+1; i++) {
 		  in>> vi_ColumnStartPointers[i];
 		}
-		
+
 		// get the 3rd data block: row (or variable) indices,
 		for(i=0; i<NNZERO; i++) {
 		  in >> num;
 		  vi_RowIndices[i] = num-1;
 		}
 
-		// get the 4th data block: numerical values 
+		// get the 4th data block: numerical values
 		if(VALCRD !=0) {
 		  for(i=0; i<NNZERO; i++) {
 		    in >> num_string;
@@ -492,17 +492,17 @@ namespace ColPack
 		  for(j=vi_ColumnStartPointers[i]; j< vi_ColumnStartPointers[i+1]; j++) {
 		    num = vi_RowIndices[counter];
 		    d = vd_Values[counter];
-		    
+
 		    if(num != i) {
 		      if(b_symmetric) {
-			vvi_VertexAdjacency[i].push_back(num);			
+			vvi_VertexAdjacency[i].push_back(num);
 			vvi_VertexAdjacency[num].push_back(i);
-			
+
 			if(VALCRD !=0) {
 			  vvd_Values[i].push_back(d);
 			  vvd_Values[num].push_back(d);
 			}
-			
+
 			nnz+=2;
 		      }
 		      else { // !b_symmetric
@@ -514,7 +514,7 @@ namespace ColPack
 		    counter++;
 		  }
 		}
-		
+
 		m_vi_Edges.clear();
 		m_vi_Edges.resize(nnz, _UNKNOWN);
 		if(VALCRD !=0) {
@@ -528,13 +528,13 @@ namespace ColPack
 		    m_vi_Edges[m_vi_Vertices[i]+j] = vvi_VertexAdjacency[i][j];
 		    if(VALCRD !=0) m_vd_Values[m_vi_Vertices[i]+j] = vvd_Values[i][j];
 		  }
-		  
+
 		  m_vi_Vertices[i+1] = m_vi_Vertices[i]+vvi_VertexAdjacency[i].size();
 		}
-		
+
 		PrintGraph();
 		Pause();
-				
+
 	  return 0;
 	}
 
@@ -652,7 +652,7 @@ namespace ColPack
 				}
 				if(input_end<0) s_InputLine = "";
 				else s_InputLine = s_InputLine.substr(0, input_end+1);
-				
+
 				in2.str(s_InputLine);
 				string tokens;
 
@@ -684,7 +684,7 @@ namespace ColPack
 					{
 						if(vs_InputTokens[i] != "") {
 							i_Vertex = STEP_DOWN(atoi(vs_InputTokens[i].c_str()));
-							
+
 							//if(i_Vertex == -1) {
 							//  cout<<"i_Vertex == -1, i = "<<i<<", vs_InputTokens[i] = "<<vs_InputTokens[i]<<endl;
 							//  Pause();
@@ -1158,7 +1158,7 @@ namespace ColPack
 		for(i=0; i<i_VertexCount-1; i++)
 		{
 			cout<<"Vertex "<<STEP_UP(i)<<" ("<<m_vi_Vertices[i+1] - m_vi_Vertices[i]<<"): ";
-			
+
 			for(int j=m_vi_Vertices[i]; j<m_vi_Vertices[i+1]; j++)
 			{
 				cout<<STEP_UP(m_vi_Edges[j])<<", ";
@@ -1166,7 +1166,7 @@ namespace ColPack
 			cout<<endl;
 		}
 
-		
+
 		cout<<endl;
 
 		return(_TRUE);

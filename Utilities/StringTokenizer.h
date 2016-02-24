@@ -45,59 +45,59 @@ namespace ColPack
 	 public:
 
 		//Public Constructor 4151
-		StringTokenizer();			
-	  
+		StringTokenizer();
+
 		//Public Constructor 4152
-		StringTokenizer(char *);		
-	  
+		StringTokenizer(char *);
+
 		//Public Constructor 4153
-		StringTokenizer(char *, char *);	
-	  
+		StringTokenizer(char *, char *);
+
 		//Public Constructor 4154
-		StringTokenizer(string, char *);	
-	  
+		StringTokenizer(string, char *);
+
 		//Public Constructor 4155
-		StringTokenizer(string, string);	
-	  
+		StringTokenizer(string, string);
+
 		//Public Destructor 4156
-		~StringTokenizer();		
+		~StringTokenizer();
 
 		//Public Function 4157
-		int CountTokens();			
+		int CountTokens();
 
 		//Public Function 4158
-		int CountTokens(char *);		
+		int CountTokens(char *);
 
 		//Public Function 4159
-		string GetDelimiterString() const;	
+		string GetDelimiterString() const;
 
 		//Public Function 4160
-		string GetFirstToken();		
-	  
+		string GetFirstToken();
+
 		//Public Function 4161
 		string GetInputString() const;
-	  
+
 		//Public Function 4162
-		string GetLastToken();		
-	  
+		string GetLastToken();
+
 		//Public Function 4163
-		string GetNextToken();		
-	  
+		string GetNextToken();
+
 		//Public Function 4164
-		string GetNextToken(char *);		
-	  
+		string GetNextToken(char *);
+
 		//Public Function 4165
-		string GetToken(int);			
+		string GetToken(int);
 
 		//Public Function 4166
-		int HasMoreTokens();			
-	  
+		int HasMoreTokens();
+
 		//Public Function 4167
-		int HasMoreTokens(char *);		
-	  
+		int HasMoreTokens(char *);
+
 		//Public Function 4168
-		int SetInputString(char *);		
-	  
+		int SetInputString(char *);
+
 		//Public Function 4169
 		int SetDelimiterString(char *);
 

@@ -24,9 +24,9 @@ vector<string> getListOfGraphs(string location_of_graph_list)
 
       //Display
       cout<<"\t "<<temp<<endl;
-      
+
       input>>temp;
-      
+
       i++;
   }
   if (i==max_iteration) {
@@ -79,9 +79,9 @@ void toFileC_forColoringBasedOrdering(string baseDir, string stat_output_suffix 
 
 		switch(j)
 		{
-		case 0: s_ColoringVariant = "DISTANCE_ONE"; cout<<"D1 "; stat_out1<<"D1,";stat_out2<<"D1,";stat_out3<<"D1,";break;//SL, 
+		case 0: s_ColoringVariant = "DISTANCE_ONE"; cout<<"D1 "; stat_out1<<"D1,";stat_out2<<"D1,";stat_out3<<"D1,";break;//SL,
 		case 1: s_ColoringVariant = "ACYCLIC"; cout<<"A "; stat_out1<<"A,";stat_out2<<"A,";stat_out3<<"A,";break; //N
-		case 2: s_ColoringVariant = "STAR"; cout<<"S "; stat_out1<<"S,";stat_out2<<"S,";stat_out3<<"S,";break; //D2SL 
+		case 2: s_ColoringVariant = "STAR"; cout<<"S "; stat_out1<<"S,";stat_out2<<"S,";stat_out3<<"S,";break; //D2SL
 		case 3: s_ColoringVariant = "RESTRICTED_STAR"; cout<<"RS "; stat_out1<<"RS,";stat_out2<<"RS,";stat_out3<<"RS,";break;
 		case 4: s_ColoringVariant = "DISTANCE_TWO"; cout<<"D2 "; stat_out1<<"D2,";stat_out2<<"D2,";stat_out3<<"D2,";break; //SL
 		}
@@ -146,7 +146,7 @@ void toFileC_forColoringBasedOrdering(string baseDir, string stat_output_suffix 
 			gGraph->GraphColoring::DistanceOneColoring();
 			m_T_Timer.Stop();
 			double ColoringTime = m_T_Timer.GetWallTime();
-			
+
 			stat_out1<<","<<gGraph->GetVertexColorCount()<<flush;
 			stat_out2<<","<<OrderingTime<<","<<ColoringTime<<","<<ColoringTime+OrderingTime<<flush;
 
@@ -194,7 +194,7 @@ void toFileC_forColoringBasedOrdering(string baseDir, string stat_output_suffix 
 void toFileC(string baseDir, string stat_output_suffix, vector<string> Orderings, vector<string> Colorings, map<string, bool> stat_flags ) {
 	ofstream out_NumberOfColors, out_Time, out_MaxBackDegree, out_Graph_Stat;
 	vector <string> listOfGraphs = getListOfGraphs(baseDir+"listOfGraphs.txt");
-	
+
 	// ******************************************************
 	// Open appropriate output stream
 	if( stat_flags["output_append"] ) {
@@ -203,47 +203,47 @@ void toFileC(string baseDir, string stat_output_suffix, vector<string> Orderings
 	    out_NumberOfColors.open((baseDir+"NumberOfColors"+"-Coloring"+stat_output_suffix+".csv").c_str(),ios::app);
 	    out_NumberOfColors<<endl<<endl;
 	  }
-	  
+
 	  if(stat_flags["Time"]) {
 	    cout<<"Time: Append to "<<(baseDir+"Time"+"-Coloring"+stat_output_suffix+".csv")<<endl;
 	    out_Time.open((baseDir+"Time"+"-Coloring"+"-Coloring"+stat_output_suffix+".csv").c_str(),ios::app);
 	    out_Time<<endl<<endl;
 	  }
-	  
+
 	  if(stat_flags["MaxBackDegree"]) {
 	    cout<<"MaxBackDegree: Append to "<<(baseDir+"MaxBackDegree"+"-Coloring"+stat_output_suffix+".csv")<<endl;
 	    out_MaxBackDegree.open((baseDir+"MaxBackDegree"+"-Coloring"+stat_output_suffix+".csv").c_str(),ios::app);
 	    out_MaxBackDegree<<endl<<endl;
 	  }
-	  
+
 	  if(stat_flags["Graph_Stat"]) {
 	    cout<<"Graph_Stat: Append to "<<(baseDir+"Graph_Stat"+"-Coloring"+stat_output_suffix+".csv")<<endl;
 	    out_Graph_Stat.open((baseDir+"Graph_Stat"+"-Coloring"+stat_output_suffix+".csv").c_str(),ios::app);
 	    out_Graph_Stat<<endl<<endl;
-	  }	  
+	  }
 	}
 	else {
 	  if(stat_flags["NumberOfColors"]) {
 	    cout<<"NumberOfColors: Write to "<<(baseDir+"NumberOfColors"+"-Coloring"+stat_output_suffix+".csv")<<endl;
 	    out_NumberOfColors.open((baseDir+"NumberOfColors"+"-Coloring"+stat_output_suffix+".csv").c_str());
 	  }
-	  
+
 	  if(stat_flags["Time"]) {
 	    cout<<"Time: Write to "<<(baseDir+"Time"+"-Coloring"+stat_output_suffix+".csv")<<endl;
 	    out_Time.open((baseDir+"Time"+"-Coloring"+stat_output_suffix+".csv").c_str());
 	  }
-	  
+
 	  if(stat_flags["MaxBackDegree"]) {
 	    cout<<"MaxBackDegree: Write to "<<(baseDir+"MaxBackDegree"+"-Coloring"+stat_output_suffix+".csv")<<endl;
 	    out_MaxBackDegree.open((baseDir+"MaxBackDegree"+"-Coloring"+stat_output_suffix+".csv").c_str());
 	  }
-	  
+
 	  if(stat_flags["Graph_Stat"]) {
 	    cout<<"Graph_Stat: Write to "<<(baseDir+"Graph_Stat"+"-Coloring"+stat_output_suffix+".csv")<<endl;
 	    out_Graph_Stat.open((baseDir+"Graph_Stat"+"-Coloring"+stat_output_suffix+".csv").c_str());
 	  }
 	}
-	
+
 	// ******************************************************
 	// Create titles
 	if(stat_flags["NumberOfColors"]) {
@@ -253,7 +253,7 @@ void toFileC(string baseDir, string stat_output_suffix, vector<string> Orderings
 	  }
 	  out_NumberOfColors<<endl;
 	}
-	
+
 	if(stat_flags["Time"]) {
 	  // line 1
 	  out_Time<<"Style,Name";
@@ -261,7 +261,7 @@ void toFileC(string baseDir, string stat_output_suffix, vector<string> Orderings
 	    out_Time<<", "<<Orderings[i]<<", , ";
 	  }
 	  out_Time<<endl;
-	  
+
 	  // line 2
 	  out_Time<<",";
 	  for(int i=0; i< Orderings.size(); i++) {
@@ -269,7 +269,7 @@ void toFileC(string baseDir, string stat_output_suffix, vector<string> Orderings
 	  }
 	  out_Time<<endl;
 	}
-	
+
 	if(stat_flags["MaxBackDegree"]) {
 	  out_MaxBackDegree<<"Name";
 	  for(int i=0; i< Orderings.size(); i++) {
@@ -277,14 +277,14 @@ void toFileC(string baseDir, string stat_output_suffix, vector<string> Orderings
 	  }
 	  out_MaxBackDegree<<endl;
 	}
-	
+
 	if(stat_flags["Graph_Stat"]) {
 		out_Graph_Stat<<"Name,|V|,|E|,MaxDegree,MinDegree,AvgDegree"<<endl;
 	}
 
 	for(unsigned int i=0;i < listOfGraphs.size(); i++){
 		printListOfGraphs(listOfGraphs,i);
-		
+
 		for(int j=0;j < Colorings.size();j++) {
 			cout<<Colorings[j]<<" Coloring"<<endl<<flush;
 			if(stat_flags["NumberOfColors"]) out_NumberOfColors<<Colorings[j]<<", ";
@@ -295,15 +295,15 @@ void toFileC(string baseDir, string stat_output_suffix, vector<string> Orderings
 			if(stat_flags["NumberOfColors"]) out_NumberOfColors<<stat_file_parsor.GetName();
 			if(stat_flags["Time"]) out_Time<<stat_file_parsor.GetName();
 			if(stat_flags["MaxBackDegree"] && j == 0) out_MaxBackDegree<<stat_file_parsor.GetName();
-			
+
 			for(int k=0;k < Orderings.size();k++) {
 				current_time();
-				
+
 				cout<<Orderings[k]<<" Ordering"<<endl<<flush;
 
 				GraphColoringInterface * gGraph = new GraphColoringInterface(SRC_FILE,listOfGraphs[i].c_str(), "AUTO_DETECTED");
 				gGraph->Coloring(Orderings[k], Colorings[j] );
-				
+
 				/*
 				if(Colorings[j] == "ACYCLIC") {
 				  int result =  gGraph->CheckAcyclicColoring();
@@ -324,11 +324,11 @@ void toFileC(string baseDir, string stat_output_suffix, vector<string> Orderings
 					}
 
 				}
-				
+
 
 				if(stat_flags["NumberOfColors"]) out_NumberOfColors<<","<<gGraph->GetVertexColorCount()<<flush;
 				if(stat_flags["Time"]) out_Time<<","<<gGraph->GetVertexOrderingTime()<<","<<gGraph->GetVertexColoringTime()<<","<<gGraph->GetVertexColoringTime()+gGraph->GetVertexOrderingTime()<<flush;
-				  
+
 				// Only get MaxBackDegree of one coloring
 				if(j == 0) {
 					if(stat_flags["MaxBackDegree"]) {
@@ -338,7 +338,7 @@ void toFileC(string baseDir, string stat_output_suffix, vector<string> Orderings
 						out_MaxBackDegree<<","<<MaxBackDegree<<flush;
 						cout<<MaxBackDegree<<endl;
 					}
-					
+
 					//populate Graph_Stat, done once for each graph
 					if(stat_flags["Graph_Stat"] && k == 0) {
 						out_Graph_Stat<<stat_file_parsor.GetName();
@@ -350,14 +350,14 @@ void toFileC(string baseDir, string stat_output_suffix, vector<string> Orderings
 						out_Graph_Stat<<endl<<flush;
 					}
 				}
-			  
+
 				cout<<endl<<" DONE"<<endl;
 				delete gGraph;
 			}
-			
-			if(stat_flags["NumberOfColors"]) out_NumberOfColors<<endl;	
-			if(stat_flags["Time"]) out_Time<<endl;	
-			if(stat_flags["MaxBackDegree"] && j == 0) out_MaxBackDegree<<endl;	
+
+			if(stat_flags["NumberOfColors"]) out_NumberOfColors<<endl;
+			if(stat_flags["Time"]) out_Time<<endl;
+			if(stat_flags["MaxBackDegree"] && j == 0) out_MaxBackDegree<<endl;
 		}
 
 		cout<<"***Finish 1 graph"<<endl<<endl<<endl;
@@ -367,9 +367,9 @@ void toFileC(string baseDir, string stat_output_suffix, vector<string> Orderings
 		}
 	}
 
-	if(stat_flags["NumberOfColors"]) out_NumberOfColors.close();	
-	if(stat_flags["Time"]) out_Time.close();	
-	if(stat_flags["MaxBackDegree"]) out_MaxBackDegree.close();	
+	if(stat_flags["NumberOfColors"]) out_NumberOfColors.close();
+	if(stat_flags["Time"]) out_Time.close();
+	if(stat_flags["MaxBackDegree"]) out_MaxBackDegree.close();
 	if(stat_flags["Graph_Stat"]) out_Graph_Stat.close();
 }
 
@@ -487,7 +487,7 @@ void toFileBiC(string baseDir, string stat_output_suffix , vector<string> Orderi
 {
 	ofstream out_NumberOfColors, out_Time;
 	vector <string> listOfGraphs = getListOfGraphs(baseDir+"listOfGraphs.txt");
-	
+
 	// ******************************************************
 	// Open appropriate output stream
 	if( stat_flags["output_append"] ) {
@@ -496,7 +496,7 @@ void toFileBiC(string baseDir, string stat_output_suffix , vector<string> Orderi
 	    out_NumberOfColors.open((baseDir+"NumberOfColors"+"-BiColoring"+stat_output_suffix+".csv").c_str(),ios::app);
 	    out_NumberOfColors<<endl<<endl;
 	  }
-	  
+
 	  if(stat_flags["Time"]) {
 	    cout<<"Time: Append to "<<(baseDir+"Time"+"-BiColoring"+stat_output_suffix+".csv")<<endl;
 	    out_Time.open((baseDir+"Time"+"-BiColoring"+stat_output_suffix+".csv").c_str(),ios::app);
@@ -508,13 +508,13 @@ void toFileBiC(string baseDir, string stat_output_suffix , vector<string> Orderi
 	    cout<<"NumberOfColors: Write to "<<(baseDir+"NumberOfColors"+"-BiColoring"+stat_output_suffix+".csv")<<endl;
 	    out_NumberOfColors.open((baseDir+"NumberOfColors"+"-BiColoring"+stat_output_suffix+".csv").c_str());
 	  }
-	  
+
 	  if(stat_flags["Time"]) {
 	    cout<<"Time: Write to "<<(baseDir+"Time"+"-BiColoring"+stat_output_suffix+".csv")<<endl;
 	    out_Time.open((baseDir+"Time"+"-BiColoring"+stat_output_suffix+".csv").c_str());
-	  }	  
+	  }
 	}
-	
+
 	// ******************************************************
 	// Create titles
 	if(stat_flags["NumberOfColors"]) {
@@ -523,7 +523,7 @@ void toFileBiC(string baseDir, string stat_output_suffix , vector<string> Orderi
 	    out_NumberOfColors<<", "<<Orderings[i]<<", , ";
 	  }
 	  out_NumberOfColors<<endl;
-	  
+
 	  // line 2
 	  out_NumberOfColors<<",";
 	  for(int i=0; i< Orderings.size(); i++) {
@@ -531,7 +531,7 @@ void toFileBiC(string baseDir, string stat_output_suffix , vector<string> Orderi
 	  }
 	  out_NumberOfColors<<endl;
 	}
-	
+
 	if(stat_flags["Time"]) {
 	  // line 1
 	  out_Time<<"Style,Name";
@@ -539,7 +539,7 @@ void toFileBiC(string baseDir, string stat_output_suffix , vector<string> Orderi
 	    out_Time<<", "<<Orderings[i]<<", , ";
 	  }
 	  out_Time<<endl;
-	  
+
 	  // line 2
 	  out_Time<<",";
 	  for(int i=0; i< Orderings.size(); i++) {
@@ -565,7 +565,7 @@ void toFileBiC(string baseDir, string stat_output_suffix , vector<string> Orderi
 			for (int k=0; k<Orderings.size(); k++)
 			{
 				current_time();
-				
+
 				cout<<Orderings[k]<<" Ordering"<<endl<<flush;
 
 				//readBipartiteGraph(gGraph, listOfGraphs[i]);
@@ -577,13 +577,13 @@ void toFileBiC(string baseDir, string stat_output_suffix , vector<string> Orderi
 
 				//system("pause");
 				//break;
-			  
+
 				cout<<endl<<" DONE"<<endl;
 				delete gGraph;
 			}
-			
-			if(stat_flags["NumberOfColors"]) out_NumberOfColors<<endl;	
-			if(stat_flags["Time"]) out_Time<<endl;	
+
+			if(stat_flags["NumberOfColors"]) out_NumberOfColors<<endl;
+			if(stat_flags["Time"]) out_Time<<endl;
 		}
 		cout<<"***Finish 1 graph"<<endl<<endl<<endl;
 
@@ -601,7 +601,7 @@ void toFileBiPC(string baseDir, string stat_output_suffix, vector<string> Orderi
 {
 	ofstream out_NumberOfColors, out_Time;
 	vector <string> listOfGraphs = getListOfGraphs(baseDir+"listOfGraphs.txt");
-	
+
 	// ******************************************************
 	// Open appropriate output stream
 	if( stat_flags["output_append"] ) {
@@ -610,7 +610,7 @@ void toFileBiPC(string baseDir, string stat_output_suffix, vector<string> Orderi
 	    out_NumberOfColors.open((baseDir+"NumberOfColors"+"-PD2Coloring"+stat_output_suffix+".csv").c_str(),ios::app);
 	    out_NumberOfColors<<endl<<endl;
 	  }
-	  
+
 	  if(stat_flags["Time"]) {
 	    cout<<"Time: Append to "<<(baseDir+"Time"+"-PD2Coloring"+stat_output_suffix+".csv")<<endl;
 	    out_Time.open((baseDir+"Time"+"-PD2Coloring"+stat_output_suffix+".csv").c_str(),ios::app);
@@ -622,13 +622,13 @@ void toFileBiPC(string baseDir, string stat_output_suffix, vector<string> Orderi
 	    cout<<"NumberOfColors: Write to "<<(baseDir+"NumberOfColors"+"-PD2Coloring"+stat_output_suffix+".csv")<<endl;
 	    out_NumberOfColors.open((baseDir+"NumberOfColors"+"-PD2Coloring"+stat_output_suffix+".csv").c_str());
 	  }
-	  
+
 	  if(stat_flags["Time"]) {
 	    cout<<"Time: Write to "<<(baseDir+"Time"+"-PD2Coloring"+stat_output_suffix+".csv")<<endl;
 	    out_Time.open((baseDir+"Time"+"-PD2Coloring"+stat_output_suffix+".csv").c_str());
 	  }
 	}
-	
+
 	// ******************************************************
 	// Create titles
 	if(stat_flags["NumberOfColors"]) {
@@ -638,7 +638,7 @@ void toFileBiPC(string baseDir, string stat_output_suffix, vector<string> Orderi
 	  }
 	  out_NumberOfColors<<endl;
 	}
-	
+
 	if(stat_flags["Time"]) {
 	  // line 1
 	  out_Time<<"Style,Name";
@@ -646,7 +646,7 @@ void toFileBiPC(string baseDir, string stat_output_suffix, vector<string> Orderi
 	    out_Time<<", "<<Orderings[i]<<", , ";
 	  }
 	  out_Time<<endl;
-	  
+
 	  // line 2
 	  out_Time<<",";
 	  for(int i=0; i< Orderings.size(); i++) {
@@ -671,9 +671,9 @@ void toFileBiPC(string baseDir, string stat_output_suffix, vector<string> Orderi
 
 			for (int k=0; k<Orderings.size(); k++)	{
 				current_time();
-				
+
 				cout<<Orderings[k]<<" Ordering"<<endl<<flush;
-				
+
 				BipartiteGraphPartialColoringInterface * gGraph = new BipartiteGraphPartialColoringInterface(SRC_FILE, listOfGraphs[i].c_str(), "AUTO_DETECTED");
 				gGraph->PartialDistanceTwoColoring(Orderings[k], Colorings[j] );
 
@@ -683,13 +683,13 @@ void toFileBiPC(string baseDir, string stat_output_suffix, vector<string> Orderi
 				  else out_NumberOfColors<<','<<gGraph->GetLeftVertexColorCount();
 				}
 				if(stat_flags["Time"]) out_Time<<','<<gGraph->GetVertexOrderingTime()<<','<<gGraph->GetVertexColoringTime()<<','<<gGraph->GetVertexOrderingTime()+gGraph->GetVertexColoringTime();
-			  
+
 				cout<<endl<<" DONE"<<endl;
 				delete gGraph;
 			}
-			
-			if(stat_flags["NumberOfColors"]) out_NumberOfColors<<endl;	
-			if(stat_flags["Time"]) out_Time<<endl;	
+
+			if(stat_flags["NumberOfColors"]) out_NumberOfColors<<endl;
+			if(stat_flags["Time"]) out_Time<<endl;
 		}
 
 		cout<<"Finish 1 graph"<<endl;
