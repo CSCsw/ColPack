@@ -388,7 +388,9 @@ namespace ColPack
 					  if ( m_vi_LeftVertexColors [m_vi_Edges [x]] == m_vi_LeftVertexColors[v] && f(v) > f(m_vi_Edges [x]) ) {
 							//Algo 4 - Line 18: add [v] to R ; cont <- false; break
 #pragma omp critical
-							vi_verticesNeedNewColor.push_back(v);
+							{
+								vi_verticesNeedNewColor.push_back(v);
+							}
 							cont = false;
 							break;
 						}
@@ -574,7 +576,9 @@ namespace ColPack
 					  if ( m_vi_RightVertexColors [m_vi_Edges [x]] == m_vi_RightVertexColors[v] && f(v) > f(m_vi_Edges [x]) ) {
 							//Algo 4 - Line 18: add [v] to R ; cont <- false; break
 #pragma omp critical
-							vi_verticesNeedNewColor.push_back(v);
+							{
+								vi_verticesNeedNewColor.push_back(v);
+							}
 							cont = false;
 							break;
 						}
