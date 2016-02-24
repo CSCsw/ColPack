@@ -49,7 +49,7 @@ int WriteMatrixMarket_ADOLCInput(string s_postfix, int i_mode, ...) {
 
     ofstream out_Matrix (s_MatrixName.c_str());
     if(!out_Matrix) {
-	    cout<<"Error creating file: \""<<out_Matrix<<"\""<<endl;
+	    cout<<"Error creating file: \""<<s_MatrixName<<"\""<<endl;
 	    exit(1);
     }
     
@@ -84,7 +84,7 @@ int WriteMatrixMarket_ADOLCInput(string s_postfix, int i_mode, ...) {
     string s_MatrixName = "pattern"+s_postfix+s_BaseName;
     ofstream out_Matrix (s_MatrixName.c_str());
     if(!out_Matrix) {
-	    cout<<"Error creating file: \""<<out_Matrix<<"\""<<endl;
+	    cout<<"Error creating file: \""<<s_MatrixName<<"\""<<endl;
 	    exit(1);
     }
 
@@ -111,7 +111,7 @@ int WriteMatrixMarket_ADOLCInput(string s_postfix, int i_mode, ...) {
     string s_CompressedMatrixName = "CompressedMatrix"+s_postfix+s_BaseName;
     ofstream out_CompressedMatrix (s_CompressedMatrixName.c_str());
     if(!out_CompressedMatrix) {
-	    cout<<"Error creating file: \""<<out_CompressedMatrix<<"\""<<endl;
+	    cout<<"Error creating file: \""<<s_CompressedMatrixName<<"\""<<endl;
 	    exit(1);
     }
     
@@ -140,7 +140,7 @@ int WriteMatrixMarket_ADOLCInput(string s_postfix, int i_mode, ...) {
     string s_MatrixName = "pattern_value"+s_postfix+s_BaseName;
     ofstream out_Matrix (s_MatrixName.c_str());
     if(!out_Matrix) {
-	    cout<<"Error creating file: \""<<out_Matrix<<"\""<<endl;
+	    cout<<"Error creating file: \""<<s_MatrixName<<"\""<<endl;
 	    exit(1);
     }
 
@@ -167,7 +167,7 @@ int WriteMatrixMarket_ADOLCInput(string s_postfix, int i_mode, ...) {
     string s_CompressedMatrixName = "CompressedMatrix"+s_postfix+s_BaseName;
     ofstream out_CompressedMatrix (s_CompressedMatrixName.c_str());
     if(!out_CompressedMatrix) {
-	    cout<<"Error creating file: \""<<out_CompressedMatrix<<"\""<<endl;
+	    cout<<"Error creating file: \""<<s_CompressedMatrixName<<"\""<<endl;
 	    exit(1);
     }
     
@@ -671,7 +671,6 @@ int buildDotWithColor(ColPack::GraphColoringInterface &g, vector<string> &ListOf
 	    }
 	  }
 	}
-	
       }
     }
   }
@@ -1483,4 +1482,3 @@ int DisplayADICFormat_Value(std::list<std::vector<double> > &lvd_Value) {
 }
 
 #endif
-
