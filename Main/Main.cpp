@@ -21,19 +21,19 @@ int main(int argc, const char* argv[]) {
 	Orderings.push_back("SMALLEST_LAST");
 	Orderings.push_back("INCIDENCE_DEGREE");
 	Orderings.push_back("RANDOM");
-	
+
 	vector<string> Colorings;
 	Colorings.push_back("EXPLICIT_COVERING__STAR_BICOLORING");
 	Colorings.push_back("EXPLICIT_COVERING__MODIFIED_STAR_BICOLORING");
 	Colorings.push_back("IMPLICIT_COVERING__STAR_BICOLORING");
 	Colorings.push_back("IMPLICIT_COVERING__GREEDY_STAR_BICOLORING");
-	
+
 	map<string, bool> stat_flags;
 	stat_flags["output_append"]=true;
 	stat_flags["NumberOfColors"]=true;
 	stat_flags["Time"]=true;
-	
+
 	toFileBiC("/home/nguyend/Desktop/Duck/Research/Prog/graph/MM_collection/", "test1", Orderings,  Colorings,  stat_flags );
-	
+
 	return 0;
 }

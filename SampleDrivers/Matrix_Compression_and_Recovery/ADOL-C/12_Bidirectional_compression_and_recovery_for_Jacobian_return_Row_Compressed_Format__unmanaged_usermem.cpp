@@ -109,7 +109,7 @@ int main()
 	we could manage the memory deallocation for dp3_NewValue by ourselves.
 	This way, we can reuse (*dp3_NewValue) to store new values if RecoverD2Cln_RowCompressedFormat...() need to be called again.
 	//*/
-	
+
 	cout<<"Finish Recover()"<<endl;
 
 	displayCompressedRowMatrix(*dp3_NewValue,rowCount);
@@ -130,7 +130,7 @@ int main()
 	for(int i=0; i<3;i++) {
 	  jr2d->DirectRecover_RowCompressedFormat_usermem(g, *dp3_LeftCompressedMatrix, *dp3_RightCompressedMatrix, *uip3_SparsityPattern, dp3_NewValue);
 	}
-	
+
 	//Deallocate memory for 2-dimensional array (*dp3_NewValue)
 	for(int i=0; i<rowCount;i++) {
 	  free((*dp3_NewValue)[i]);

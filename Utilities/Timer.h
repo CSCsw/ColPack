@@ -38,7 +38,7 @@
 #ifndef TIMER_H
 #define TIMER_H
 
-namespace ColPack 
+namespace ColPack
 {
 	/** @ingroup group4
 	 *  @brief class Timer in @link group4@endlink.
@@ -51,9 +51,9 @@ namespace ColPack
 	class Timer
 	{
 	  private:
-	    
+
 /// UNIX only.  Used to measure longer execution time.
-/** Define SYSTEM_TIME to measure the execution time of a program which may run for more than 30 minutes 
+/** Define SYSTEM_TIME to measure the execution time of a program which may run for more than 30 minutes
 (35.79 minutes or 2,147 seconds to be accurate)
 Reason: In UNIX, CLOCKS_PER_SEC is defined to be 1,000,000 (In Windows, CLOCKS_PER_SEC == 1,000).
 The # of clock-ticks is measured by using variables of type int => max value is 2,147,483,648.
@@ -70,7 +70,7 @@ Time in seconds = # of clock-ticks / CLOCKS_PER_SEC => max Time in seconds = 2,1
 
 
 	  public:
-	    
+
 		//Public Constructor 4351
 		Timer();
 
@@ -82,16 +82,16 @@ Time in seconds = # of clock-ticks / CLOCKS_PER_SEC => max Time in seconds = 2,1
 
 		//Public Function 4355
 		void Stop();
-	    
+
 		//Public Function 4356
 		double GetWallTime();
-		
+
 		//Public Function 4357
 		double GetProcessorTime();
-		
+
 		//Public Function 4358
 		double GetUserProcessorTime();
-		
+
 		//Public Function 4359
 		double GetSystemProcessorTime();
 	};

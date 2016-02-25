@@ -655,14 +655,14 @@ namespace ColPack
 		return(_TRUE);
 
 	}
-	
+
 	int GraphColoring::PrintVertexColorCombination(map <int, int >* VertexColorCombination) {
 		cout<<"PrintVertexColorCombination"<<endl;
 		map< int, int>::iterator mii_iter;
 		mii_iter = (*VertexColorCombination).begin();
 		for(;mii_iter != (*VertexColorCombination).end(); mii_iter++) {
 			cout<<"\t c "<<mii_iter->first<<": ";
-			
+
 			if( mii_iter->second > -1) {
 				cout<<" NO hub, connect to v "<<mii_iter->second<<" c "<<m_vi_VertexColors[mii_iter->second];
 			}
@@ -673,18 +673,18 @@ namespace ColPack
 				cout<<" LEAF of hub v "<<-(mii_iter->second+2) <<" c "<<m_vi_VertexColors[-(mii_iter->second+2)];
 			}
 			cout<<endl;
-						
+
 		}
 		return (_TRUE);
 	}
-	
+
 	int GraphColoring::PrintPotentialHub(map< int, int> *PotentialHub_Private, int i_thread_num, pair<int, int> pii_ColorCombination) {
 		cout<<"PrintPotentialHub - Star collection of combination "<< pii_ColorCombination.first << " "<< pii_ColorCombination.second <<endl;
 		map< int, int>::iterator mii_iter;
 		mii_iter = PotentialHub_Private[i_thread_num].begin();
 		for(;mii_iter != PotentialHub_Private[i_thread_num].end(); mii_iter++) {
 			cout<<"\t v "<<mii_iter->first<<" c "<<m_vi_VertexColors[mii_iter->first]<<":";
-			
+
 			if( mii_iter->second > -1) {
 				cout<<" NO hub, connect to v "<<mii_iter->second<<" c "<<m_vi_VertexColors[mii_iter->second];
 			}
@@ -695,12 +695,12 @@ namespace ColPack
 				cout<<" LEAF of hub v "<<-(mii_iter->second+2) <<" c "<<m_vi_VertexColors[-(mii_iter->second+2)];
 			}
 			cout<<endl;
-						
+
 		}
 		return (_TRUE);
 	}
-	
-		
+
+
 	// !!! later on, remove the codes that check for conflicts (because we assume no conflict) => make this function run faster)
 	int GraphColoring::BuildStarFromColorCombination_forChecking(int i_Mode, int i_MaxNumThreads, int i_thread_num, pair<int, int> pii_ColorCombination, map< pair<int, int>, Colors2Edge_Value , lt_pii>* Colors2Edge_Private,
 							  map< int, int> * PotentialHub_Private) {
@@ -720,7 +720,7 @@ namespace ColPack
 				// now start counting the appearance of vertices and detect conflict
 				for(int j=0; j< vpii_EdgesPtr->size(); j++  ) {
 					pii_Edge = (*vpii_EdgesPtr)[j];
-#ifdef COLPACK_DEBUG		
+#ifdef COLPACK_DEBUG
 					cout<<"\t Looking at "<<pii_Edge.first<<"-"<<pii_Edge.second;
 #endif
 					i_PotentialHub=0;
@@ -748,9 +748,9 @@ namespace ColPack
 							i_ConflictVertex=pii_Edge.first;
 						}
 					}
-					
-					if(i_PotentialHub == 3 || b_isConflict) { // pii_Edge.first and pii_Edge.second are both potential hubs || conflict has been detected 
-						CoutLock::set(); 
+
+					if(i_PotentialHub == 3 || b_isConflict) { // pii_Edge.first and pii_Edge.second are both potential hubs || conflict has been detected
+						CoutLock::set();
 						{
 							//Detect conflict
 							cerr<<endl<<" !!! conflict detected in BuildStarFromColorCombination_forChecking()"<<endl;
@@ -762,17 +762,17 @@ namespace ColPack
 							//PrintColorCombination(Colors2Edge_Private, i_MaxNumThreads, pii_ColorCombination, 100);
 							PrintColorCombination(Colors2Edge_Private, i_MaxNumThreads, pii_ColorCombination);
 							PrintPotentialHub(PotentialHub_Private, i_thread_num, pii_ColorCombination);
-							
+
 							map< int, map<int,bool> > *graph = new map< int, map<int,bool> >;
 							map<int, bool> *mib_FilterByColors = new map<int, bool>;
 							{
 								(*mib_FilterByColors)[m_vi_VertexColors[pii_Edge.first]] = true;
 								(*mib_FilterByColors)[m_vi_VertexColors[pii_Edge.second]] = true;
-								
+
 							}
 							//BuildSubGraph(graph, pii_Edge.first, 4, mib_FilterByColors);
 							BuildColorsSubGraph(graph,mib_FilterByColors);
-							vector<int> vi_VertexColors; 
+							vector<int> vi_VertexColors;
 							GetVertexColors(vi_VertexColors);
 							displayGraph(graph, &vi_VertexColors, true, FDP);
 							delete graph;
@@ -784,7 +784,7 @@ namespace ColPack
 							//fout.close();
 #endif
 							if(i_Mode==1) {
-								CoutLock::unset(); 
+								CoutLock::unset();
 								//cout<<"IN BuildStarFromColorCombination_forChecking i_ConflictVertex="<<i_ConflictVertex<<endl;
 								//Pause();
 								return i_ConflictVertex;
@@ -793,7 +793,7 @@ namespace ColPack
 								Pause();
 							}
 						}
-						CoutLock::unset(); 
+						CoutLock::unset();
 						continue;
 					}
 					else if(i_PotentialHub == 1) { //only pii_Edge.first is a potential hub
@@ -822,20 +822,20 @@ namespace ColPack
 						PotentialHub_Private[i_thread_num][pii_Edge.second] = pii_Edge.first;
 						PotentialHub_Private[i_thread_num][pii_Edge.first] = pii_Edge.second;
 					}
-#ifdef COLPACK_DEBUG		
+#ifdef COLPACK_DEBUG
 					cout<<" PASSED"<<endl;
 #endif
-					
+
 				}
 			}
 		}
-		
+
 		//cout<<"IN BuildStarFromColorCombination_forChecking i_ConflictVertex="<<-1<<endl;
 		return -1;
 	}
-	
+
 	int GraphColoring::CheckStarColoring_OMP(int i_Mode, pair<int,int> *pii_ConflictColorCombination) {
-		
+
 		int i_MaxNumThreads;
 #ifdef _OPENMP
 		i_MaxNumThreads = omp_get_max_threads();
@@ -846,18 +846,18 @@ namespace ColPack
 		int* i_ConflictVertex= new int[i_MaxNumThreads];
 		for(int i=0; i<i_MaxNumThreads;i++) i_ConflictVertex[i] = -1;
 		map< int, int> * PotentialHub_Private = new map< int, int> [i_MaxNumThreads];
-		
-#ifdef COLPACK_DEBUG		
+
+#ifdef COLPACK_DEBUG
 		cout<<"Color combination "<<pii_ColorCombination.first<<" "<<pii_ColorCombination.second<<endl;
 #endif
-		
+
 		// Threads go through all edges and put each edge into a 2-color group
 		i_ProcessedEdgeCount=0;
 		map< pair<int, int>, Colors2Edge_Value, lt_pii> *Colors2Edge_Private = new map< pair<int, int>, Colors2Edge_Value, lt_pii> [i_MaxNumThreads]; // map 2-color combination to edges that have those 2 colors
-		
+
 		bool b_Stop = false;
 #ifdef _OPENMP
-		#pragma omp parallel for default(none) shared(i_ConflictVertex, i_VertexCount, Colors2Edge_Private, cout , i_MaxNumThreads, i_Mode, b_Stop) 
+		#pragma omp parallel for default(none) shared(i_ConflictVertex, i_VertexCount, Colors2Edge_Private, cout , i_MaxNumThreads, i_Mode, b_Stop)
 #endif
 		for(int i=0; i<i_VertexCount; i++) {
 			if(b_Stop) continue;
@@ -878,22 +878,22 @@ namespace ColPack
 					pii_Edge.second = m_vi_Edges[j];
 					//#pragma omp critical
 					//{i_ProcessedEdgeCount++;}
-					 
+
 					if(m_vi_VertexColors[i] < m_vi_VertexColors[ m_vi_Edges[j] ]) {
 						pii_ColorCombination.first = m_vi_VertexColors[i];
 						pii_ColorCombination.second = m_vi_VertexColors[m_vi_Edges[j]];
-						
+
 						Colors2Edge_Private[i_thread_num][pii_ColorCombination].value.push_back(pii_Edge);
 					}
 					else if ( m_vi_VertexColors[i] > m_vi_VertexColors[ m_vi_Edges[j] ] ) {
 						pii_ColorCombination.second = m_vi_VertexColors[i];
 						pii_ColorCombination.first = m_vi_VertexColors[m_vi_Edges[j]];
-						
+
 						Colors2Edge_Private[i_thread_num][pii_ColorCombination].value.push_back(pii_Edge);
 					}
 					else { //m_vi_VertexColors[i] == m_vi_VertexColors[ m_vi_Edges[j] ]
-						// conflict found! 
-						CoutLock::set(); 
+						// conflict found!
+						CoutLock::set();
 						{
 							//Detect conflict
 							cout<<endl<<" !!! conflict detected in CheckStarColoring_OMP()"<<endl;
@@ -911,14 +911,14 @@ namespace ColPack
 							//fout.close();
 #endif
 							if(i_Mode==1) {
-								CoutLock::unset(); 
+								CoutLock::unset();
 								b_Stop = true;
 							}
 							else if(i_Mode==0) {
 								Pause();
 							}
 						}
-						CoutLock::unset(); 
+						CoutLock::unset();
 					}
 				}
 			}
@@ -936,14 +936,14 @@ namespace ColPack
 			delete[] i_ConflictVertex;
 			return -1;
 		}
-		
+
 		/* Each thread will goes through 2-color combination, attemp to build stars (assume that there is no conflict edges)
 		*/
 		for(int i=0; i<i_MaxNumThreads; i++) {
 			if(b_Stop) break;
-		
+
 #ifdef _OPENMP
-			#pragma omp parallel default(none) firstprivate(i) shared(pii_ConflictColorCombination, i_ConflictVertex, cout, i_VertexCount, Colors2Edge_Private, PotentialHub_Private, i_MaxNumThreads, b_Stop, i_Mode) 
+			#pragma omp parallel default(none) firstprivate(i) shared(pii_ConflictColorCombination, i_ConflictVertex, cout, i_VertexCount, Colors2Edge_Private, PotentialHub_Private, i_MaxNumThreads, b_Stop, i_Mode)
 #endif
 			for(map< pair<int, int>, Colors2Edge_Value, lt_pii >::iterator iter = Colors2Edge_Private[i].begin(); iter != Colors2Edge_Private[i].end() ; iter++) {
 				#pragma omp single nowait
@@ -958,18 +958,18 @@ namespace ColPack
 								iter2->second.visited = true;
 							}
 						}
-						
+
 						int i_thread_num;
 #ifdef _OPENMP
 						i_thread_num = omp_get_thread_num();
 #else
 						i_thread_num = 0;
 #endif
-						
+
 						// now, let a thread works on this combination:
 						//    build stars and identify conflict edges
 						i_ConflictVertex[i_thread_num] = BuildStarFromColorCombination_forChecking(i_Mode, i_MaxNumThreads, i_thread_num, iter->first, Colors2Edge_Private, PotentialHub_Private);
-						
+
 						if(i_ConflictVertex[i_thread_num]  != -1) {
 							#pragma omp critial
 							{
@@ -983,7 +983,7 @@ namespace ColPack
 							//Pause();
 						}
 /*
-#ifdef COLPACK_DEBUG		
+#ifdef COLPACK_DEBUG
 						#pragma omp critical
 						{
 							cout<<flush<<"Color combination "<<(iter->first).first<<" "<<(iter->first).second<<endl;
@@ -998,7 +998,7 @@ namespace ColPack
 		}
 		delete[] Colors2Edge_Private;
 		delete[] PotentialHub_Private;
-		
+
 		if(b_Stop) {
 			for(int i=0; i<i_MaxNumThreads;i++) {
 				if( i_ConflictVertex[i]!=-1) {
@@ -1008,12 +1008,12 @@ namespace ColPack
 				}
 			}
 		}
-		
-		
+
+
 		delete[] i_ConflictVertex;
 		return -1;
 	}
-	
+
 	// !!! later on, remove the codes that check for conflicts (because we assume no conflict) => make this function run faster)
 	int GraphColoring::BuildStarFromColorCombination(int i_MaxNumThreads, int i_thread_num, pair<int, int> pii_ColorCombination, map< pair<int, int>, Colors2Edge_Value , lt_pii>* Colors2Edge_Private,
 							 map< int, vector< pair<int, int> > > *Vertex2ColorCombination_Private, map< int, int> * PotentialHub_Private) {
@@ -1024,11 +1024,11 @@ namespace ColPack
 		bool b_isConflict=false;
 		// reset PotentialHub_Private;
 		PotentialHub_Private[i_thread_num].clear();
-		
-#ifdef COLPACK_DEBUG		
+
+#ifdef COLPACK_DEBUG
 		cout<<"Color combination "<<pii_ColorCombination.first<<" "<<pii_ColorCombination.second<<endl;
 #endif
-		
+
 		for(int i= 0; i<i_MaxNumThreads; i++) {
 			mpii_iter = Colors2Edge_Private[i].find(pii_ColorCombination);
 			if(mpii_iter != Colors2Edge_Private[i].end()) { //Colors2Edge_Private[i] contains the color combination
@@ -1038,7 +1038,7 @@ namespace ColPack
 				// now start counting the appearance of vertices and detect conflict
 				for(int j=0; j< vpii_EdgesPtr->size(); j++  ) {
 					pii_Edge = (*vpii_EdgesPtr)[j];
-#ifdef COLPACK_DEBUG		
+#ifdef COLPACK_DEBUG
 					cout<<"\t Looking at "<<pii_Edge.first<<"-"<<pii_Edge.second;
 #endif
 					i_PotentialHub=0;
@@ -1064,9 +1064,9 @@ namespace ColPack
 							b_isConflict=true;
 						}
 					}
-					
+
 					if(i_PotentialHub == 3 || b_isConflict) { // pii_Edge.first and pii_Edge.second are both potential hubs || conflict has been detected => add this edge into ConflictedEdges_Private
-						CoutLock::set(); 
+						CoutLock::set();
 						{
 							//Detect conflict
 							cerr<<endl<<" !!! conflict detected in BuildStarFromColorCombination()"<<endl;
@@ -1083,7 +1083,7 @@ namespace ColPack
 #endif
 							Pause();
 						}
-						CoutLock::unset(); 
+						CoutLock::unset();
 						continue;
 					}
 					else if(i_PotentialHub == 1) { //only pii_Edge.first is a potential hub
@@ -1112,14 +1112,14 @@ namespace ColPack
 						PotentialHub_Private[i_thread_num][pii_Edge.second] = pii_Edge.first;
 						PotentialHub_Private[i_thread_num][pii_Edge.first] = pii_Edge.second;
 					}
-#ifdef COLPACK_DEBUG		
+#ifdef COLPACK_DEBUG
 					cout<<" PASSED"<<endl;
 #endif
-					
+
 				}
 			}
 		}
-				
+
 		//Make each vertex remember this combination and whether or not it is a leaf in this combination
 		int i_TheOtherColor = 0;
 		pair<int, int> pii_pair;
@@ -1134,11 +1134,11 @@ namespace ColPack
 		return (_TRUE);
 	}
 
-	
+
 	/** This function will go through 2-color combination, attemp to build stars and identify conflict edges.
 	 * Conflict edges will be pushed into (thread private) ConflictedEdges. ConflictCount of each vertex will be increased accordingly
 	 */
-	int GraphColoring::DetectConflictInColorCombination(int i_MaxNumThreads, int i_thread_num, pair<int, int> pii_ColorCombination, map< pair<int, int>, Colors2Edge_Value , lt_pii>* Colors2Edge_Private, 
+	int GraphColoring::DetectConflictInColorCombination(int i_MaxNumThreads, int i_thread_num, pair<int, int> pii_ColorCombination, map< pair<int, int>, Colors2Edge_Value , lt_pii>* Colors2Edge_Private,
 					     map< int, vector< pair<int, int> > > *Vertex2ColorCombination_Private, map< int, int> * PotentialHub_Private, vector< pair<int, int> >* ConflictedEdges_Private, vector<int>* ConflictCount_Private) {
 		int i_VertexCount = m_vi_Vertices.size() - 1;
 		map< pair<int, int>, Colors2Edge_Value, lt_pii >::iterator mpii_iter;
@@ -1147,16 +1147,16 @@ namespace ColPack
 		bool b_isConflict=false;
 		// reset PotentialHub_Private;
 		PotentialHub_Private[i_thread_num].clear();
-		
+
 		// !!! consider remove AppearanceCount_Private (if not used)
 		//reset AppearanceCount_Private[i_thread_num]
 		//for(int i=0; i<i_VertexCount;i++) AppearanceCount_Private[i_thread_num][i] = 0;
-		
-#ifdef COLPACK_DEBUG		
+
+#ifdef COLPACK_DEBUG
 		cout<<"Color combination "<<pii_ColorCombination.first<<" "<<pii_ColorCombination.second<<endl;
 		//cout<<"i_StartingIndex="<<i_StartingIndex<<endl;
 #endif
-		
+
 		// Now count the appearance of each vertex in the star collection
 		// Because we suppose to have a collection of stars, with any edge, only one vertex can have the count > 1. This property is used to detect conflict
 		for(int i= 0; i<i_MaxNumThreads; i++) {
@@ -1164,14 +1164,14 @@ namespace ColPack
 			if(mpii_iter != Colors2Edge_Private[i].end()) { //Colors2Edge_Private[i] contains the color combination
 				//vector<int> vi_ConflictedEdgeIndices;
 				vector< pair<int, int> >* vpii_EdgesPtr = &(mpii_iter->second.value);
-				
+
 				pair<int, int> pii_Edge;
 				// now start counting the appearance of vertices and detect conflict
 				for(int j=0; j< vpii_EdgesPtr->size(); j++  ) {
 					pii_Edge = (*vpii_EdgesPtr)[j];
 					//#pragma omp critical
 					//{i_ProcessedEdgeCount++;}
-#ifdef COLPACK_DEBUG		
+#ifdef COLPACK_DEBUG
 					//if(pii_ColorCombination.first==1 && pii_ColorCombination.second==2 && pii_Edge.first==1 && pii_Edge.second==3) cout<<"^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"<<endl;
 					cout<<"\t Looking at "<<pii_Edge.first<<"-"<<pii_Edge.second<<endl<<flush;
 #endif
@@ -1198,7 +1198,7 @@ namespace ColPack
 							b_isConflict=true;
 						}
 					}
-					
+
 					if(i_PotentialHub == 3 || b_isConflict) { // pii_Edge.first and pii_Edge.second are both potential hubs || conflict has been detected => add this edge into ConflictedEdges_Private
 						//Detect conflict
 						ConflictedEdges_Private[i_thread_num].push_back(pii_Edge);
@@ -1247,9 +1247,9 @@ namespace ColPack
 						fout<<"\t\t"<<pii_Edge.first<<"-"<<pii_Edge.second<<" PASSED"<<endl;
 					}
 #endif
-					
+
 					/*
-					if( (pii_Edge.first==18310 && pii_Edge.second==18342) || (pii_Edge.first==11413 && pii_Edge.second==11506) 
+					if( (pii_Edge.first==18310 && pii_Edge.second==18342) || (pii_Edge.first==11413 && pii_Edge.second==11506)
 					    || (pii_Edge.first==117989 && pii_Edge.second==118105) || (pii_Edge.first==46761 && pii_Edge.second==46798)) {
 						#pragma omp critical
 						{
@@ -1260,30 +1260,30 @@ namespace ColPack
 						}
 					}
 					//*/
-					
+
 					/* !!! consider remove
 					if(AppearanceCount_Private[i_thread_num][pii_Edge.first]>0 && AppearanceCount_Private[i_thread_num][pii_Edge.second]>0) {
 						//Detect conflict
 						ConflictedEdges_Private[i_thread_num].push_back(pii_Edge);
 						ConflictCount_Private[i_thread_num][pii_Edge.first]++;
-						ConflictCount_Private[i_thread_num][pii_Edge.second]++;	
+						ConflictCount_Private[i_thread_num][pii_Edge.second]++;
 						continue;
 					}
 					AppearanceCount_Private[i_thread_num][pii_Edge.first]++;
 					AppearanceCount_Private[i_thread_num][pii_Edge.second]++;
 					//*/
 				}
-				
+
 				/*
-				
+
 				//Remove conflict edges out of this ColorCombination
 				for(int j=vi_ConflictedEdgeIndices.size()-1; j>=0;j--) {
 					if(vi_ConflictedEdgeIndices[j] != (vpii_EdgesPtr->size()-1)) {
-						(*vpii_EdgesPtr)[ vi_ConflictedEdgeIndices[j] ] = (*vpii_EdgesPtr)[ vpii_EdgesPtr->size()-1 ];						
+						(*vpii_EdgesPtr)[ vi_ConflictedEdgeIndices[j] ] = (*vpii_EdgesPtr)[ vpii_EdgesPtr->size()-1 ];
 					}
 					vpii_EdgesPtr->pop_back();
 				}
-				
+
 				//Make each vertex remember this combination and whether or not it is a leaf in this combination
 				int i_TheOtherColor = 0;
 				pair<int, int> pii_pair;
@@ -1298,10 +1298,10 @@ namespace ColPack
 				//*/
 			}
 		}
-		
+
 		return(_TRUE);
 	}
-	
+
 	int GraphColoring::PrintColorCombination(map< pair<int, int>, Colors2Edge_Value , lt_pii>* Colors2Edge_Private, int i_MaxNumThreads, pair<int, int> pii_ColorCombination, int i_MaxElementsOfCombination) {
 		cout<<"PrintColorCombination "<<pii_ColorCombination.first<<"-"<<pii_ColorCombination.second<<": "<<endl;
 		int i_ElementCount = 0, i_TotalElementsOfCombination=0;
@@ -1330,13 +1330,13 @@ namespace ColPack
 		}
 		return (_TRUE);
 	}
-	
+
 	int GraphColoring::PrintAllColorCombination(map< pair<int, int>, Colors2Edge_Value , lt_pii>* Colors2Edge_Private, int i_MaxNumThreads, int i_MaxNumOfCombination, int i_MaxElementsOfCombination) {
 		cout<<"PrintAllColorCombination"<<endl;
 		map< pair<int, int>, bool, lt_pii > mpiib_VisitedColorCombination;
 		for(int i=0; i< i_MaxNumThreads; i++) {
 			map< pair<int, int>, Colors2Edge_Value , lt_pii>::iterator itr = Colors2Edge_Private[i].begin();
-			
+
 			for(; itr != Colors2Edge_Private[i].end(); itr++) {
 				if(mpiib_VisitedColorCombination.find(itr->first) == mpiib_VisitedColorCombination.end()) {
 					mpiib_VisitedColorCombination[itr->first] = true;
@@ -1362,15 +1362,15 @@ namespace ColPack
 			if(mpiib_VisitedColorCombination.size() >= i_MaxNumOfCombination) break;
 		}
 		cout<<endl;
-		
+
 		return(_TRUE);
 	}
-	
+
 	int GraphColoring::PrintVertex2ColorCombination(int i_MaxNumThreads, map< int, vector< pair<int, int> > > *Vertex2ColorCombination_Private) {
 		int i_VertexCount = m_vi_Vertices.size() - 1;
 		map< int, vector< pair<int, int> > >::iterator itr;
 		cout<<"PrintVertex2ColorCombination"<<endl;
-		
+
 		for(int i=0; i<i_VertexCount;i++) {
 			cout<<"\t Vertex "<<i;
 			if(m_vi_VertexColors[i]==_UNKNOWN) {
@@ -1381,7 +1381,7 @@ namespace ColPack
 				cout<<" color "<< m_vi_VertexColors[i] <<endl;
 			}
 			for(int ii=0; ii<i_MaxNumThreads;ii++) {
-				
+
 				itr = Vertex2ColorCombination_Private[ii].find(i) ;
 				if(itr !=Vertex2ColorCombination_Private[ii].end()) {
 					cout<<"\t   Thread "<<ii<<" size()="<<itr->second.size()<<endl;
@@ -1402,11 +1402,11 @@ namespace ColPack
 			}
 		}
 		cout<<"DONE PrintVertex2ColorCombination"<<endl;
-		
-		
+
+
 		return(_TRUE);
 	}
-	
+
 	int GraphColoring::PrintConflictEdges(vector< pair<int, int> > *ConflictedEdges_Private, int i_MaxNumThreads) {
 		cout<<"PrintConflictEdges"<<endl;
 		for(int i=0; i<i_MaxNumThreads;i++) {
@@ -1415,33 +1415,33 @@ namespace ColPack
 			}
 		}
 		cout<<endl;
-		
+
 		return(_TRUE);
 	}
-	
+
 	int GraphColoring::PrintConflictCount(vector<int> &ConflictCount) {
 		cout<<"PrintConflictCount"<<endl;
 		for(int i=0; i<ConflictCount.size(); i++) {
 			cout<<"Vertex "<<i<<": "<<ConflictCount[i]<<endl;
 		}
 		cout<<endl;
-		
+
 		return(_TRUE);
 	}
-	
+
 	int GraphColoring::PickVerticesToBeRecolored(int i_MaxNumThreads, vector< pair<int, int> > *ConflictedEdges_Private, vector<int> &ConflictCount) {
 #if COLPACK_DEBUG_LEVEL	> 100
 		fout<<"PickVerticesToBeRecolored ..."<<endl;
 #endif
 #ifdef _OPENMP
-		#pragma omp parallel for schedule(static,1) default(none) shared(cout, ConflictedEdges_Private, ConflictCount, i_MaxNumThreads) 
+		#pragma omp parallel for schedule(static,1) default(none) shared(cout, ConflictedEdges_Private, ConflictCount, i_MaxNumThreads)
 #endif
 		for(int i=0; i<i_MaxNumThreads; i++) {
 			for(int j=0; j< ConflictedEdges_Private[i].size(); j++) {
 				pair<int, int> pii_Edge = ConflictedEdges_Private[i][j];
 				//before decide which end, remember to check if one end's color is already removed. If this is the case, just skip to the next conflicted edge.
 				if(m_vi_VertexColors[pii_Edge.first] == _UNKNOWN || m_vi_VertexColors[pii_Edge.second] == _UNKNOWN ) continue;
-				
+
 				if(ConflictCount[pii_Edge.first] > ConflictCount[pii_Edge.second]) {
 					m_vi_VertexColors[pii_Edge.first] = _UNKNOWN;
 #if COLPACK_DEBUG_LEVEL	> 100
@@ -1489,13 +1489,13 @@ namespace ColPack
 		/*
 		bool* ip_VerticesToBeRecolored = new bool[i_VertexCount];
 #ifdef _OPENMP
-		#pragma omp parallel for schedule(static,50) default(none) shared(i_VertexCount, ip_VerticesToBeRecolored) 
+		#pragma omp parallel for schedule(static,50) default(none) shared(i_VertexCount, ip_VerticesToBeRecolored)
 #endif
 		for(int i=0; i<i_VertexCount; i++) {
 			ip_VerticesToBeRecolored[i] = false;
 		}
 #ifdef _OPENMP
-		#pragma omp parallel for schedule(static,1) default(none) shared(i_VertexCount, ConflictedEdges_Private, ip_VerticesToBeRecolored, ConflictCount, i_MaxNumThreads) 
+		#pragma omp parallel for schedule(static,1) default(none) shared(i_VertexCount, ConflictedEdges_Private, ip_VerticesToBeRecolored, ConflictCount, i_MaxNumThreads)
 #endif
 		for(int i=0; i<i_MaxNumThreads; i++) {
 			for(int j=0; j< ConflictedEdges_Private[i].size(); j++) {
@@ -1526,14 +1526,14 @@ namespace ColPack
 		//*/
 		return (_TRUE);
 	}
-	
+
 	int GraphColoring::BuildVertex2ColorCombination(int i_MaxNumThreads, map< int, vector< pair<int, int> > > *Vertex2ColorCombination_Private, vector< map <int, int > > *Vertex2ColorCombination) {
 		int i_VertexCount = m_vi_Vertices.size() - 1;
 		(*Vertex2ColorCombination).resize(i_VertexCount);
-		
+
 		// Build Vertex2ColorCombination
 #ifdef _OPENMP
-		#pragma omp parallel for default(none) shared(i_VertexCount, Vertex2ColorCombination_Private, Vertex2ColorCombination, i_MaxNumThreads) 
+		#pragma omp parallel for default(none) shared(i_VertexCount, Vertex2ColorCombination_Private, Vertex2ColorCombination, i_MaxNumThreads)
 #endif
 		for(int i=0; i<i_VertexCount;i++) {
 			int i_thread_num;
@@ -1550,11 +1550,11 @@ namespace ColPack
 					for(int iii=0; iii< vpii_Ptr->size(); iii++) {
 						(*Vertex2ColorCombination)[i][(*vpii_Ptr)[iii].first] = (*vpii_Ptr)[iii].second;
 					}
-					
+
 				}
 			}
 		}
-		
+
 		// Deallocate memory for Vertex2ColorCombination_Private
 		for(int i=0; i<i_MaxNumThreads;i++) {
 			Vertex2ColorCombination_Private[i].clear();
@@ -1562,7 +1562,7 @@ namespace ColPack
 		delete[] Vertex2ColorCombination_Private;
 		return (_TRUE);
 	}
-	
+
 	int GraphColoring::PrintD1Colors(map<int, int>* D1Colors, int i_thread_num) {
 		cout<<"PrintD1Colors"<<endl;
 		map<int, int>::iterator mib_itr = D1Colors[i_thread_num].begin();
@@ -1570,9 +1570,9 @@ namespace ColPack
 		for(;mib_itr != D1Colors[i_thread_num].end(); mib_itr++) {
 			cout<<flush<<"\t color "<<mib_itr->first<<"; count "<<mib_itr->second<<endl;
 		}
-		return (_TRUE);								
+		return (_TRUE);
 	}
-	
+
 	int GraphColoring::PrintForbiddenColors(map<int, bool>* mip_ForbiddenColors,int i_thread_num) {
 		map< int, bool >::iterator itr = mip_ForbiddenColors[i_thread_num].begin();
 		cout<<"PrintForbiddenColors for thread "<<i_thread_num<<": ";
@@ -1582,7 +1582,7 @@ namespace ColPack
 		cout<<endl;
 		return (_TRUE);
 	}
-	
+
 	int GraphColoring::PrintSubGraph(map< int, map<int,bool> > *graph) {
 		cout<<"PrintSubGraph (0-based indexing)"<<endl;
 		map< int, map<int,bool> >::iterator itr = graph->begin();
@@ -1596,7 +1596,7 @@ namespace ColPack
 		}
 		return (_TRUE);
 	}
-	
+
 	int GraphColoring::PrintVertexD1NeighborAndColor(int VertexIndex, int excludedVertex) {
 		if(VertexIndex > (int)m_vi_Vertices.size() - 2) {
 			cout<<"Illegal request. VertexIndex is too large. VertexIndex > m_vi_Vertices.size() - 2"<<endl;
@@ -1612,18 +1612,18 @@ namespace ColPack
 			cout<<"v "<<m_vi_Edges[i]<<" (c "<<m_vi_VertexColors[m_vi_Edges[i]]<<" ); ";
 		}
 		cout<<"( # of edges = "<<m_vi_Vertices[STEP_UP(VertexIndex)] - m_vi_Vertices[VertexIndex]<<")"<<endl;
-		
+
 		return _TRUE;
 	}
-	
+
 	int GraphColoring::FindDistance(int v1, int v2) {
 		cout<<"FindDistance between v "<<v1<<" and v "<<v2<<endl;
 		int i_Distance=0;
-		pair<int,int> pii_tmp; 
+		pair<int,int> pii_tmp;
 		pii_tmp.first = v1; //.first is the vertexID
 		pii_tmp.second = -1; // .second is the parent
 		map<int, int> mib_IncludedVertices;
-		
+
 		// Step *: Run a BFS to get all vertices within  distance-<distance> of i_CenterVertex
 		queue<pair<int,int> > Q;
 		//cout<<"Push in v "<< pii_tmp.first<< " l "<<pii_tmp.second<<endl;
@@ -1636,11 +1636,11 @@ namespace ColPack
 			pii_CurrentVertex.first = Q.front().first; //pii_CurrentVertex
 			pii_CurrentVertex.second = Q.front().second; //pii_CurrentVertex
 			//cout<<"CurrentVertex "<< pii_CurrentVertex.first<< " from "<<pii_CurrentVertex.second<<endl;
-			
+
 			for(int i=m_vi_Vertices[pii_CurrentVertex.first]; i < m_vi_Vertices[pii_CurrentVertex.first+1]; i++) {
 				int i_D1Neighbor = m_vi_Edges[i];
 				//cout<<"i_D1Neighbor="<<i_D1Neighbor<<endl;
-				
+
 				if( mib_IncludedVertices.find(i_D1Neighbor) == mib_IncludedVertices.end() //make sure that i_D1Neighbor is not already included
 				) {
 					pii_tmp.first = i_D1Neighbor;
@@ -1662,14 +1662,14 @@ namespace ColPack
 					mib_IncludedVertices[pii_tmp.first] = pii_tmp.second;
 				}
 			}
-			  
-			Q.pop();			
+
+			Q.pop();
 		}
 		cout<<"\tDISCONNECTED"<<endl;
-		
+
 		return _FALSE;
 	}
-	
+
 	int GraphColoring::BuildColorsSubGraph(map< int, map<int,bool> > *graph, map<int,bool> *mib_Colors) {
 		cout<<"BuildColorsSubGraph for colors: "<<endl;
 		map<int,bool>::iterator itr= (*mib_Colors).begin();
@@ -1688,30 +1688,30 @@ namespace ColPack
 		// Step *: now build a subgraph with my own structure
 		for(int i=0; i<m_vi_Vertices.size()-1;i++) {
 			if((*mib_Colors).find(m_vi_VertexColors[i]) == (*mib_Colors).end()) continue;
-			
+
 			for(int ii=m_vi_Vertices[i]; ii<m_vi_Vertices[i+1];ii++) {
 				int i_D1Neighbor = m_vi_Edges[ii];
 				if(i<=i_D1Neighbor) continue;
-				
+
 				if((*mib_Colors).find(m_vi_VertexColors[i_D1Neighbor]) != (*mib_Colors).end()){
 					(*graph)[i][i_D1Neighbor] = true;
 					(*graph)[i_D1Neighbor][i] = true;
 				}
-				
+
 			}
-			
+
 		}
-		
+
 		return _TRUE;
 	}
-	
+
 	int GraphColoring::BuildSubGraph(map< int, map<int,bool> > *graph, int i_CenterVertex, int distance, map<int, bool> *mib_FilterByColors) {
 		cout<<"BuildSubGraph centered at v "<<i_CenterVertex<<" distance="<<distance<<"... "<<endl;
 		map<int, bool> mib_IncludedVertices;
-		pair<int,int> pii_tmp; 
+		pair<int,int> pii_tmp;
 		pii_tmp.first = i_CenterVertex; //.first is the vertexID
 		pii_tmp.second = 0; // .second is the level/distance
-		
+
 		// Step *: Run a BFS to get all vertices within  distance-<distance> of i_CenterVertex
 		queue<pair<int,int> > Q;
 		//cout<<"Push in v "<< pii_tmp.first<< " l "<<pii_tmp.second<<endl;
@@ -1723,14 +1723,14 @@ namespace ColPack
 			pii_CurrentVertex.first = Q.front().first; //pii_CurrentVertex
 			pii_CurrentVertex.second = Q.front().second; //pii_CurrentVertex
 			//cout<<"CurrentVertex "<< pii_CurrentVertex.first<< " l "<<pii_CurrentVertex.second<<endl;
-			
+
 			int i_NexLevel = pii_CurrentVertex.second+1;
 			if(i_NexLevel<=distance) {
 				//cout<<"i_NexLevel<=distance"<<endl;
 				for(int i=m_vi_Vertices[pii_CurrentVertex.first]; i < m_vi_Vertices[pii_CurrentVertex.first+1]; i++) {
 					int i_D1Neighbor = m_vi_Edges[i];
 					//cout<<"i_D1Neighbor="<<i_D1Neighbor<<endl;
-					
+
 					if( mib_IncludedVertices.find(i_D1Neighbor) == mib_IncludedVertices.end() //make sure that i_D1Neighbor is not already included
 					) {
 						pii_tmp.first = i_D1Neighbor;
@@ -1741,12 +1741,12 @@ namespace ColPack
 					}
 				}
 			}
-			  
-			Q.pop();			
+
+			Q.pop();
 		}
-		
+
 		cout<<" ... "<<endl;
-		
+
 		// Step *: now build a subgraph with my own structure
 		map<int,bool> mib_tmp;
 		for(int i=0; i<m_vi_Vertices.size()-1;i++) {
@@ -1768,25 +1768,25 @@ namespace ColPack
 				}
 			}
 		}
-		
+
 		//PrintSubGraph(graph);
-		//vector<int> vi_VertexColors; 
+		//vector<int> vi_VertexColors;
 		//GetVertexColors(vi_VertexColors);
 		//displayGraph(graph, &vi_VertexColors);
 		//Pause();
-		
+
 		cout<<"DONE"<<endl;
-		
+
 		return _TRUE;
 	}
-	
+
 	int GraphColoring::BuildConnectedSubGraph(map< int, map<int,bool> > *graph, int i_CenterVertex, int distance, map<int, bool> *mib_FilterByColors) {
 		cout<<"BuildConnectedSubGraph i_CenterVertex="<<i_CenterVertex<<" distance="<<distance<<"... "<<endl;
 		map<int, bool> mib_IncludedVertices;
-		pair<int,int> pii_tmp; 
+		pair<int,int> pii_tmp;
 		pii_tmp.first = i_CenterVertex; //.first is the vertexID
 		pii_tmp.second = 0; // .second is the level/distance
-		
+
 		// Step *: Run a BFS to get all vertices within  distance-<distance> of i_CenterVertex
 		queue<pair<int,int> > Q;
 		//cout<<"Push in v "<< pii_tmp.first<< " l "<<pii_tmp.second<<endl;
@@ -1798,14 +1798,14 @@ namespace ColPack
 			pii_CurrentVertex.first = Q.front().first; //pii_CurrentVertex
 			pii_CurrentVertex.second = Q.front().second; //pii_CurrentVertex
 			//cout<<"CurrentVertex "<< pii_CurrentVertex.first<< " l "<<pii_CurrentVertex.second<<endl;
-			
+
 			int i_NexLevel = pii_CurrentVertex.second+1;
 			if(i_NexLevel<=distance) {
 				//cout<<"i_NexLevel<=distance # of D1 neighbors = "<< m_vi_Vertices[pii_CurrentVertex.first+1] - m_vi_Vertices[pii_CurrentVertex.first] <<endl;
 				for(int i=m_vi_Vertices[pii_CurrentVertex.first]; i < m_vi_Vertices[pii_CurrentVertex.first+1]; i++) {
 					int i_D1Neighbor = m_vi_Edges[i];
 					//cout<<"i_D1Neighbor="<<i_D1Neighbor<<endl;
-					
+
 					if( mib_IncludedVertices.find(i_D1Neighbor) == mib_IncludedVertices.end() //make sure that i_D1Neighbor is not already included
 					      && (  mib_FilterByColors==NULL //NOT filter by colors
 						    || ((*mib_FilterByColors).size()>0 && (*mib_FilterByColors).find(m_vi_VertexColors[i_D1Neighbor])!=(*mib_FilterByColors).end() ) // filter by colors
@@ -1819,12 +1819,12 @@ namespace ColPack
 					}
 				}
 			}
-			  
-			Q.pop();			
+
+			Q.pop();
 		}
-		
+
 		cout<<" ... "<<endl;
-		
+
 		// Step *: now build a subgraph with my own structure
 		map<int,bool> mib_tmp;
 		for(int i=0; i<m_vi_Vertices.size()-1;i++) {
@@ -1837,24 +1837,24 @@ namespace ColPack
 				}
 			}
 		}
-		
+
 		//PrintSubGraph(graph);
-		//vector<int> vi_VertexColors; 
+		//vector<int> vi_VertexColors;
 		//GetVertexColors(vi_VertexColors);
 		//displayGraph(graph, &vi_VertexColors);
 		//Pause();
-		
+
 		cout<<"DONE"<<endl;
-		
+
 		return _TRUE;
 	}
-	
+
 	int GraphColoring::PrintVertexAndColorAdded(int i_MaxNumThreads, vector< pair<int, int> > *vi_VertexAndColorAdded, int i_LastNEntries) {
 		int i_MaxSize = vi_VertexAndColorAdded[0].size();
 		for(int i=1; i<i_MaxNumThreads;i++) {
 			if(vi_VertexAndColorAdded[i].size()>i_MaxSize) i_MaxSize=vi_VertexAndColorAdded[i].size();
 		}
-		
+
 		if(i_LastNEntries>i_MaxSize) i_LastNEntries=i_MaxSize;
 		cout<<"PrintVertexAndColorAdded the last "<< i_LastNEntries<<" entries"<<endl;
 		for(int i=i_MaxSize-i_LastNEntries; i<i_MaxSize;i++) {
@@ -1869,12 +1869,12 @@ namespace ColPack
 		}
 		return (_TRUE);
 	}
-	
+
 	int GraphColoring::BuildForbiddenColors(int i_MaxNumThreads, int i_thread_num, int i_CurrentVertex, map<int, bool>* mip_ForbiddenColors, map<int, int>* D1Colors, vector<  map <int, int > > *Vertex2ColorCombination) {
 			mip_ForbiddenColors[i_thread_num].clear();
 			D1Colors[i_thread_num].clear();
-			
-#if COLPACK_DEBUG_LEVEL > 10		
+
+#if COLPACK_DEBUG_LEVEL > 10
 			//cout<<flush<<endl<<"degree of i_CurrentVertex "<<m_vi_Vertices[i_CurrentVertex+1]-m_vi_Vertices[i_CurrentVertex]<<endl;
 #endif
 			// count how many D1 colors are there and mark all of them as forbidden
@@ -1885,23 +1885,23 @@ namespace ColPack
 					    D1Colors[i_thread_num][i_Color]=1;
 					    //mark forbidden color
 					    mip_ForbiddenColors[i_thread_num][i_Color] = true;
-#if COLPACK_DEBUG_LEVEL > 10		
+#if COLPACK_DEBUG_LEVEL > 10
 					    cout<<flush<<endl<<"Thread "<<i_thread_num<<": "<< "D1 color="<<i_Color<<"; SET count="<< D1Colors[i_thread_num][ i_Color]<<endl;
 #endif
 				  }
 				  else {
 					    D1Colors[i_thread_num][ i_Color]++;
-#if COLPACK_DEBUG_LEVEL > 10		
+#if COLPACK_DEBUG_LEVEL > 10
 					    cout<<flush<<endl<<"Thread "<<i_thread_num<<": "<< "D1 color="<<i_Color<<"; INCREASE count="<< D1Colors[i_thread_num][ i_Color]<<endl;
 #endif
 				  }
 				}
 			}
-#if COLPACK_DEBUG_LEVEL > 10		
+#if COLPACK_DEBUG_LEVEL > 10
 			cout<<"after D1Colors is polulated"<<endl;
 			PrintD1Colors(D1Colors, i_thread_num);
 #endif
-			
+
 			/* mark forbidden color using these 2 rules:
 			  * - if vertex with color appear more than once or _UNKOWN, forbid all colors that its D1 neighbors have
 			  *    (its D1 neighbors have) => make a function for this so I can improve latter
@@ -1910,7 +1910,7 @@ namespace ColPack
 			// !!! could to be improved ???
 			for(int ii=m_vi_Vertices[i_CurrentVertex]; ii<m_vi_Vertices[i_CurrentVertex+1];ii++) {
 				int D1Neighbor = m_vi_Edges[ii];
-				
+
 				map <int, int >::iterator mii_iter = (*Vertex2ColorCombination)[D1Neighbor].begin();
 				// !!! could this read from the hash table cause problem if we don't lock it?
 				if( m_vi_VertexColors[D1Neighbor] == _UNKNOWN ) {
@@ -1926,15 +1926,15 @@ namespace ColPack
 						}
 					}
 				}
-				else if (D1Colors[i_thread_num][m_vi_VertexColors[D1Neighbor]] > 1 ) { 
-					//forbid all colors that its D1 neighbors have						
+				else if (D1Colors[i_thread_num][m_vi_VertexColors[D1Neighbor]] > 1 ) {
+					//forbid all colors that its D1 neighbors have
 					for(; mii_iter != (*Vertex2ColorCombination)[D1Neighbor].end(); mii_iter++) {
 						//mark mii_iter->first as forbidden
 						mip_ForbiddenColors[i_thread_num][mii_iter->first] = true;
 					}
 				}
 				else {
-					// For any color combinations that D1Neighbor is NOT a hub (i.e. a leaf or a non-HUB), forbid the color of the hub (in this color combination)						
+					// For any color combinations that D1Neighbor is NOT a hub (i.e. a leaf or a non-HUB), forbid the color of the hub (in this color combination)
 					for(; mii_iter != (*Vertex2ColorCombination)[D1Neighbor].end(); mii_iter++) {
 						if(mii_iter->second != -1) { // D1Neighbor is NOT a hub in the combination (m_vi_VertexColors[D1Neighbor], mii_iter->first)
 							//mark mii_iter->first as forbidden
@@ -1942,17 +1942,17 @@ namespace ColPack
 						}
 					}
 				}
-				
+
 			}
 		return (_TRUE);
 	}
-	
+
 	int GraphColoring::StarColoring_serial2() {
 		if(CheckVertexColoring("STAR"))
 		{
 			return(_TRUE);
 		}
-		
+
 		int i_MaxNumThreads = 1;
 		int i_MaxColor;
 		if(m_i_VertexColorCount>0) i_MaxColor = m_i_VertexColorCount;
@@ -1960,7 +1960,7 @@ namespace ColPack
 		int i_VertexCount = m_vi_Vertices.size() - 1;
 		m_vi_VertexColors.clear();
 		m_vi_VertexColors.resize((unsigned) i_VertexCount, _UNKNOWN);
-		
+
 		/*
 		for(int i=0; i<=i_MaxColor;i++) {
 			if(!omp_test_lock( vl_ColorLock[i] )) {
@@ -1968,22 +1968,22 @@ namespace ColPack
 			}
 		}
 		//*/
-		
+
 		vector<int> vi_VerticesToBeColored;
 		vector<int>* vip_VerticesToBeRecolored_Private = new vector<int>[i_MaxNumThreads];
 		map<int, bool>* mip_ForbiddenColors = new map<int,bool>[i_MaxNumThreads];
 		map<int, int>* D1Colors = new map<int, int>[i_MaxNumThreads];
-		
+
 		vector<  map <int, int > > *Vertex2ColorCombination = new vector<  map <int, int > >;
 		(*Vertex2ColorCombination).resize(i_VertexCount);
-		
+
 		//Populate (vi_VerticesToBeColored)
 		for(int i=0 ; i< i_VertexCount; i++) {
 			int i_thread_num;
 			i_thread_num = 0;
 			vip_VerticesToBeRecolored_Private[i_thread_num].push_back(m_vi_OrderedVertices[i]);
 		}
-		
+
 		int* i_StartingIndex = new int[i_MaxNumThreads];
 		i_StartingIndex[0] = 0;
 		for(int i=1; i < i_MaxNumThreads; i++) {
@@ -1995,12 +1995,12 @@ namespace ColPack
 				vi_VerticesToBeColored[i_StartingIndex[i]+j] = vip_VerticesToBeRecolored_Private[i][j];
 			}
 		}
-		
-#if COLPACK_DEBUG_LEVEL == 0		
+
+#if COLPACK_DEBUG_LEVEL == 0
 		int i_LoopCount = 0;
 #endif
 		while(vi_VerticesToBeColored.size()>0) {
-#if COLPACK_DEBUG_LEVEL == 0		
+#if COLPACK_DEBUG_LEVEL == 0
 			i_LoopCount++;
 			//cout<<"(loop "<<i_LoopCount<<") vi_VerticesToBeColored.size()="<<vi_VerticesToBeColored.size()<<"/"<<i_VertexCount<<endl;
 			//cout<<"(loop "<<i_LoopCount<<") i_MaxColor="<<i_MaxColor<<endl;
@@ -2010,10 +2010,10 @@ namespace ColPack
 			for(int i=0; i < i_MaxNumThreads; i++) {
 				vip_VerticesToBeRecolored_Private[i].clear();
 			}
-			
+
 			int i_RecolorCount = vi_VerticesToBeColored.size();
 			for(int i=0; i<i_RecolorCount;i++) {
-				
+
 				int i_thread_num = 0;
 				int i_CurrentVertex = vi_VerticesToBeColored[i];
 // 				cout<<"v"<<i_CurrentVertex<<endl<<flush;
@@ -2021,13 +2021,13 @@ namespace ColPack
 // 					PrintVertex2ColorCombination(Vertex2ColorCombination);
 // 					Pause();
 // 				}
-#if COLPACK_DEBUG_LEVEL > 10		
+#if COLPACK_DEBUG_LEVEL > 10
 				cout<<flush<<endl<<"Thread "<<i_thread_num<<": "<<"works on v"<<i_CurrentVertex<<endl<<flush;
 #endif
 				mip_ForbiddenColors[i_thread_num].clear();
 				D1Colors[i_thread_num].clear();
-				
-#if COLPACK_DEBUG_LEVEL > 10		
+
+#if COLPACK_DEBUG_LEVEL > 10
 				cout<<flush<<endl<<"degree of i_CurrentVertex "<<m_vi_Vertices[i_CurrentVertex+1]-m_vi_Vertices[i_CurrentVertex]<<endl;
 #endif
 				// DONE Step *: count how many D1 colors are there and mark all of them as forbidden
@@ -2038,19 +2038,19 @@ namespace ColPack
 						    D1Colors[i_thread_num][i_Color]=1;
 						    //mark forbidden color
 						    mip_ForbiddenColors[i_thread_num][i_Color] = true;
-#if COLPACK_DEBUG_LEVEL > 10		
+#if COLPACK_DEBUG_LEVEL > 10
 						    cout<<flush<<endl<<"Thread "<<i_thread_num<<": "<< "D1 color="<<i_Color<<"; SET count="<< D1Colors[i_thread_num][ i_Color]<<endl;
 #endif
 					  }
 					  else {
 						    D1Colors[i_thread_num][ i_Color]++;
-#if COLPACK_DEBUG_LEVEL > 10		
+#if COLPACK_DEBUG_LEVEL > 10
 						    cout<<flush<<endl<<"Thread "<<i_thread_num<<": "<< "D1 color="<<i_Color<<"; INCREASE count="<< D1Colors[i_thread_num][ i_Color]<<endl;
 #endif
 					  }
 					}
 				}
-#if COLPACK_DEBUG_LEVEL > 10		
+#if COLPACK_DEBUG_LEVEL > 10
 				cout<<"after D1Colors is polulated"<<endl;
 				PrintD1Colors(D1Colors, i_thread_num);
 #endif
@@ -2061,11 +2061,11 @@ namespace ColPack
 					cout<<flush<<endl<<"Thread "<<i_thread_num<<": "<< "D1 color="<<mib_itr2->first<<"; count="<< mib_itr2->second<<endl;
 				}
 //*/
-#if COLPACK_DEBUG_LEVEL > 10		
+#if COLPACK_DEBUG_LEVEL > 10
 				PrintD1Colors(D1Colors, i_thread_num);
 				cout<<"*Start marking forbidden color"<<endl;
 #endif
-				
+
 				/* DONE Step *: mark forbidden color using these 2 rules:
 				 * - if vertex with color appear more than once, forbid all colors that its D1 neighbors have
 				 *    (its D1 neighbors have) => make a function for this so I can improve latter
@@ -2080,13 +2080,13 @@ namespace ColPack
 // 							for(int iii=m_vi_Vertices[D1Neighbor]; iii<m_vi_Vertices[D1Neighbor+1];iii++) {
 // 								cout<<"\t D2Neighbor="<< m_vi_Edges[iii] <<" color="<< m_vi_VertexColors[m_vi_Edges[iii]]  <<endl;
 // 							}
-// 							
+//
 // 						}
 // 					}
 					if(m_vi_VertexColors[D1Neighbor] != _UNKNOWN) {
 						map <int, int >::iterator mii_iter = (*Vertex2ColorCombination)[D1Neighbor].begin();
 						if( D1Colors[i_thread_num][m_vi_VertexColors[D1Neighbor]] > 1 ) {
-							//forbid all colors that its D1 neighbors have						
+							//forbid all colors that its D1 neighbors have
 							for(; mii_iter != (*Vertex2ColorCombination)[D1Neighbor].end(); mii_iter++) {
 								//mark mii_iter->first as forbidden
 								mip_ForbiddenColors[i_thread_num][mii_iter->first] = true;
@@ -2096,7 +2096,7 @@ namespace ColPack
 							}
 						}
 						else {
-							// For any color combinations that this vertex is a LEAF, forbid the color of the hub (in this color combination)						
+							// For any color combinations that this vertex is a LEAF, forbid the color of the hub (in this color combination)
 							for(; mii_iter != (*Vertex2ColorCombination)[D1Neighbor].end(); mii_iter++) {
 // 								if(i_CurrentVertex==31 && D1Neighbor==20) {
 // 									cout<<"\t mii_iter->first="<<mii_iter->first<<" mii_iter->second="<< mii_iter->second <<endl;
@@ -2112,11 +2112,11 @@ namespace ColPack
 						}
 					}
 				}
-#if COLPACK_DEBUG_LEVEL > 10	
+#if COLPACK_DEBUG_LEVEL > 10
 				cout<<"*After finish marking forbidden color"<<endl;
 				PrintD1Colors(D1Colors, i_thread_num);
 #endif
-				
+
 				/* Step *: Pick a color for the current vertex:
 				 * Among the available color, test the lock of that color and see if I can lock it
 				 *      if I'm able to lock one
@@ -2149,19 +2149,19 @@ namespace ColPack
 							//PrintVertexAndColorAdded(i_MaxNumThreads ,vi_VertexAndColorAdded);
 							cout<<"t"<<i_thread_num<<": After assign color "<<i_PotentialColor<<" to v "<<i_CurrentVertex<<endl;
 							PrintForbiddenColors(mip_ForbiddenColors, i_thread_num);
-							
+
 							//map< int, map<int,bool> > *graph = new map< int, map<int,bool> >;
 							//BuildConnectedSubGraph(graph , i_CurrentVertex, 1);
-							//vector<int> vi_VertexColors; 
+							//vector<int> vi_VertexColors;
 							//GetVertexColors(vi_VertexColors);
 							//displayGraph(graph, &vi_VertexColors, true, FDP);
 							//delete graph;
-							
+
 							//graph = new map< int, map<int,bool> >;
 							//BuildSubGraph(graph , i_CurrentVertex, 0);
 							//displayGraph(graph, &vi_VertexColors, true, FDP);
 							//delete graph;
-							
+
 							cout<<"i_ConflictVertex="<<i_ConflictVertex;
 							if(i_ConflictVertex>=0)cout<<" with color "<< m_vi_VertexColors[i_ConflictVertex];
 							cout<<endl;
@@ -2183,20 +2183,20 @@ namespace ColPack
 								map<int, bool>::iterator itr2 = itr;itr2++;
 								for(;  itr2 != VerticiesWithConflictColors.end(); itr2++) {
 									FindDistance(itr->first, itr2->first);
-								}							
+								}
 							}
 							//*/
-							
+
 							cout<<"-----------------------------------"<<endl;
 							Pause();
 						}
 						delete pii_ConflictColorCombination;
 					}
 				}
-#if COLPACK_DEBUG_LEVEL > 10		
+#if COLPACK_DEBUG_LEVEL > 10
 				cout<<flush<<endl<<"Thread "<<i_thread_num<<": "<<"Pick color "<< i_PotentialColor <<" for vertex "<<i_CurrentVertex<<endl<<flush;
 #endif
-				
+
 				/* Step *: update Vertex2ColorCombination
 				 */
 				for(int ii=m_vi_Vertices[i_CurrentVertex]; ii<m_vi_Vertices[i_CurrentVertex+1];ii++) {
@@ -2227,9 +2227,9 @@ namespace ColPack
 						}
 					}
 				}
-				
+
 			}
-		  
+
 			//Populate (vi_VerticesToBeColored)
 			vi_VerticesToBeColored.clear();
 			for(int i=1; i < i_MaxNumThreads; i++) {
@@ -2237,7 +2237,7 @@ namespace ColPack
 				//cout<<"i_StartingIndex["<< i <<"]="<<i_StartingIndex[i]<<endl;
 			}
 			vi_VerticesToBeColored.resize(i_StartingIndex[i_MaxNumThreads-1]+vip_VerticesToBeRecolored_Private[i_MaxNumThreads-1].size(),_UNKNOWN);
-#if COLPACK_DEBUG_LEVEL > 10		
+#if COLPACK_DEBUG_LEVEL > 10
 			cout<<"vi_VerticesToBeColored.size()="<<vi_VerticesToBeColored.size()<<endl;
 #endif
 			for(int i=0 ; i< i_MaxNumThreads; i++) {
@@ -2246,9 +2246,9 @@ namespace ColPack
 				}
 			}
 		}
-		
+
 		//
-		
+
 		delete Vertex2ColorCombination;
 		Vertex2ColorCombination=NULL;
 		delete[] vip_VerticesToBeRecolored_Private;
@@ -2257,15 +2257,15 @@ namespace ColPack
 		mip_ForbiddenColors = NULL;
 		delete[] D1Colors;
 		D1Colors=NULL;
-		
+
 		delete[] i_StartingIndex;
 		i_StartingIndex=NULL;
-		
+
 		m_i_VertexColorCount=i_MaxColor;
-		
+
 		return(_TRUE);
 	}
-	
+
 	int GraphColoring::PrintVertex2ColorCombination (vector<  map <int, int > > *Vertex2ColorCombination) {
 		cout<<"PrintVertex2ColorCombination()"<<endl;
 		for(int i=0; i< (*Vertex2ColorCombination).size(); i++) {
@@ -2285,7 +2285,7 @@ namespace ColPack
 		}
 		return (_TRUE);
 	}
-	
+
 	int GraphColoring::PrintVertex2ColorCombination_raw (vector<  map <int, int > > *Vertex2ColorCombination) {
 		cout<<"PrintVertex2ColorCombination_raw()"<<endl;
 		for(int i=0; i< (*Vertex2ColorCombination).size(); i++) {
@@ -2297,20 +2297,20 @@ namespace ColPack
 		}
 		return (_TRUE);
 	}
-	
+
 
 	int GraphColoring::StarColoring() {
 		return GraphColoring::StarColoring_serial2();
 	}
-		
-	
+
+
 
 	// !!! if not use, remove this function.
 	/* ?Possible improvement: A dedicate thread will be used to push the result into vi_VerticesToBeRecolored
 	 * NOTE: this routine will not work correctly if there are conflicts
 	 */
 	int GraphColoring::BuildStarCollection(vector<int> & vi_VerticesToBeRecolored) {
-	  
+
 		int i, j, k;
 		int i_StarID, i_VertexOne, i_VertexTwo;
 		int i_VertexCount = m_vi_Vertices.size() - 1;
@@ -2320,7 +2320,7 @@ namespace ColPack
 		vector<int> vi_StarHubMap; // map a star to its hub (the center of 2-color star. For example vi_StarHubMap[star#5] = edge#7
 		map< int, map<int, int> > mimi2_VertexEdgeMap; // map 2 vertices to its edge ID. Note that for mimi2_VertexEdgeMap[vertex#1][vertex#2]= edge#1, the id of vertex#1 must always less than vertex#2
 		vector<int> vi_FirstSeenOne, vi_FirstSeenTwo;
-		
+
 		vi_FirstSeenOne.clear();
 		vi_FirstSeenOne.resize((unsigned) i_VertexCount, _UNKNOWN);
 
@@ -2350,7 +2350,7 @@ namespace ColPack
 				}
 			}
 		}
-		
+
 		// This function is similar to Algorithm 4.3: procedure updateStars(v)
 		//		in paper: A. Gebremedhin, A. Tarafdar, F. Manne and A. Pothen, New Acyclic and Star Coloring Algorithms with Applications to Hessian Computation, SIAM Journal on Scientific Computing, Vol 29, No 3, pp 1042--1072, 2007.
 		//  updating the collection of two-colored stars incident on the colored vertex v
@@ -2361,7 +2361,7 @@ namespace ColPack
 				continue;
 			}
 			int i_PresentVertex = i;
-					
+
 			for(j=m_vi_Vertices[i_PresentVertex]; j<m_vi_Vertices[STEP_UP(i_PresentVertex)]; j++)
 			{
 				int _FOUND = _FALSE;
@@ -2398,7 +2398,7 @@ namespace ColPack
 							i_StarID = vi_EdgeStarMap[mimi2_VertexEdgeMap[m_vi_Edges[j]][m_vi_Edges[k]]];
 
 							// m_vi_Edges[j] (D1 neighbor of v) will be the hub of the star that include i_PresentVertex, m_vi_Edges[j], m_vi_Edges[k]
-							vi_StarHubMap[i_StarID] = m_vi_Edges[j]; 
+							vi_StarHubMap[i_StarID] = m_vi_Edges[j];
 
 							// add edge (i_PresentVertex, m_vi_Edges[j]) in to the star i_StarID
 							if(i_PresentVertex < m_vi_Edges[j])
@@ -2454,17 +2454,17 @@ namespace ColPack
 						else {
 							vi_EdgeStarMap[mimi2_VertexEdgeMap[m_vi_Edges[j]][i_PresentVertex]] = i_StarID;
 						}
-						
+
 					}
 				}
 			}
 		}
-		
+
 		PrintVertexColors();
 		PrintStarCollection(vi_EdgeStarMap, vi_StarHubMap, mimi2_VertexEdgeMap);
 		return(_TRUE);
 	}
-	
+
 	int GraphColoring::PrintStarCollection(vector<int>& vi_EdgeStarMap, vector<int>& vi_StarHubMap, map< int, map<int, int> >& mimi2_VertexEdgeMap) {
 		int i, j;
 		int i_VertexCount = m_vi_Vertices.size() - 1;
@@ -2483,7 +2483,7 @@ namespace ColPack
 				}
 			}
 		}
-		
+
 		return (_TRUE);
 	}
 
@@ -2601,7 +2601,7 @@ namespace ColPack
 				}
 
 				// Line 5: forbid vertex i_PresentVertex to use color i_ColorID
-				vi_CandidateColors[i_ColorID] = i_PresentVertex; 
+				vi_CandidateColors[i_ColorID] = i_PresentVertex;
 
 				// Line 6?
 				i_VertexOne = vi_FirstSeenOne[i_ColorID];
@@ -2747,7 +2747,7 @@ namespace ColPack
 							i_StarID = vi_EdgeStarMap[mimi2_VertexEdgeMap[m_vi_Edges[j]][m_vi_Edges[k]]];
 
 							// m_vi_Edges[j] (D1 neighbor of v) will be the hub of the star that include i_PresentVertex, m_vi_Edges[j], m_vi_Edges[k]
-							vi_StarHubMap[i_StarID] = m_vi_Edges[j]; 
+							vi_StarHubMap[i_StarID] = m_vi_Edges[j];
 
 							// add edge (i_PresentVertex, m_vi_Edges[j]) in to the star i_StarID
 							if(i_PresentVertex < m_vi_Edges[j])
@@ -2968,7 +2968,7 @@ namespace ColPack
 				// Line 7-10, Algorithm 4.1
 				if(i_VertexOne == i_PresentVertex)
 				{
-				  
+
 					// Line 8-9, Algorithm 4.1
 					if(vi_FirstTreated[i_VertexTwo] != i_PresentVertex)
 					{

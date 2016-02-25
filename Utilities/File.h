@@ -35,7 +35,7 @@ using namespace std;
 #endif
 
 
-namespace ColPack 
+namespace ColPack
 {
 	/** @ingroup group4
 	 *  @brief class File in @link group4@endlink.
@@ -46,13 +46,13 @@ namespace ColPack
 	class File
 	{
 	  private:
-	    
+
 		string path; //including the last DIR_SEPARATOR
 		string name;
 		string fileExtension; //excluding the '.'
 
 	  public:
-	    
+
 		File();
 
 		File(string fileName);
@@ -64,7 +64,7 @@ namespace ColPack
 		string GetName() const;
 
 		///GetFileExtension excluding the '.'
-		string GetFileExtension() const; 
+		string GetFileExtension() const;
 
 		string GetFullName() const;
 

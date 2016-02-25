@@ -41,7 +41,7 @@ namespace ColPack
 		  unsigned int ** uip2_HessianSparsityPattern = va_arg(ap,unsigned int **);
 		  int i_RowCount = va_arg(ap,int);
 
-#ifdef	_COLPACK_CHECKPOINT_	
+#ifdef	_COLPACK_CHECKPOINT_
 		  string s_postfix = "-GraphColoringInterface_Constructor";
 		  //cout<<"*WriteMatrixMarket_ADOLCInput("<<s_postfix<<", 0, uip2_HessianSparsityPattern, "<< i_RowCount <<", " << i_RowCount  <<endl;
 		  WriteMatrixMarket_ADOLCInput(s_postfix, 0, uip2_HessianSparsityPattern, i_RowCount, i_RowCount);
@@ -68,7 +68,7 @@ namespace ColPack
 		  va_end(ap); /*cleanup*/
 		  return;
 		}
-#ifdef	_COLPACK_CHECKPOINT_	
+#ifdef	_COLPACK_CHECKPOINT_
 		string s_OutputFile = "-ColPack_debug.mtx";
 		s_OutputFile = "GraphColoringInterface-InternalGraph"+s_OutputFile;
 		WriteMatrixMarket(s_OutputFile);

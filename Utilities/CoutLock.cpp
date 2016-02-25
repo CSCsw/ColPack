@@ -27,7 +27,7 @@ namespace ColPack
 #ifdef _OPENMP
 	omp_lock_t CoutLock::coutLock;
 #endif
-	
+
 	int CoutLock::unset()
 	{
 #ifdef _OPENMP

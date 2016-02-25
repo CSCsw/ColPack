@@ -25,7 +25,7 @@
 	#include <omp.h>
 #endif
 
-namespace ColPack 
+namespace ColPack
 {
 	/** @ingroup group4
 	 *  @brief class CoutLock in @link group4@endlink.
@@ -34,7 +34,7 @@ namespace ColPack
 	 Here is how you do cout:
 	 CoutLock::set(); cout<<"blah blah blah"<<int<<endl;CoutLock::unset();
 	 */
-	
+
 	class CoutLock
 	{
 	public:

@@ -5465,7 +5465,7 @@ namespace ColPack
 
 		dp2_lSeed = GetLeftSeedMatrix_unmanaged(ip1_SeedRowCount, ip1_SeedColumnCount);
 		if(dp2_lSeed == NULL) return NULL;
-		
+
 		i_lseed_rowCount = *ip1_SeedRowCount;
 		lseed_available = true;
 
@@ -5478,7 +5478,7 @@ namespace ColPack
 
 		dp2_rSeed = GetRightSeedMatrix_unmanaged(ip1_SeedRowCount, ip1_SeedColumnCount);
 		if(dp2_rSeed == NULL) return NULL;
-		
+
 		i_rseed_rowCount = *ip1_SeedRowCount;
 		rseed_available = true;
 
@@ -5557,7 +5557,7 @@ namespace ColPack
 
 		return Seed;
 	}
-	
+
 	double BipartiteGraphBicoloring::GetVertexColoringTime() {
 	  return m_d_ColoringTime;
 	}

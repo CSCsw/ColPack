@@ -35,18 +35,18 @@ namespace ColPack
 
 	}
 
-	
+
 	//Public Constructor 4152
 	StringTokenizer::StringTokenizer(char * InputChar)
 	{
 	  string TempInputString(InputChar);
-	  
+
 	  InputString = TempInputString;
 	  TokenString = InputString;
 
 	}
 
-	
+
 	//Public Constructor 4153
 	StringTokenizer::StringTokenizer(char * InputChar, char * DelimiterChar)
 	{
@@ -60,7 +60,7 @@ namespace ColPack
 
 	}
 
-	
+
 	//Public Constructor 4154
 	StringTokenizer::StringTokenizer(string InputChar, char * DelimiterChar)
 	{
@@ -73,7 +73,7 @@ namespace ColPack
 
 	}
 
-	
+
 	//Public Constructor 4155
 	StringTokenizer::StringTokenizer(string InputChar, string DelimiterChar)
 	{
@@ -84,7 +84,7 @@ namespace ColPack
 
 	}
 
-	
+
 	//Public Destructor 4156
 	StringTokenizer::~StringTokenizer()
 	{
@@ -92,14 +92,14 @@ namespace ColPack
 
 	}
 
-	
+
 	//Public Function 4157
 	int StringTokenizer::CountTokens()
 	{
 		int TokenCounter = 1;
 
 		int DelimiterPosition;
-	  
+
 		int LastPosition;
 
 		int TokenStringLength = TokenString.size();
@@ -122,21 +122,21 @@ namespace ColPack
 
 		for ( ; ; )
 		{
-	    
+
 			DelimiterPosition = TokenString.find(DelimiterString, DelimiterPosition);
 
 			if(DelimiterPosition == 0)
-			{ 
+			{
 				DelimiterPosition += DelimiterStringLength;
 
 				continue;
 			}
 
 			if((DelimiterPosition < 0) || (DelimiterPosition == TokenStringLength))
-			{ 
+			{
 				return(TokenCounter);
 			}
-	    
+
 			if(DelimiterStringLength != (DelimiterPosition - LastPosition))
 			{
 				//      cout<<"Delimiter Position = "<<DelimiterPosition<<endl;
@@ -145,14 +145,14 @@ namespace ColPack
 			}
 
 			LastPosition = DelimiterPosition;
-	    
+
 			DelimiterPosition += DelimiterStringLength;
 
 		}
 	}
 
 
-	
+
 	//Public Function 4158
 	int StringTokenizer::CountTokens(char * DelimiterChar)
 	{
@@ -162,7 +162,7 @@ namespace ColPack
 	}
 
 
-	
+
 	//Public Function 4159
 	string StringTokenizer::GetDelimiterString() const
 	{
@@ -170,7 +170,7 @@ namespace ColPack
 	}
 
 
-	
+
 	//Public Function 4160
 	string StringTokenizer::GetFirstToken()
 	{
@@ -196,14 +196,14 @@ namespace ColPack
 	  return(StringToken);
 	}
 
-	
+
 	//Public Function 4161
 	string StringTokenizer::GetInputString() const
 	{
 	  return(InputString);
 	}
 
-	
+
 	//Public Function 4162
 	string StringTokenizer::GetLastToken()
 	{
@@ -217,17 +217,17 @@ namespace ColPack
 	  }
 
 	  return(StringToken);
-	  
+
 	}
 
-	
+
 	//Public Function 4163
 	string StringTokenizer::GetNextToken()
 	{
 	  string Token;
-	  
+
 	  int DelimiterPosition;
-	  
+
 	  int TokenStringLength = TokenString.size();
 	  int DelimiterStringLength = DelimiterString.size();
 
@@ -242,7 +242,7 @@ namespace ColPack
 	  {
 		return(InputString);
 	  }
-	  
+
 	  DelimiterPosition = TokenString.find(DelimiterString);
 
 	  if(DelimiterPosition == 0)
@@ -261,7 +261,7 @@ namespace ColPack
 
 		DelimiterPosition = TokenString.find(DelimiterString);
 	  }
-	    
+
 	  if(DelimiterPosition < 0)
 	  {
 		Token = TokenString;
@@ -274,7 +274,7 @@ namespace ColPack
 		Token = TokenString.substr(0, DelimiterPosition);
 
 		TokenString.erase(0, DelimiterPosition+DelimiterStringLength);
-	  
+
 
 		DelimiterPosition = 0;
 
@@ -289,13 +289,13 @@ namespace ColPack
 			break;
 		  }
 		}
-	    
+
 	  }
 
 	  return(Token);
-	}  
+	}
 
-	
+
 	//Public Function 4164
 	string StringTokenizer::GetNextToken(char * DelimiterChar)
 	{
@@ -304,7 +304,7 @@ namespace ColPack
 	  return(GetNextToken());
 	}
 
-	
+
 	//Public Function 4165
 	string StringTokenizer::GetToken(int TokenPosition)
 	{
@@ -329,14 +329,14 @@ namespace ColPack
 	  return(StringToken);
 	}
 
-	
+
 	//Public Function 4166
 	int StringTokenizer::HasMoreTokens()
 	{
 	  return(CountTokens());
 	}
 
-	
+
 	//Public Function 4167
 	int StringTokenizer::HasMoreTokens(char * DelimiterChar)
 	{
@@ -345,7 +345,7 @@ namespace ColPack
 	  return(HasMoreTokens());
 	}
 
-	
+
 	//Public Function 4168
 	int StringTokenizer::SetInputString(char * InputChar)
 	{
@@ -357,7 +357,7 @@ namespace ColPack
 	  return(0);
 	}
 
-	
+
 	//Public Function 4169
 	int StringTokenizer::SetDelimiterString(char * DelimiterChar)
 	{

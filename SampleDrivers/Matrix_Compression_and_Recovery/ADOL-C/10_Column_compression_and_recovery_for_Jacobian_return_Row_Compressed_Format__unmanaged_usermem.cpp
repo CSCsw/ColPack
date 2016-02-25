@@ -100,7 +100,7 @@ int main()
 	we could manage the memory deallocation for dp3_NewValue by ourselves.
 	This way, we can reuse (*dp3_NewValue) to store new values if RecoverD2Cln_RowCompressedFormat...() need to be called again.
 	//*/
-	
+
 	cout<<"Finish Recover()"<<endl;
 
 	displayCompressedRowMatrix(*dp3_NewValue,rowCount);
@@ -111,7 +111,7 @@ int main()
 	else cout<< "*dp3_Value != dp3_NewValue"<<endl;
 
 	Pause();
-	
+
 	/* Let say that we have new matrices with the same sparsity structure (only the values changed),
 	 We can take advantage of the memory already allocated to (*dp3_NewValue) and use (*dp3_NewValue) to stored the new values
 	 by calling RecoverD2Cln_RowCompressedFormat_usermem recovery function.
@@ -121,7 +121,7 @@ int main()
 	for(int i=0; i<3;i++) {
 	  jr1d->RecoverD2Cln_RowCompressedFormat_usermem(g, *dp3_CompressedMatrix, *uip3_SparsityPattern, dp3_NewValue);
 	}
-	
+
 	//Deallocate memory for 2-dimensional array (*dp3_NewValue)
 	for(int i=0; i<rowCount_for_dp3_NewValue;i++) {
 	  free((*dp3_NewValue)[i]);

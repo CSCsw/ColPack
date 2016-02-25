@@ -226,7 +226,7 @@ int main()
 
   printf("XXX STEP 2: The time needed for Graph construction:  %10.6f \n \n", (t_f_2-t_f_1) );
   printf("XXX STEP 2: runtime ratio:  %10.6f \n \n", (t_f_2-t_f_1)/div_c);
-  
+
   t_f_1 = k_getTime();
   //gGraph->GenerateSeedJacobian(&Seed_J, &dummy, &p_J,
   //                          "NATURAL", "COLUMN_PARTIAL_DISTANCE_TWO");
@@ -235,7 +235,7 @@ int main()
 
   printf("XXX STEP 2: The time needed for Coloring:  %10.6f \n \n", (t_f_2-t_f_1));
   printf("XXX STEP 2: runtime ratio:  %10.6f \n \n", (t_f_2-t_f_1)/div_c);
-  
+
   t_f_1 = k_getTime();
   Seed_J = gGraph->GetSeedMatrix(&dummy, &p_J);
   t_f_2 = k_getTime();

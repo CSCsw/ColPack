@@ -37,11 +37,11 @@ namespace ColPack
 	class DisjointSets
 	{
 	 private:
-	   
+
 		vector<int> p_vi_Nodes;
-	   
+
 	 public:
-	    
+
 		//Public Constructor 4251
 		DisjointSets();
 
@@ -54,11 +54,11 @@ namespace ColPack
 		//Public Function 4254
 		/// Set the size of this DisjointSets object, i.e. resize the vector p_vi_Nodes
 		int SetSize(int);
-	    
+
 		//Public Function 4255
 		/// Count the number of sets contained by this DisjointSets object
 		int Count();
-	    
+
 		//Public Function 4256
 		/// Print out the elements' ID and their values (i.e., p_vi_Nodes's IDs and values)
 		int Print();
@@ -100,7 +100,7 @@ namespace ColPack
 		problem due to the different meaning of the root's value
 		*/
 		int UnionBySize(int li_SetOne, int li_SetTwo);
-	    
+
 	};
 }
 #endif

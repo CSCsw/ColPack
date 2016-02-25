@@ -228,7 +228,7 @@ namespace ColPack
 				m_i_MinimumVertexDegree = i_DegreeCount;
 			}
 		}
-		
+
 		if(i_VertexCount <2) m_i_MinimumVertexDegree = i_DegreeCount;
 
 		// clear the vertexorder
@@ -308,7 +308,7 @@ namespace ColPack
 				m_i_MinimumVertexDegree = i_DegreeCount;
 			}
 		}
-		
+
 		if(i_VertexCount <2) m_i_MinimumVertexDegree = i_DegreeCount;
 
 		// clear the vertexorder
@@ -348,9 +348,9 @@ namespace ColPack
 		{
 			return(_TRUE);
 		}
-		
-// 		PrintBipartiteGraph(); 
-		
+
+// 		PrintBipartiteGraph();
+
 		int j, k, l, u;
 		int i_LeftVertexCount = (signed) m_vi_LeftVertices.size() - 1;
 		int i_RightVertexCount = (signed) m_vi_RightVertices.size() - 1;
@@ -377,7 +377,7 @@ namespace ColPack
 			i_MinDegree_Private[i] = i_LeftVertexCount;
 		}
 		int* delta = new int[i_MaxNumThreads];
-				
+
 		vector<int>** B; //private buckets. Each thread i will have their own buckets B[i][]
 		B = new vector<int>*[i_MaxNumThreads];
 #ifdef _OPENMP
@@ -403,7 +403,7 @@ namespace ColPack
 					}
 				}
 			}
-			
+
 			int i_thread_num;
 #ifdef _OPENMP
 			i_thread_num = omp_get_thread_num();
@@ -420,7 +420,7 @@ namespace ColPack
 			if(i_MaxDegree<i_MaxDegree_Private[i] ) i_MaxDegree = i_MaxDegree_Private[i];
 			delta[i] = i_MinDegree_Private[i];
 		}
-		
+
 #ifdef _OPENMP
 #pragma omp parallel for default(none) schedule(static) shared(B, i_MaxDegree, i_MaxNumThreads)
 #endif
@@ -445,9 +445,9 @@ namespace ColPack
 #else
 			i_thread_num = 0;
 #endif
-			//DONE Line 4: add v to B_t(v) [d (v)] 
+			//DONE Line 4: add v to B_t(v) [d (v)]
 			B[ i_thread_num ][ d[v] ].push_back(v);
-			
+
 			//record that v is in B_t(v)
 			VertexThreadGroup[v] = i_thread_num;
 
@@ -455,7 +455,7 @@ namespace ColPack
 
 		//DONE Line 5: i_NumOfVerticesToBeColored <- |V|
 		int i_NumOfVerticesToBeColored = i_LeftVertexCount;
-		
+
 		//Line 6: for k = 1 to p in parallel do
 #ifdef _OPENMP
 		#pragma omp parallel for default(none) schedule(static) shared(i_MaxNumThreads, i_NumOfVerticesToBeColored, B, delta, VertexThreadGroup, d, cout, i_MaxDegree, i_MaxDegree_Private ) firstprivate(vi_Visited)
@@ -480,10 +480,10 @@ namespace ColPack
 // 				cout<<'*'<<endl;
 				if(delta[i_thread_num]!=0 && B[ i_thread_num ][ delta[i_thread_num] - 1 ].size() != 0) delta[i_thread_num] --;
 // 				cout<<"delta[i_thread_num] 2="<< delta[i_thread_num] <<endl;
-				
+
 				//Line 9: Let v be a vertex drawn from B_k [delta]
-				int v; 
-				
+				int v;
+
 				for(int i=delta[i_thread_num] ; i<i_MaxDegree_Private[i_thread_num]; i++) {
 					if(B[ i_thread_num ][ i ].size()!=0) {
 						v = B[ i_thread_num ][ delta[i_thread_num] ][ B[ i_thread_num ][ delta[i_thread_num] ].size() - 1 ];
@@ -491,14 +491,14 @@ namespace ColPack
 
 						//Line 10: remove v from B_k [delta]
 						B[ i_thread_num ][ delta[i_thread_num] ].pop_back();
-						
+
 						break;
 					}
 					else delta[i_thread_num]++;
 				}
 // 				cout<<"Select vertex v="<<v<<" ; d[v]="<< d[v]<<endl;
 // 				cout<<"delta[i_thread_num] 3="<< delta[i_thread_num] <<endl;
-				
+
 				//Line 11: for each vertex w which is distance-2-neighbor of (v) do
 				for(int l = m_vi_LeftVertices[v]; l < m_vi_LeftVertices[v+1]; l++) {
 					int i_D1Neighbor = m_vi_Edges[l];
@@ -507,7 +507,7 @@ namespace ColPack
 
 						//Line 12: if w in B_k then
 						if( VertexThreadGroup[w] != i_thread_num || vi_Visited [w] == v || d[w] < 1 || w == v ) continue;
-						
+
 						//Line 13: remove w from B_k [d (w)]
 						// find location of w in B_k [d (w)] and pop it . !!! naive, improvable by keeping extra data. See if the extra data affacts concurrency
 						int i_w_location = B[ i_thread_num ][ d[w] ].size() - 1;
@@ -522,16 +522,16 @@ namespace ColPack
 // 						cout<<"i_w_location after="<<i_w_location<<endl;
 						if(i_w_location != (B[ i_thread_num ][ d[w] ].size() - 1) ) B[ i_thread_num ] [ d[w] ][i_w_location] = B[ i_thread_num ] [ d[w] ][ B[ i_thread_num ][ d[w] ].size() - 1 ];
 						B[ i_thread_num ] [ d[w] ].pop_back();
-						
+
 						//Line 14: d (w) <- d (w) - 1
 						d[w]--;
-						
+
 						//Line 15: add w to B_k [d (w)]
 						B[ i_thread_num ] [ d[w] ].push_back(w);
-						
+
 					}
 				}
-						
+
 				//DONE Line 16: W [i_NumOfVerticesToBeColored] <- v; i_NumOfVerticesToBeColored <- i_NumOfVerticesToBeColored - 1 . critical statements
 #ifdef _OPENMP
 				#pragma omp critical
@@ -569,7 +569,7 @@ namespace ColPack
 		vector< int > vi_VertexLocation;
 
 		// initialize
-		
+
 		i_SelectedVertex = _UNKNOWN;
 		i_VertexCount = (int)m_vi_LeftVertices.size () - 1;
 		i_VertexCountMinus1 = i_VertexCount - 1;
@@ -672,7 +672,7 @@ namespace ColPack
 						// it is pointed to itself or already visited
 						continue;
 					}
-					
+
 					u = m_vi_Edges[j];
 
 					// now check to make sure that the neighbor's degree isn't UNKNOWN
@@ -685,7 +685,7 @@ namespace ColPack
 					// update that we visited this
 					vi_Visited [u] = i_SelectedVertex;
 					// end up update that we visited this
-					
+
 					// move the last element in this bucket to u's position to get rid of expensive erase operation
 					if(vvi_GroupedInducedVertexDegree[vi_InducedVertexDegree[u]].size() > 1)
 					{
@@ -709,7 +709,7 @@ namespace ColPack
 					vi_VertexLocation[u] = vvi_GroupedInducedVertexDegree[vi_InducedVertexDegree[u]].size() - 1;
 
 
-					
+
 				}
 			}
 			// end of go to the neighbors of i_SelectedVertex and decrease the degrees by 1
@@ -722,7 +722,7 @@ namespace ColPack
 			// go to next vertex
 			++i_SelectedVertexCount;
 		}
-		
+
 		// clear the buffer
                 vi_InducedVertexDegree.clear();
                 vi_VertexLocation.clear();
@@ -739,7 +739,7 @@ namespace ColPack
 		return BipartiteGraphPartialOrdering::ColumnSmallestLastOrdering_serial();
 #endif*/
 	}
-	
+
 	//Line 1: procedure SMALLESTLASTORDERING-EASY(G = (V;E))
 	int BipartiteGraphPartialOrdering::ColumnSmallestLastOrdering_OMP()
 	{
@@ -748,9 +748,9 @@ namespace ColPack
 		{
 			return(_TRUE);
 		}
-		
-// 		PrintBipartiteGraph(); 
-		
+
+// 		PrintBipartiteGraph();
+
 		int j, k, l, u;
 		int i_LeftVertexCount = (signed) m_vi_LeftVertices.size() - 1;
 		int i_RightVertexCount = (signed) m_vi_RightVertices.size() - 1;
@@ -777,7 +777,7 @@ namespace ColPack
 			i_MinDegree_Private[i] = i_RightVertexCount;
 		}
 		int* delta = new int[i_MaxNumThreads];
-				
+
 		vector<int>** B; //private buckets. Each thread i will have their own buckets B[i][]
 		B = new vector<int>*[i_MaxNumThreads];
 #ifdef _OPENMP
@@ -803,7 +803,7 @@ namespace ColPack
 					}
 				}
 			}
-			
+
 			int i_thread_num;
 #ifdef _OPENMP
 			i_thread_num = omp_get_thread_num();
@@ -820,7 +820,7 @@ namespace ColPack
 			if(i_MaxDegree<i_MaxDegree_Private[i] ) i_MaxDegree = i_MaxDegree_Private[i];
 			delta[i] = i_MinDegree_Private[i];
 		}
-		
+
 #ifdef _OPENMP
 #pragma omp parallel for default(none) schedule(static) shared(B, i_MaxDegree, i_MaxNumThreads)
 #endif
@@ -845,9 +845,9 @@ namespace ColPack
 #else
 			i_thread_num = 0;
 #endif
-			//DONE Line 4: add v to B_t(v) [d (v)] 
+			//DONE Line 4: add v to B_t(v) [d (v)]
 			B[ i_thread_num ][ d[v] ].push_back(v);
-			
+
 			//record that v is in B_t(v)
 			VertexThreadGroup[v] = i_thread_num;
 
@@ -855,7 +855,7 @@ namespace ColPack
 
 		//DONE Line 5: i_NumOfVerticesToBeColored <- |V|
 		int i_NumOfVerticesToBeColored = i_RightVertexCount;
-		
+
 		//Line 6: for k = 1 to p in parallel do
 #ifdef _OPENMP
 		#pragma omp parallel for default(none) schedule(static) shared(i_LeftVertexCount, i_MaxNumThreads, i_NumOfVerticesToBeColored, B, delta, VertexThreadGroup, d, cout, i_MaxDegree, i_MaxDegree_Private ) firstprivate(vi_Visited)
@@ -880,10 +880,10 @@ namespace ColPack
 // 				cout<<'*'<<endl;
 				if(delta[i_thread_num]!=0 && B[ i_thread_num ][ delta[i_thread_num] - 1 ].size() != 0) delta[i_thread_num] --;
 // 				cout<<"delta[i_thread_num] 2="<< delta[i_thread_num] <<endl;
-				
+
 				//Line 9: Let v be a vertex drawn from B_k [delta]
-				int v; 
-				
+				int v;
+
 				for(int i=delta[i_thread_num] ; i<i_MaxDegree_Private[i_thread_num]; i++) {
 					if(B[ i_thread_num ][ i ].size()!=0) {
 						v = B[ i_thread_num ][ delta[i_thread_num] ][ B[ i_thread_num ][ delta[i_thread_num] ].size() - 1 ];
@@ -891,14 +891,14 @@ namespace ColPack
 
 						//Line 10: remove v from B_k [delta]
 						B[ i_thread_num ][ delta[i_thread_num] ].pop_back();
-						
+
 						break;
 					}
 					else delta[i_thread_num]++;
 				}
 // 				cout<<"Select vertex v="<<v<<" ; d[v]="<< d[v]<<endl;
 // 				cout<<"delta[i_thread_num] 3="<< delta[i_thread_num] <<endl;
-				
+
 				//Line 11: for each vertex w which is distance-2-neighbor of (v) do
 				for(int l = m_vi_RightVertices[v]; l < m_vi_RightVertices[v+1]; l++) {
 					int i_D1Neighbor = m_vi_Edges[l];
@@ -907,7 +907,7 @@ namespace ColPack
 
 						//Line 12: if w in B_k then
 						if( VertexThreadGroup[w] != i_thread_num || vi_Visited [w] == v || d[w] < 1 || w == v ) continue;
-						
+
 						//Line 13: remove w from B_k [d (w)]
 						// find location of w in B_k [d (w)] and pop it . !!! naive, improvable by keeping extra data. See if the extra data affacts concurrency
 						int i_w_location = B[ i_thread_num ][ d[w] ].size() - 1;
@@ -922,16 +922,16 @@ namespace ColPack
 // 						cout<<"i_w_location after="<<i_w_location<<endl;
 						if(i_w_location != (B[ i_thread_num ][ d[w] ].size() - 1) ) B[ i_thread_num ] [ d[w] ][i_w_location] = B[ i_thread_num ] [ d[w] ][ B[ i_thread_num ][ d[w] ].size() - 1 ];
 						B[ i_thread_num ] [ d[w] ].pop_back();
-						
+
 						//Line 14: d (w) <- d (w) - 1
 						d[w]--;
-						
+
 						//Line 15: add w to B_k [d (w)]
 						B[ i_thread_num ] [ d[w] ].push_back(w);
-						
+
 					}
 				}
-						
+
 				//DONE Line 16: W [i_NumOfVerticesToBeColored] <- v; i_NumOfVerticesToBeColored <- i_NumOfVerticesToBeColored - 1 . critical statements
 #ifdef _OPENMP
 				#pragma omp critical
@@ -985,7 +985,7 @@ namespace ColPack
  		vvi_GroupedInducedVertexDegree.resize((unsigned) i_VertexCount);
  		vi_VertexLocation.clear();
  		vi_VertexLocation.reserve((unsigned) i_VertexCount);
-		
+
 		int i_LeftVertexCount = STEP_DOWN((signed) m_vi_LeftVertices.size());
 
 		for ( i=0; i<i_VertexCount; ++i )
@@ -1011,7 +1011,7 @@ namespace ColPack
 					}
 				}
 			}
-			
+
 			//vi_InducedVertexDegree[i] = vertex degree of vertex i
 			vi_InducedVertexDegree.push_back ( i_InducedVertexDegree );
 			// vector vvi_GroupedInducedVertexDegree[i] = all the vertices with degree i
@@ -1074,7 +1074,7 @@ namespace ColPack
 						// it is pointed to itself or already visited
 						continue;
 					}
-					
+
 					u = m_vi_Edges[j];
 
 					// now check to make sure that the neighbor's degree isn't UNKNOWN
@@ -1087,7 +1087,7 @@ namespace ColPack
 					// update that we visited this
 					vi_Visited [u] = i_SelectedVertex;
 					// end up update that we visited this
-					
+
 					// move the last element in this bucket to u's position to get rid of expensive erase operation
 					if(vvi_GroupedInducedVertexDegree[vi_InducedVertexDegree[u]].size() > 1)
 					{
@@ -1141,9 +1141,9 @@ namespace ColPack
 		int i_Current;
 		int i_SelectedVertex, i_SelectedVertexCount;
 		int i_VertexCount;
-		
+
 		int i_HighestInducedVertexDegree, i_InducedVertexDegree;
-		
+
 		vector < int > vi_InducedVertexDegree;
 		vector < int > vi_Visited;
 		vector < vector < int > > vvi_GroupedInducedVertexDegree;
@@ -1152,24 +1152,24 @@ namespace ColPack
 		// initialize
 		i_SelectedVertex = _UNKNOWN;
 		i_VertexCount = (int)m_vi_RightVertices.size () - 1;
-		
+
 		i_HighestInducedVertexDegree = 0;
-		
+
 		vi_Visited.clear();
 		vi_Visited.resize ( i_VertexCount, _UNKNOWN );
-		
+
 		m_vi_OrderedVertices.clear();
 		m_vi_OrderedVertices.reserve(i_VertexCount);
 
  		vi_InducedVertexDegree.clear();
  		vi_InducedVertexDegree.reserve((unsigned) i_VertexCount);
- 		
+
 		vvi_GroupedInducedVertexDegree.clear();
  		vvi_GroupedInducedVertexDegree.resize((unsigned) i_VertexCount);
- 		
+
 		vi_VertexLocation.clear();
  		vi_VertexLocation.reserve((unsigned) i_VertexCount);
-		
+
 		int i_LeftVertexCount = STEP_DOWN((signed) m_vi_LeftVertices.size());
 
 		for ( i=0; i<i_VertexCount; ++i)
@@ -1195,7 +1195,7 @@ namespace ColPack
 					}
 				}
 			}
-			
+
 			//vi_InducedVertexDegree[i] = vertex degree of vertex i
 			vi_InducedVertexDegree.push_back ( i_InducedVertexDegree );
 			// vector vvi_GroupedInducedVertexDegree[i] = all the vertices with degree i
@@ -1257,7 +1257,7 @@ namespace ColPack
 						// it is pointed to itself or already visited
 						continue;
 					}
-					
+
 					u = m_vi_Edges[j];
 
 					// now check to make sure that the neighbor's degree isn't UNKNOWN
@@ -1270,7 +1270,7 @@ namespace ColPack
 					// update that we visited this
 					vi_Visited [u] = i_SelectedVertex;
 					// end up update that we visited this
-					
+
 					// move the last element in this bucket to u's position to get rid of expensive erase operation
 					if(vvi_GroupedInducedVertexDegree[vi_InducedVertexDegree[u]].size() > 1)
 					{
@@ -1309,7 +1309,7 @@ namespace ColPack
                 vi_InducedVertexDegree.clear();
                 vi_VertexLocation.clear();
                 vvi_GroupedInducedVertexDegree.clear();
-		vi_Visited.clear ();	
+		vi_Visited.clear ();
 		return(_TRUE);
 	}
 
@@ -1324,7 +1324,7 @@ namespace ColPack
 		int i_Current;
 		int i_SelectedVertex, i_SelectedVertexCount;
 		int i_VertexCount;
-		
+
 		int i_HighestInducedVertexDegree, i_InducedVertexDegree;
 		vector<int> vi_InducedVertexDegree;
 		vector<int> vi_Visited;
@@ -1332,14 +1332,14 @@ namespace ColPack
 		vector< int > vi_VertexLocation;
 
 		// initialize
-		
+
 		i_SelectedVertex = _UNKNOWN;
 		i_VertexCount = (int)m_vi_LeftVertices.size () - 1;
 		i_HighestInducedVertexDegree = 0;
-		
+
 		vi_Visited.clear();
 		vi_Visited.resize ( i_VertexCount, _UNKNOWN );
-		
+
 		m_vi_OrderedVertices.clear();
 		m_vi_OrderedVertices.reserve(i_VertexCount);
 
@@ -1436,7 +1436,7 @@ namespace ColPack
 						// it is pointed to itself or already visited
 						continue;
 					}
-					
+
 					u = m_vi_Edges[j];
 
 					// now check to make sure that the neighbor's degree isn't UNKNOWN
@@ -1449,7 +1449,7 @@ namespace ColPack
 					// update that we visited this
 					vi_Visited [u] = i_SelectedVertex;
 					// end up update that we visited this
-					
+
 					// move the last element in this bucket to u's position to get rid of expensive erase operation
 					if(vvi_GroupedInducedVertexDegree[vi_InducedVertexDegree[u]].size() > 1)
 					{
@@ -1471,7 +1471,7 @@ namespace ColPack
 
 					// update vi_VertexLocation[u] since it has now been changed
 					vi_VertexLocation[u] = vvi_GroupedInducedVertexDegree[vi_InducedVertexDegree[u]].size() - 1;
-					
+
 				}
 			}
 			// end of go to the neighbors of i_SelectedVertex and decrease the degrees by 1
@@ -1484,7 +1484,7 @@ namespace ColPack
 			// go to next vertex
 			++i_SelectedVertexCount;
 		}
-		
+
 		// clear the buffer
                 vi_InducedVertexDegree.clear();
                 vi_VertexLocation.clear();
@@ -1566,14 +1566,14 @@ namespace ColPack
 		i_SelectedVertexCount = 0;
 		vi_Visited.clear ();
 		vi_Visited.resize ( i_VertexCount, _UNKNOWN );
-		
+
 		int iMax =  0;
 
 		while ( i_SelectedVertexCount < i_VertexCount )
 		{
 			if(iMax != m_i_MaximumVertexDegree && vvi_GroupedIncidenceVertexDegree[iMax + 1].size() != _FALSE)
 				iMax++;
-			
+
 			for ( i=iMax; i>=0; i-- )
 			{
 				if ( (int)vvi_GroupedIncidenceVertexDegree [i].size () != 0 )
@@ -1594,7 +1594,7 @@ namespace ColPack
 				for ( j=m_vi_RightVertices [i_Current]; j<m_vi_RightVertices [i_Current+1]; ++j )
 				{
 					u = m_vi_Edges[j];
-					
+
 					// now check if the degree of i_SelectedVertex's neighbor isn't unknow to us
 					if ( vi_IncidenceVertexDegree [u] == _UNKNOWN )
 					{
@@ -1725,14 +1725,14 @@ namespace ColPack
 		i_SelectedVertexCount = 0;
 		vi_Visited.clear ();
 		vi_Visited.resize ( i_VertexCount, _UNKNOWN );
-		
+
 		int iMax = 0;
 
 		while ( i_SelectedVertexCount < i_VertexCount )
 		{
 			if(iMax != m_i_MaximumVertexDegree && vvi_GroupedIncidenceVertexDegree[iMax + 1].size() != _FALSE)
 				iMax++;
-			
+
 			// select the vertex with the highest Incidence degree
 			for ( i=m_i_MaximumVertexDegree; i>=0; i-- )
 			{
@@ -1958,7 +1958,7 @@ namespace ColPack
 		}
 		cout<<endl;
 	}
-	
+
 	double BipartiteGraphPartialOrdering::GetVertexOrderingTime() {
 	  return m_d_OrderingTime;
 	}

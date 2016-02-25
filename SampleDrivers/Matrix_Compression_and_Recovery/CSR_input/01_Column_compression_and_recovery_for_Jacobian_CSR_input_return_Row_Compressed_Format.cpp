@@ -1,6 +1,6 @@
 // An example of Column compression and recovery for Jacobian
-/* 
-This example simulates the situation where the matrix input for BipartiteGraphPartialColoringInterface() constructor in Step 2 is in CSR format 
+/*
+This example simulates the situation where the matrix input for BipartiteGraphPartialColoringInterface() constructor in Step 2 is in CSR format
 (in ColPack, we also call this format SSF, Sparse Solvers Format).
 Step 1 in this example is used to build the sparse matrix in CSR format. In reality, the data structure in CSR format is the output of some AD tools.
 
@@ -68,7 +68,7 @@ int main()
 	displayVector(*ip_ColumnIndex, (*ip_RowIndex)[rowCount]);
 	cout<<"Finish ConvertRowCompressedFormat2CSR()"<<endl;
 	Pause();
-	
+
 	//Step 2: Obtain the seed matrix via coloring.
 	double*** dp3_Seed = new double**;
 	int *ip1_SeedRowCount = new int;
@@ -155,11 +155,11 @@ int main()
 
 	delete g;
 	g=NULL;
-	
+
 	delete[] (*ip_RowIndex);
 	delete ip_RowIndex;
 	delete[] (*ip_ColumnIndex);
 	delete ip_ColumnIndex;
-	
+
 	return 0;
 }

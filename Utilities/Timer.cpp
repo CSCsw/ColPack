@@ -32,14 +32,14 @@ namespace ColPack
 
 	}
 
-	
+
 	//Public Destructor 4352
 	Timer::~Timer()
 	{
 
 	}
 
-	
+
 	//Public Function 4354
 	void Timer::Start()
 	{
@@ -55,7 +55,7 @@ namespace ColPack
 #endif
 
 	}
-	 
+
 	//Public Function 4355
 	void Timer::Stop()
 	{
@@ -71,7 +71,7 @@ namespace ColPack
 #endif
 
 	}
-	 
+
 	//Public Function 4356
 	double Timer::GetWallTime()
 	{
@@ -87,7 +87,7 @@ namespace ColPack
 #endif
 
 	}
-	 
+
 	//Public Function 4357
 	double Timer::GetProcessorTime()
 	{
@@ -106,7 +106,7 @@ namespace ColPack
 #endif
 
 	}
-	 
+
 	//Public Function 4358
 	double Timer::GetUserProcessorTime()
 	{
@@ -124,7 +124,7 @@ namespace ColPack
 #endif
 
 	}
-	 
+
 	//Public Function 4359
 	double Timer::GetSystemProcessorTime()
 	{

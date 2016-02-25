@@ -34,35 +34,35 @@ int WriteMatrixMarket_ADOLCInput(string s_postfix, int i_mode, ...) {
   int i_CompressedMatrix_Row;
   int i_CompressedMatrix_Col;
   double** dp2_Values;
-  
+
   string s_BaseName = "-ColPack_debug.mtx";
-  
+
   va_list ap; /*will point to each unnamed argument in turn*/
   va_start(ap,i_mode); /* point to first element after i_mode*/
-  
+
   if (i_mode == 0) {
     uip2_SparsityPattern = va_arg(ap,unsigned int **);
     i_Matrix_Row = va_arg(ap,int);
     i_Matrix_Col = va_arg(ap,int);
-    
+
     string s_MatrixName = "pattern"+s_postfix+s_BaseName;
 
     ofstream out_Matrix (s_MatrixName.c_str());
     if(!out_Matrix) {
-	    cout<<"Error creating file: \""<<out_Matrix<<"\""<<endl;
+	    cout<<"Error creating file: \""<<s_MatrixName<<"\""<<endl;
 	    exit(1);
     }
-    
+
     int i_NumOfLines = 0;
-    
+
     //Count i_NumOfLines
     for(int i = 0; i<i_Matrix_Row;i++) {
       i_NumOfLines += uip2_SparsityPattern[i][0];
     }
-			
-    out_Matrix<<"%%MatrixMarket matrix coordinate real general"<<endl;    
+
+    out_Matrix<<"%%MatrixMarket matrix coordinate real general"<<endl;
     out_Matrix<<i_Matrix_Row<<" "<<i_Matrix_Col<<" "<< i_NumOfLines<<endl;
-    
+
     out_Matrix<<setprecision(10)<<scientific<<showpoint;
     for(int i = 0; i<i_Matrix_Row;i++) {
       for(int j = 1; j<=uip2_SparsityPattern[i][0];j++) {
@@ -80,24 +80,24 @@ int WriteMatrixMarket_ADOLCInput(string s_postfix, int i_mode, ...) {
     dp2_CompressedMatrix = va_arg(ap,double**);
     i_CompressedMatrix_Row = va_arg(ap,int);
     i_CompressedMatrix_Col = va_arg(ap,int);
-    
+
     string s_MatrixName = "pattern"+s_postfix+s_BaseName;
     ofstream out_Matrix (s_MatrixName.c_str());
     if(!out_Matrix) {
-	    cout<<"Error creating file: \""<<out_Matrix<<"\""<<endl;
+	    cout<<"Error creating file: \""<<s_MatrixName<<"\""<<endl;
 	    exit(1);
     }
 
     int i_NumOfLines = 0;
-    
+
     //Count i_NumOfLines
     for(int i = 0; i<i_Matrix_Row;i++) {
       i_NumOfLines += uip2_SparsityPattern[i][0];
     }
-			
-    out_Matrix<<"%%MatrixMarket matrix coordinate real general"<<endl;    
+
+    out_Matrix<<"%%MatrixMarket matrix coordinate real general"<<endl;
     out_Matrix<<i_Matrix_Row<<" "<<i_Matrix_Col<<" "<< i_NumOfLines<<endl;
-    
+
     out_Matrix<<setprecision(10)<<scientific<<showpoint;
     for(int i = 0; i<i_Matrix_Row;i++) {
       for(int j = 1; j<=uip2_SparsityPattern[i][0];j++) {
@@ -111,13 +111,13 @@ int WriteMatrixMarket_ADOLCInput(string s_postfix, int i_mode, ...) {
     string s_CompressedMatrixName = "CompressedMatrix"+s_postfix+s_BaseName;
     ofstream out_CompressedMatrix (s_CompressedMatrixName.c_str());
     if(!out_CompressedMatrix) {
-	    cout<<"Error creating file: \""<<out_CompressedMatrix<<"\""<<endl;
+	    cout<<"Error creating file: \""<<s_CompressedMatrixName<<"\""<<endl;
 	    exit(1);
     }
-    
-    out_CompressedMatrix<<"%%MatrixMarket matrix coordinate real general"<<endl;    
+
+    out_CompressedMatrix<<"%%MatrixMarket matrix coordinate real general"<<endl;
     out_CompressedMatrix<<i_CompressedMatrix_Row<<" "<<i_CompressedMatrix_Col<<" "<< i_CompressedMatrix_Row*i_CompressedMatrix_Col<<endl;
-    
+
     out_CompressedMatrix<<setprecision(10)<<scientific<<showpoint;
     for(int i = 0; i<i_CompressedMatrix_Row;i++) {
       for(int j = 0; j<i_CompressedMatrix_Col;j++) {
@@ -136,24 +136,24 @@ int WriteMatrixMarket_ADOLCInput(string s_postfix, int i_mode, ...) {
     i_CompressedMatrix_Row = va_arg(ap,int);
     i_CompressedMatrix_Col = va_arg(ap,int);
     dp2_Values = va_arg(ap,double**);
-    
+
     string s_MatrixName = "pattern_value"+s_postfix+s_BaseName;
     ofstream out_Matrix (s_MatrixName.c_str());
     if(!out_Matrix) {
-	    cout<<"Error creating file: \""<<out_Matrix<<"\""<<endl;
+	    cout<<"Error creating file: \""<<s_MatrixName<<"\""<<endl;
 	    exit(1);
     }
 
     int i_NumOfLines = 0;
-    
+
     //Count i_NumOfLines
     for(int i = 0; i<i_Matrix_Row;i++) {
       i_NumOfLines += uip2_SparsityPattern[i][0];
     }
-			
-    out_Matrix<<"%%MatrixMarket matrix coordinate real general"<<endl;    
+
+    out_Matrix<<"%%MatrixMarket matrix coordinate real general"<<endl;
     out_Matrix<<i_Matrix_Row<<" "<<i_Matrix_Col<<" "<< i_NumOfLines<<endl;
-    
+
     out_Matrix<<setprecision(10)<<scientific<<showpoint;
     for(int i = 0; i<i_Matrix_Row;i++) {
       for(int j = 1; j<=uip2_SparsityPattern[i][0];j++) {
@@ -167,13 +167,13 @@ int WriteMatrixMarket_ADOLCInput(string s_postfix, int i_mode, ...) {
     string s_CompressedMatrixName = "CompressedMatrix"+s_postfix+s_BaseName;
     ofstream out_CompressedMatrix (s_CompressedMatrixName.c_str());
     if(!out_CompressedMatrix) {
-	    cout<<"Error creating file: \""<<out_CompressedMatrix<<"\""<<endl;
+	    cout<<"Error creating file: \""<<s_CompressedMatrixName<<"\""<<endl;
 	    exit(1);
     }
-    
-    out_CompressedMatrix<<"%%MatrixMarket matrix coordinate real general"<<endl;    
+
+    out_CompressedMatrix<<"%%MatrixMarket matrix coordinate real general"<<endl;
     out_CompressedMatrix<<i_CompressedMatrix_Row<<" "<<i_CompressedMatrix_Col<<" "<< i_CompressedMatrix_Row*i_CompressedMatrix_Col<<endl;
-    
+
     out_CompressedMatrix<<setprecision(10)<<scientific<<showpoint;
     for(int i = 0; i<i_CompressedMatrix_Row;i++) {
       for(int j = 0; j<i_CompressedMatrix_Col;j++) {
@@ -190,8 +190,8 @@ int WriteMatrixMarket_ADOLCInput(string s_postfix, int i_mode, ...) {
     va_end(ap); //cleanup
     return 1;
   }
-  
-  va_end(ap); //cleanup  
+
+  va_end(ap); //cleanup
   return 0;
 }
 
@@ -202,7 +202,7 @@ int displayGraph(map< int, map<int,bool> > *graph, vector<int>* vi_VertexColors,
   vector<string> ListOfColors = getListOfColors("");
   string fileName = "/tmp/.";
   fileName = fileName + "ColPack_"+ itoa(ranNum)+"_"+itoa(seq)+".dot";
-  
+
   //build the dot file of the graph
   if(vi_VertexColors == NULL) {
     //build dot file represents graph without color info
@@ -211,7 +211,7 @@ int displayGraph(map< int, map<int,bool> > *graph, vector<int>* vi_VertexColors,
     //build dot file represents graph with color
     buildDotWithColor(graph, vi_VertexColors, ListOfColors, fileName);
   }
-  
+
   //display the graph using xdot
   string command;
   switch (filter) {
@@ -221,7 +221,7 @@ int displayGraph(map< int, map<int,bool> > *graph, vector<int>* vi_VertexColors,
     case FDP: command="xdot -f fdp "; break;
     default: command="xdot -f dot "; // case DOT
   }
-  
+
   command = command + fileName;
   if(i_RunInBackground) command = command + " &";
   int i_ReturnValue = system(command.c_str());
@@ -237,12 +237,12 @@ int buildDotWithoutColor(map< int, map<int,bool> > *graph, vector<string> &ListO
   } else {
     cout<<"Create File "<<fileName<<endl;
   }
-  
+
   string line="";
-  
+
   //build header
   OutputStream<<"graph g {"<<endl;
-  
+
   //build body
   map< int, map<int,bool> >::iterator itr = graph->begin();
   for(; itr != graph->end(); itr++) {
@@ -254,13 +254,13 @@ int buildDotWithoutColor(map< int, map<int,bool> > *graph, vector<string> &ListO
       OutputStream<<line<<endl;
     }
   }
-  
+
   //build footer
   OutputStream<<"}"<<endl;
-  
+
   OutputStream.close();
   cout<<"\t File created"<<endl;
-  
+
   return 0;
 }
 
@@ -273,7 +273,7 @@ int buildDotWithColor(map< int, map<int,bool> > *graph, vector<int>* vi_VertexCo
   } else {
     cout<<"Create File "<<fileName<<endl;
   }
-  
+
   //vector<int> m_vi_Vertices, m_vi_Edges, m_vi_VertexColors;
   //g.GetVertices(m_vi_Vertices);
   //g.GetEdges(m_vi_Edges);
@@ -281,10 +281,10 @@ int buildDotWithColor(map< int, map<int,bool> > *graph, vector<int>* vi_VertexCo
   //int i_VertexCount = STEP_DOWN((signed) m_vi_Vertices.size());
   int i_NumberOfColors = ListOfColors.size();
   string line="", color_str="", colorID_str="", colorID_str2="";
-  
+
   //build header
   OutputStream<<"graph g {"<<endl;
-  
+
   //build node colors
   map< int, map<int,bool> >::iterator itr = graph->begin();
   for(; itr != graph->end(); itr++) {
@@ -302,7 +302,7 @@ int buildDotWithColor(map< int, map<int,bool> > *graph, vector<int>* vi_VertexCo
     OutputStream<<line<<endl;
   }
   cout<<endl<<endl;
-  
+
 
   //build body
   itr = graph->begin();
@@ -310,30 +310,30 @@ int buildDotWithColor(map< int, map<int,bool> > *graph, vector<int>* vi_VertexCo
     map<int,bool>::iterator itr2 = (itr->second).begin();
     for(; itr2 != (itr->second).end(); itr2++) {
       if(itr2->first <= itr->first) continue;
-      
+
       if((*vi_VertexColors)[itr->first] != _UNKNOWN) {
 	colorID_str = itoa((*vi_VertexColors)[itr->first]);
       }
       else {
 	colorID_str = "_";
       }
-      
+
       if((*vi_VertexColors)[itr2->first] != _UNKNOWN) {
 	colorID_str2 = itoa((*vi_VertexColors)[itr2->first]);
       }
       else {
 	colorID_str2 = "_";
       }
-      
+
       line = "";
       line = line + "v"+itoa(itr->first)+"_c"+colorID_str+" -- v"+ itoa(itr2->first)+"_c"+colorID_str2 ;
       OutputStream<<line<<" ;"<<endl;
     }
   }
-  
+
   //build footer
   OutputStream<<"}"<<endl;
-  
+
   OutputStream.close();
   cout<<"\t File created"<<endl;
   return 0;
@@ -355,7 +355,7 @@ string itoa(int i) {
   stringstream out;
   out << i;
   s = out.str();
-  
+
   return s;
 }
 
@@ -367,16 +367,16 @@ vector<string> getListOfColors(string s_InputFile) {
   } else {
     cout<<"Found File "<<s_InputFile<<endl;
   }
-  
+
   string line;
   getline(InputStream, line);
   vector<string> ListOfColors;
-  
+
   while(!InputStream.eof() && line != "*") {
     ListOfColors.push_back(line);
     getline(InputStream, line);
   }
-  
+
   return ListOfColors;
 }
 
@@ -390,16 +390,16 @@ int buildDotWithoutColor(ColPack::BipartiteGraphPartialColoringInterface &g, vec
   } else {
     cout<<"Create File "<<fileName<<endl;
   }
-  
+
   vector<int> m_vi_Vertices, m_vi_Edges;
   g.GetLeftVertices(m_vi_Vertices);
   g.GetEdges(m_vi_Edges);
   int i_VertexCount = STEP_DOWN((signed) m_vi_Vertices.size());
   string line="";
-  
+
   //build header
   OutputStream<<"graph g {"<<endl;
-  
+
   //build body
   for(int i=0; i < i_VertexCount; i++) {
     for(int j=m_vi_Vertices[i] ; j< m_vi_Vertices[i + 1]; j++) {
@@ -408,13 +408,13 @@ int buildDotWithoutColor(ColPack::BipartiteGraphPartialColoringInterface &g, vec
       OutputStream<<line<<endl;
     }
   }
-  
+
   //build footer
   OutputStream<<"}"<<endl;
-  
+
   OutputStream.close();
   cout<<"\t File created"<<endl;
-  
+
   return 0;
 }
 
@@ -427,7 +427,7 @@ int buildDotWithColor(ColPack::BipartiteGraphPartialColoringInterface &g, vector
   } else {
     cout<<"Create File "<<fileName<<endl;
   }
-  
+
   vector<int> m_vi_Vertices, m_vi_Edges, m_vi_LeftVertexColors, m_vi_RightVertexColors;
   g.GetLeftVertices(m_vi_Vertices);
   //cout<<"displayVector(m_vi_Vertices);"<<endl;
@@ -446,10 +446,10 @@ int buildDotWithColor(ColPack::BipartiteGraphPartialColoringInterface &g, vector
   //cout<<"i_RightVertexCount="<<i_RightVertexCount<<endl;
   int i_NumberOfColors = ListOfColors.size();
   string line="", color_str="";
-  
+
   //build header
   OutputStream<<"graph g {"<<endl;
-  
+
   //build node colors
   //colors for left vertices
   for(int i=0; i < i_VertexCount; i++) {
@@ -480,13 +480,13 @@ int buildDotWithColor(ColPack::BipartiteGraphPartialColoringInterface &g, vector
     OutputStream<<line<<endl;
   }
   cout<<endl<<endl;
-  
+
   //Find conflicts
   vector<bool> m_vi_ConflictEdges;
   /*
   vector<vector<int> > ListOfConflicts;
   g.GetStarColoringConflicts(ListOfConflicts);
-  
+
   //Mark conflict edge
   m_vi_ConflictEdges.resize(m_vi_Edges.size(),false);
   if(ListOfConflicts.size()>0) {
@@ -510,12 +510,12 @@ int buildDotWithColor(ColPack::BipartiteGraphPartialColoringInterface &g, vector
 	    }
 	  }
 	}
-	
+
       }
     }
   }
   //*/
-  
+
   //build body
   for(int i=0; i < i_VertexCount; i++) {
     for(int j=m_vi_Vertices[i] ; j< m_vi_Vertices[i + 1]; j++) {
@@ -528,26 +528,26 @@ int buildDotWithColor(ColPack::BipartiteGraphPartialColoringInterface &g, vector
       else {
 	line = line + '_';
       }
-      
+
       line = line + " -- v"+ itoa(m_vi_Edges[j] + i_VertexCount)+"_c";
-      
+
       if(m_vi_RightVertexColors.size() > 0) {
 	line = line + itoa(m_vi_RightVertexColors[m_vi_Edges[j]]);
       }
       else {
 	line = line + '_';
       }
-      
+
       if(m_vi_ConflictEdges.size()>0 && m_vi_ConflictEdges[j]) { // make the line bolder if the edge is conflict
 	line = line + "[style=\"setlinewidth(3)\"]";
       }
       OutputStream<<line<<" ;"<<endl;
     }
   }
-  
+
   //build footer
   OutputStream<<"}"<<endl;
-  
+
   OutputStream.close();
   cout<<"\t File created"<<endl;
   return 0;
@@ -576,16 +576,16 @@ int buildDotWithoutColor(ColPack::GraphColoringInterface &g, vector<string> &Lis
   } else {
     cout<<"Create File "<<fileName<<endl;
   }
-  
+
   vector<int> m_vi_Vertices, m_vi_Edges;
   g.GetVertices(m_vi_Vertices);
   g.GetEdges(m_vi_Edges);
   int i_VertexCount = STEP_DOWN((signed) m_vi_Vertices.size());
   string line="";
-  
+
   //build header
   OutputStream<<"graph g {"<<endl;
-  
+
   //build body
   for(int i=0; i < i_VertexCount; i++) {
     for(int j=m_vi_Vertices[i] ; j< m_vi_Vertices[i + 1]; j++) {
@@ -595,13 +595,13 @@ int buildDotWithoutColor(ColPack::GraphColoringInterface &g, vector<string> &Lis
       OutputStream<<line<<endl;
     }
   }
-  
+
   //build footer
   OutputStream<<"}"<<endl;
-  
+
   OutputStream.close();
   cout<<"\t File created"<<endl;
-  
+
   return 0;
 }
 
@@ -614,7 +614,7 @@ int buildDotWithColor(ColPack::GraphColoringInterface &g, vector<string> &ListOf
   } else {
     cout<<"Create File "<<fileName<<endl;
   }
-  
+
   vector<int> m_vi_Vertices, m_vi_Edges, m_vi_VertexColors;
   g.GetVertices(m_vi_Vertices);
   g.GetEdges(m_vi_Edges);
@@ -622,10 +622,10 @@ int buildDotWithColor(ColPack::GraphColoringInterface &g, vector<string> &ListOf
   int i_VertexCount = STEP_DOWN((signed) m_vi_Vertices.size());
   int i_NumberOfColors = ListOfColors.size();
   string line="", color_str="", colorID_str="", colorID_str2="";
-  
+
   //build header
   OutputStream<<"graph g {"<<endl;
-  
+
   //build node colors
   for(int i=0; i < i_VertexCount; i++) {
     line="";
@@ -642,11 +642,11 @@ int buildDotWithColor(ColPack::GraphColoringInterface &g, vector<string> &ListOf
     OutputStream<<line<<endl;
   }
   cout<<endl<<endl;
-  
+
   //Find conflicts
   vector<vector<int> > ListOfConflicts;
   g.GetStarColoringConflicts(ListOfConflicts);
-  
+
   //Mark conflict edge
   vector<bool> m_vi_ConflictEdges;
   m_vi_ConflictEdges.resize(m_vi_Edges.size(),false);
@@ -671,30 +671,29 @@ int buildDotWithColor(ColPack::GraphColoringInterface &g, vector<string> &ListOf
 	    }
 	  }
 	}
-	
       }
     }
   }
-  
+
   //build body
   for(int i=0; i < i_VertexCount; i++) {
     for(int j=m_vi_Vertices[i] ; j< m_vi_Vertices[i + 1]; j++) {
       if(m_vi_Edges[j]<=i) continue;
-      
+
       if(m_vi_VertexColors[i] != _UNKNOWN) {
 	colorID_str = itoa(m_vi_VertexColors[i]);
       }
       else {
 	colorID_str = "_";
       }
-      
+
       if(m_vi_VertexColors[m_vi_Edges[j]] != _UNKNOWN) {
 	colorID_str2 = itoa(m_vi_VertexColors[m_vi_Edges[j]]);
       }
       else {
 	colorID_str2 = "_";
       }
-      
+
       line = "";
       line = line + "v"+itoa(i)+"_c"+colorID_str+" -- v"+ itoa(m_vi_Edges[j])+"_c"+colorID_str2 ;
       if(m_vi_ConflictEdges.size()>0 && m_vi_ConflictEdges[j]) { // make the line bolder if the edge is conflict
@@ -703,10 +702,10 @@ int buildDotWithColor(ColPack::GraphColoringInterface &g, vector<string> &ListOf
       OutputStream<<line<<" ;"<<endl;
     }
   }
-  
+
   //build footer
   OutputStream<<"}"<<endl;
-  
+
   OutputStream.close();
   cout<<"\t File created"<<endl;
   return 0;
@@ -724,16 +723,16 @@ bool isValidOrdering(vector<int> & ordering, int offset) {
       cerr<<" This vertex # is not in the valid range [0, ordering.size()]. ordering[i]: "<<ordering[i]<<endl;
       return false;
     }
-    
+
     if(isExist[ orderingNum ]) {
       cerr<<"This vertex id "<<orderingNum<<" has been seen before at ordering["<<index [orderingNum]<<"] and  ordering["<<i<<"]. We have duplication!"<<endl;
       return false;
     }
-    
+
     isExist[ orderingNum ] = true;
     index [orderingNum] = i;
   }
-  
+
   return true;
 }
 
@@ -743,17 +742,17 @@ int ReadRowCompressedFormat(string s_InputFile, unsigned int *** uip3_SparsityPa
   unsigned int num = 0;
   istringstream in2;
   ifstream in (s_InputFile.c_str());
-  
+
   if(!in) {
     cout<<s_InputFile<<" not Found!"<<endl;
     exit(1);
   }
-  
+
   getline(in,line);
   lineCounter++;
   in2.str(line);
   in2 >> rowCount >> columnCount >> nonzeros;
-  
+
   (*uip3_SparsityPattern) = new unsigned int*[rowCount];
 
   for(int i=0;i < rowCount; i++) {
@@ -766,12 +765,12 @@ int ReadRowCompressedFormat(string s_InputFile, unsigned int *** uip3_SparsityPa
 			in2>>nnz_per_row;
 			(*uip3_SparsityPattern)[i] = new unsigned int[nnz_per_row + 1];
 			(*uip3_SparsityPattern)[i][0] = nnz_per_row;
-			
+
 			for(int j=1; j<nnz_per_row+1; j++) {
 			  in2>>num;
 			  (*uip3_SparsityPattern)[i][j] = num;
 			  nz_counter++;
-			}			
+			}
 		}
 		else
 		{
@@ -781,7 +780,7 @@ int ReadRowCompressedFormat(string s_InputFile, unsigned int *** uip3_SparsityPa
 			exit( -1);
 		}
   }
-  
+
   if(nz_counter<nonzeros) { //nz_counter should be == nonzeros
 		  cerr<<"* WARNING: ReadRowCompressedFormat()"<<endl;
 		  cerr<<"*\t nz_counter<nonzeros+1. Wrong input format. Can't process."<<endl;
@@ -836,7 +835,7 @@ int ConvertRowCompressedFormat2SparseSolversFormat_StructureOnly (unsigned int *
 int ConvertCoordinateFormat2RowCompressedFormat(unsigned int* uip1_RowIndex, unsigned int* uip1_ColumnIndex, double* dp1_HessianValue, int i_RowCount, int i_NonZeroCount, unsigned int *** dp3_Pattern, double*** dp3_Values ) {
   (*dp3_Pattern) = (unsigned int**) malloc( (i_RowCount) * sizeof(unsigned int*));
   (*dp3_Values) = (double**) malloc( (i_RowCount) * sizeof(double*));
-  
+
   //Allocate memory for (*dp3_Pattern) and (*dp3_Values)
   int count=1;
   for(int i=1; i<i_NonZeroCount; i++) {
@@ -845,7 +844,7 @@ int ConvertCoordinateFormat2RowCompressedFormat(unsigned int* uip1_RowIndex, uns
       (*dp3_Pattern)[ uip1_RowIndex[i-1] ][0] = count;
       (*dp3_Values)[ uip1_RowIndex[i-1] ] = (double*) malloc( (count + 1) * sizeof(double));
       (*dp3_Values)[ uip1_RowIndex[i-1] ][0] = (double)count;
-      
+
       count=1;
     } else { //uip1_RowIndex[i] == uip1_RowIndex[i-1]
       count++;
@@ -855,7 +854,7 @@ int ConvertCoordinateFormat2RowCompressedFormat(unsigned int* uip1_RowIndex, uns
   (*dp3_Pattern)[ uip1_RowIndex[i_NonZeroCount-1] ][0] = count;
   (*dp3_Values)[ uip1_RowIndex[i_NonZeroCount-1] ] = (double*) malloc( (count + 1) * sizeof(double));
   (*dp3_Values)[ uip1_RowIndex[i_NonZeroCount-1] ][0] = (double) count;
-  
+
   //Populate values of (*dp3_Pattern) and (*dp3_Values)
   count=0;
   for(int i=0; i<i_RowCount; i++) {
@@ -865,13 +864,13 @@ int ConvertCoordinateFormat2RowCompressedFormat(unsigned int* uip1_RowIndex, uns
       count++;
     }
   }
-  
+
   if(count != i_NonZeroCount) {
     cerr<<"count != i_NonZeroCount"<<endl;
     exit(1);
   }
-  
-  
+
+
   return 0;
 }
 
@@ -973,7 +972,7 @@ int GenerateValues(unsigned int ** uip2_SparsityPattern, int rowCount, double***
 int GenerateValuesForSymmetricMatrix(unsigned int ** uip2_SparsityPattern, int rowCount, double*** dp3_Value) {
 	//srand(time(NULL));
 	srand(0);
-	
+
 	int * nnzCount = new int[rowCount]; // keep track of the # of non-zeros in each row
 	for(unsigned int i=0; i < (unsigned int)rowCount; i++) nnzCount[i] = 0;
 
@@ -991,7 +990,7 @@ int GenerateValuesForSymmetricMatrix(unsigned int ** uip2_SparsityPattern, int r
 			//printf("(*dp3_Value)[%d][%d] = (%d % 2001 - 1000)/1000.0 = %7.2f \n",i,j,rand(),(*dp3_Value)[i][j]);
 		}
 	}
-	
+
 	delete[] nnzCount;
 
 	return 0;
@@ -1009,7 +1008,7 @@ int ConvertRowCompressedFormat2ADIC(unsigned int ** uip2_SparsityPattern_RowComp
     (lsi_valsetlist).push_back(valset);
     (lvd_Value).push_back(valuevector);
   }
-  
+
   return 0;
 }
 
@@ -1019,13 +1018,13 @@ int ConvertRowCompressedFormat2CSR(unsigned int ** uip2_SparsityPattern_RowCompr
   for(int i=0; i < i_rowCount; i++) {
     (*ip_RowIndex)[i] = nnz;
     nnz += uip2_SparsityPattern_RowCompressedFormat[i][0];
-    
+
 	//cout<<"Display *ip_RowIndex"<<endl;
 	//displayVector(*ip_RowIndex,i_rowCount+1);
-    
+
   }
   (*ip_RowIndex)[i_rowCount] = nnz;
-  
+
   (*ip_ColumnIndex) = new int[nnz];
   int nz_count=0;
   for(int i=0; i < i_rowCount; i++) {
@@ -1036,7 +1035,7 @@ int ConvertRowCompressedFormat2CSR(unsigned int ** uip2_SparsityPattern_RowCompr
 	//cout<<"Display *ip_ColumnIndex"<<endl;
 	//displayVector(*ip_ColumnIndex, (*ip_RowIndex)[i_rowCount]);
   }
-  
+
   if(nz_count != nnz) {
     cerr<<"IN ConvertRowCompressedFormat2CSR, nz_count ("<<nz_count<<") != nnz ("<<nnz<<")"<<endl;
   }
@@ -1076,7 +1075,7 @@ int ConvertMatrixMarketFormat2RowCompressedFormat(string s_InputFile, unsigned i
 	  b_getValue = false;
 	}
 	else b_getValue = true;
-	
+
 	if(mm_is_symmetric(matcode)) {
 	  b_symmetric = true;
 	}
@@ -1126,18 +1125,18 @@ int ConvertMatrixMarketFormat2RowCompressedFormat(string s_InputFile, unsigned i
 		{
 			rowCounter++;
 			//cout<<"Line "<<rowCounter<<"="<<line<<endl;
-			
+
 			in2.clear();
 			in2.str(line);
 			in2>>rowIndex>>colIndex;
 			rowIndex--;
 			colIndex--;
-			
+
 			if(b_symmetric) {
 				if(rowIndex > colIndex) {
-				
+
 					//cout<<"\t"<<setw(4)<<rowIndex<<setw(4)<<colIndex<<setw(4)<<nz_counter<<endl;
-					nodeList[rowIndex].push_back(colIndex); 
+					nodeList[rowIndex].push_back(colIndex);
 					nodeList[colIndex].push_back(rowIndex);
 					nz_counter += 2;
 
@@ -1173,7 +1172,7 @@ int ConvertMatrixMarketFormat2RowCompressedFormat(string s_InputFile, unsigned i
 				  valueList[rowIndex].push_back(value);
 				}
 			}
-			
+
 		}
 		else
 		{
@@ -1203,11 +1202,11 @@ int ConvertMatrixMarketFormat2RowCompressedFormat(string s_InputFile, unsigned i
 	  for(unsigned int j=0; j < numOfNonZeros; j++) {
 	    (*uip3_SparsityPattern)[i][j+1] = nodeList[i][j];
 //printf("\t %d", (int) nodeList[i][j]);
-	  }	  
+	  }
 
 	  if(b_getValue)	for(unsigned int j=0; j < numOfNonZeros; j++) {
 	    (*dp3_Value)[i][j+1] = valueList[i][j];
-	  }	  
+	  }
 //printf("\n");
 	}
 
@@ -1217,7 +1216,7 @@ int ConvertMatrixMarketFormat2RowCompressedFormat(string s_InputFile, unsigned i
 
 int MatrixMultiplication_VxS__usingVertexPartialColors(std::list<std::set<int> > &lsi_SparsityPattern, std::list<std::vector<double> > &lvd_Value, int columnCount, vector<int> &vi_VertexPartialColors, int colorCount, double*** dp3_CompressedMatrix) {
 	unsigned int rowCount = lsi_SparsityPattern.size();
-  
+
 	//Allocate memory for (*dp3_CompressedMatrix)[rowCount][colorCount]
 	//cout<<"Allocate memory for (*dp3_CompressedMatrix)[rowCount][colorCount]"<<endl;
 	(*dp3_CompressedMatrix) = new double*[rowCount];
@@ -1239,7 +1238,7 @@ int MatrixMultiplication_VxS__usingVertexPartialColors(std::list<std::set<int> >
 		  (*dp3_CompressedMatrix)[i][vi_VertexPartialColors[*valsetiter] ] += (*valuelistlistiter)[j];
 		}
 	}
-  
+
 	return 0;
 }
 
@@ -1433,7 +1432,7 @@ int DisplayADICFormat_Sparsity(std::list<std::set<int> > &lsi_valsetlist) {
 	int size = (lsi_valsetlist).size();
 	int rowIndex=-1, colIndex=-1;
 	std::list<std::set<int> >::iterator valsetlistiter = (lsi_valsetlist).begin();
-	
+
 	unsigned int estimateColumnCount = 20;
 	cout<<setw(4)<<"["<<setw(3)<<"\\"<<"]       ";
 	for(unsigned int j=0; j < estimateColumnCount; j++) cout<<setw(4)<<j;
@@ -1450,8 +1449,8 @@ int DisplayADICFormat_Sparsity(std::list<std::set<int> > &lsi_valsetlist) {
 		}
 		cout<<endl<<flush;
 	}
-	cout<<endl<<endl;	
-	
+	cout<<endl<<endl;
+
 	return 0;
 }
 
@@ -1460,7 +1459,7 @@ int DisplayADICFormat_Value(std::list<std::vector<double> > &lvd_Value) {
 	int rowIndex=-1;
 	double value=0.;
 	std::list<std::vector<double> >::iterator valsetlistiter = (lvd_Value).begin();
-	
+
 	unsigned int estimateColumnCount = 20;
 	cout<<setw(4)<<"["<<setw(3)<<"\\"<<"]       ";
 	for(unsigned int j=0; j < estimateColumnCount; j++) cout<<setw(9)<<j;
@@ -1477,10 +1476,9 @@ int DisplayADICFormat_Value(std::list<std::vector<double> > &lvd_Value) {
 		}
 		cout<<endl<<flush;
 	}
-	cout<<endl<<endl;	
-	
+	cout<<endl<<endl;
+
 	return 0;
 }
 
 #endif
-

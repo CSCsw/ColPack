@@ -107,7 +107,7 @@ namespace ColPack
 		void GenerateSeedJacobian(double*** dp3_LeftSeed, int *ip1_LeftSeedRowCount, int *ip1_LeftSeedColumnCount, double*** dp3_RightSeed, int *ip1_RightSeedRowCount, int *ip1_RightSeedColumnCount, string s_OrderingVariant="NATURAL", string s_BicoloringVariant = "IMPLICIT_COVERING__STAR_BICOLORING");
 
 
-		/// Same as GenerateSeedJacobian(), except that these Seed matrices are NOT managed by ColPack 
+		/// Same as GenerateSeedJacobian(), except that these Seed matrices are NOT managed by ColPack
 		/** Notes:
 		- These Seed matrices are NOT managed by ColPack. Therefore, the user should free the Seed matrices manually when the matrices are no longer needed.
 		*/

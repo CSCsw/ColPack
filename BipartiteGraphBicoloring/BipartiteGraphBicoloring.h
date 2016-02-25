@@ -58,7 +58,7 @@ namespace ColPack
 		/// Get the color IDs for the right vertices (columns) in the format similar to GetLeftVertexColor(). Color IDs start from 1, color ID 0 should be ignored
 		void GetRightVertexColors_Transformed(vector<int> &output);
 
-		///Generate and return the Left Seed matrix. This Seed matrix is managed and freed by ColPack 
+		///Generate and return the Left Seed matrix. This Seed matrix is managed and freed by ColPack
 		/**Precondition:
 		- the Graph has been Bicolored
 
@@ -74,13 +74,13 @@ namespace ColPack
 		*/
 		double** GetLeftSeedMatrix(int* ip1_SeedRowCount, int* ip1_SeedColumnCount);
 
-		/// Same as GetLeftSeedMatrix(), except that this Seed matrix is NOT managed by ColPack 
+		/// Same as GetLeftSeedMatrix(), except that this Seed matrix is NOT managed by ColPack
 		/** Notes:
 		- This Seed matrix is NOT managed by ColPack. Therefore, the user should free the Seed matrix manually when the matrix is no longer needed.
 		*/
 		double** GetLeftSeedMatrix_unmanaged(int* ip1_SeedRowCount, int* ip1_SeedColumnCount);
 
-		///Return the Right Seed matrix. This Seed matrix is managed and freed by ColPack 
+		///Return the Right Seed matrix. This Seed matrix is managed and freed by ColPack
 		/** Precondition:
 		- the Graph has been Bicolored
 
@@ -96,19 +96,19 @@ namespace ColPack
 		*/
 		double** GetRightSeedMatrix(int* ip1_SeedRowCount, int* ip1_SeedColumnCount);
 
-		/// Same as GetRightSeedMatrix(), except that this Seed matrix is NOT managed by ColPack 
+		/// Same as GetRightSeedMatrix(), except that this Seed matrix is NOT managed by ColPack
 		/** Notes:
 		- This Seed matrix is NOT managed by ColPack. Therefore, the user should free the Seed matrix manually when the matrix is no longer needed.
 		*/
 		double** GetRightSeedMatrix_unmanaged(int* ip1_SeedRowCount, int* ip1_SeedColumnCount);
 
-		///Return both the Left and Right Seed matrix. These Seed matrices are managed and freed by ColPack 
+		///Return both the Left and Right Seed matrix. These Seed matrices are managed and freed by ColPack
 		/** Notes:
 		- These Seed matrices are NOT managed by ColPack. Therefore, the user should free the Seed matrices manually when the matrices are no longer needed.
 		*/
 		void GetSeedMatrix(double*** dp3_LeftSeed, int* ip1_LeftSeedRowCount, int* ip1_LeftSeedColumnCount, double*** dp3_RightSeed, int* ip1_RightSeedRowCount, int* ip1_RightSeedColumnCount);
 
-		/// Same as GetSeedMatrix(), except that These Seed matrices are NOT managed by ColPack 
+		/// Same as GetSeedMatrix(), except that These Seed matrices are NOT managed by ColPack
 		/** Notes:
 		- These Seed matrices are NOT managed by ColPack. Therefore, the user should free the Seed matrices manually when the matrices are no longer needed.
 		*/
@@ -285,7 +285,7 @@ namespace ColPack
 
 		//Public Function 3577
 		void PrintVertexBicolorClasses();
-		
+
 		double GetVertexColoringTime();
 	};
 }

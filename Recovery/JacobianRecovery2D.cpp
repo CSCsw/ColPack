@@ -89,10 +89,10 @@ namespace ColPack
 
 		free_2DMatrix(colorStatistic, rowCount);
 		colorStatistic = NULL;
-		
+
 		return rowCount;
 	}
-	
+
 	int JacobianRecovery2D::DirectRecover_RowCompressedFormat_unmanaged(BipartiteGraphBicoloringInterface* g, double** dp2_RowCompressedMatrix, double** dp2_ColumnCompressedMatrix, unsigned int ** uip2_JacobianSparsityPattern, double*** dp3_JacobianValue) {
 		if(g==NULL) {
 			cerr<<"g==NULL"<<endl;
@@ -110,13 +110,13 @@ namespace ColPack
 			(*dp3_JacobianValue)[i][0] = numOfNonZeros; //initialize value of the 1st entry
 			for(int j=1; j <= numOfNonZeros; j++) (*dp3_JacobianValue)[i][j] = 0.; //initialize value of other entries
 		}
-		
+
 		return DirectRecover_RowCompressedFormat_usermem(g, dp2_RowCompressedMatrix, dp2_ColumnCompressedMatrix, uip2_JacobianSparsityPattern, dp3_JacobianValue);
 	}
-	
+
 	int JacobianRecovery2D::DirectRecover_RowCompressedFormat(BipartiteGraphBicoloringInterface* g, double** dp2_RowCompressedMatrix, double** dp2_ColumnCompressedMatrix, unsigned int ** uip2_JacobianSparsityPattern, double*** dp3_JacobianValue) {
 		int returnValue = DirectRecover_RowCompressedFormat_unmanaged(g,  dp2_RowCompressedMatrix,  dp2_ColumnCompressedMatrix,  uip2_JacobianSparsityPattern,  dp3_JacobianValue);
-	  
+
 		if(AF_available) {
 			//cout<<"AF_available="<<AF_available<<endl; Pause();
 			reset();
@@ -220,7 +220,7 @@ namespace ColPack
 
 		free_2DMatrix(colorStatistic, rowCount);
 		colorStatistic = NULL;
-		
+
 		return rowCount;
 	}
 
@@ -231,7 +231,7 @@ namespace ColPack
 		}
 
 		int rowCount = g->GetRowVertexCount();
-		
+
 		// Allocate memory and populate ip2_RowIndex and ip2_ColumnIndex
 		g->GetRowVertices(ip2_RowIndex);
 		unsigned int numOfNonZeros = g->GetColumnIndices(ip2_ColumnIndex);
@@ -248,13 +248,13 @@ namespace ColPack
 		//printf("i=%d\tnumOfNonZeros=%d \n", i, numOfNonZeros);
 		(*dp2_JacobianValue) = (double*) malloc(numOfNonZeros * sizeof(double)); //allocate memory for *dp2_JacobianValue.
 		for(unsigned int i=0; i < numOfNonZeros; i++) (*dp2_JacobianValue)[i] = 0.; //initialize value of other entries
-		  
+
 		return DirectRecover_SparseSolversFormat_usermem(g, dp2_RowCompressedMatrix, dp2_ColumnCompressedMatrix, uip2_JacobianSparsityPattern, ip2_RowIndex, ip2_ColumnIndex, dp2_JacobianValue);
 	}
-	
+
 	int JacobianRecovery2D::DirectRecover_SparseSolversFormat(BipartiteGraphBicoloringInterface* g, double** dp2_RowCompressedMatrix, double** dp2_ColumnCompressedMatrix, unsigned int ** uip2_JacobianSparsityPattern, unsigned int** ip2_RowIndex, unsigned int** ip2_ColumnIndex, double** dp2_JacobianValue) {
 		int returnValue = DirectRecover_SparseSolversFormat_unmanaged(g,  dp2_RowCompressedMatrix,  dp2_ColumnCompressedMatrix,  uip2_JacobianSparsityPattern,  ip2_RowIndex,  ip2_ColumnIndex,  dp2_JacobianValue);
-		
+
 		if(SSF_available) {
 			//cout<<"SSF_available="<<SSF_available<<endl; Pause();
 			reset();
@@ -341,7 +341,7 @@ namespace ColPack
 
 		free_2DMatrix(colorStatistic, rowCount);
 		colorStatistic = NULL;
-		
+
 		return numOfNonZeros_count;
 	}
 
@@ -358,10 +358,10 @@ namespace ColPack
 
 		return DirectRecover_CoordinateFormat_usermem(g, dp2_RowCompressedMatrix, dp2_ColumnCompressedMatrix, uip2_JacobianSparsityPattern, ip2_RowIndex, ip2_ColumnIndex, dp2_JacobianValue);
 	}
-	
+
 	int JacobianRecovery2D::DirectRecover_CoordinateFormat(BipartiteGraphBicoloringInterface* g, double** dp2_RowCompressedMatrix, double** dp2_ColumnCompressedMatrix, unsigned int ** uip2_JacobianSparsityPattern, unsigned int** ip2_RowIndex, unsigned int** ip2_ColumnIndex, double** dp2_JacobianValue) {
 		int returnValue = DirectRecover_CoordinateFormat_unmanaged(g, dp2_RowCompressedMatrix, dp2_ColumnCompressedMatrix,  uip2_JacobianSparsityPattern, ip2_RowIndex,  ip2_ColumnIndex,  dp2_JacobianValue);
-		
+
 		if(CF_available) reset();
 
 		CF_available = true;

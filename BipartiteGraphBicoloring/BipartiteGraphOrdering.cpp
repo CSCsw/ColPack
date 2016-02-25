@@ -151,14 +151,14 @@ namespace ColPack
 		}
 
 		randomOrdering(tempOrdering);
-		
+
 		m_vi_OrderedVertices.reserve(i_LeftVertexCount + i_RightVertexCount);
 
 		//Now, populate vector m_vi_OrderedVertices with the right vertices
 		for(unsigned int i = 0; i<i_RightVertexCount; i++) {
 			m_vi_OrderedVertices.push_back(tempOrdering[i]);
 		}
-		
+
 		return(_TRUE);
 	}
 
@@ -278,7 +278,7 @@ namespace ColPack
 		vector < vector < int > > vvi_GroupedInducedVertexDegree;
 
 		vector <  int > vi_VertexLocation;
-		
+
 		vector <  int > vi_LeftSidedVertexinBucket;
 
 
@@ -323,11 +323,11 @@ namespace ColPack
 			}
 		}
 
-		
+
 		// get the bucket division positions now
 		for(i= 0; i < i_LeftVertexCount + i_RightVertexCount; i++)
 			vi_LeftSidedVertexinBucket.push_back(vvi_GroupedInducedVertexDegree[i].size());
-	
+
 
 		for(i=0; i<i_RightVertexCount; i++)
 		{
@@ -382,7 +382,7 @@ namespace ColPack
 						vvi_GroupedInducedVertexDegree[i][vi_LeftSidedVertexinBucket[i]] = vvi_GroupedInducedVertexDegree[i].back();
                                                 vi_VertexLocation[vvi_GroupedInducedVertexDegree[i].back()] = vi_VertexLocation[u];
 
-						_FOUND = _TRUE;						
+						_FOUND = _TRUE;
 					}
 					*/
 					if(vi_LeftSidedVertexinBucket[i] > 0)
@@ -408,7 +408,7 @@ namespace ColPack
 
 					if(!_FOUND)
 						i_SelectedVertex = vvi_GroupedInducedVertexDegree[i].back();
-					
+
 					break;
 				}
 				else
@@ -456,7 +456,7 @@ namespace ColPack
 					{
 						continue;
 					}
-					
+
 					// move the last element in this bucket to u's position to get rid of expensive erase operation
                                 	if(vvi_GroupedInducedVertexDegree[vi_InducedVertexDegree[u]].size() > 1)
                                 	{
@@ -478,11 +478,11 @@ namespace ColPack
 
                                         // update vi_VertexLocation[u] since it has now been changed
                                          vi_VertexLocation[u] = vvi_GroupedInducedVertexDegree[vi_InducedVertexDegree[u]].size() - 1;
-					
+
 					/*
 					if(u < i_LeftVertexCount)
 					{
-						// swap this vertex and location						
+						// swap this vertex and location
 						v = vvi_GroupedInducedVertexDegree[vi_InducedVertexDegree[u]].size() - 1;
 						if(v > 0)
 						{
@@ -505,7 +505,7 @@ namespace ColPack
 					{
 						continue;
 					}
-					
+
 					// move the last element in this bucket to u's position to get rid of expensive erase operation
                                 	if(vvi_GroupedInducedVertexDegree[vi_InducedVertexDegree[u]].size() > 1)
                                 	{
@@ -515,10 +515,10 @@ namespace ColPack
 
 	                                        vi_VertexLocation[l] = vi_VertexLocation[u];
         	                        }
-					
+
 					// remove last element from this bucket
                         	        vvi_GroupedInducedVertexDegree[vi_InducedVertexDegree[u]].pop_back();
-					
+
 					vi_LeftSidedVertexinBucket[vi_InducedVertexDegree[u]]--;
 
 					// reduce degree of u by 1
@@ -535,7 +535,7 @@ namespace ColPack
 					/*
 					if(u < i_LeftVertexCount)
 					{
-						// swap this vertex and location						
+						// swap this vertex and location
 						v = vvi_GroupedInducedVertexDegree[vi_InducedVertexDegree[u]].size() - 1;
 						if(v > 0)
 						{
@@ -573,7 +573,7 @@ namespace ColPack
 		}
 
 		int i, u, l;
-		
+
 		int i_HighestIncidenceVertexDegree;
 
 		int i_LeftVertexCount, i_RightVertexCount, i_VertexCount;
@@ -586,7 +586,7 @@ namespace ColPack
 
 		vector<int> vi_IncidenceVertexDegree;
 
-		//Vertices of the same IncidenceDegree are differenciated into 
+		//Vertices of the same IncidenceDegree are differenciated into
 		//  LeftVertices (vpvi_GroupedIncidenceVertexDegree.first) and
 		//  RightVertices (vpvi_GroupedIncidenceVertexDegree.second)
 		vector< pair<vector<int>, vector<int> > > vpvi_GroupedIncidenceVertexDegree;
@@ -645,7 +645,7 @@ namespace ColPack
 				m_i_MaximumVertexDegree = i_VertexDegree;
 			}
 		}
-		
+
 		i_HighestIncidenceVertexDegree = 0;
 
 		m_vi_OrderedVertices.clear();
@@ -656,19 +656,19 @@ namespace ColPack
 		while(i_SelectedVertexCount < i_VertexCount)
 		{
 			if(i_HighestIncidenceVertexDegree != m_i_MaximumVertexDegree &&
-			    vpvi_GroupedIncidenceVertexDegree[i_HighestIncidenceVertexDegree+1].first.size() + 
+			    vpvi_GroupedIncidenceVertexDegree[i_HighestIncidenceVertexDegree+1].first.size() +
 			    vpvi_GroupedIncidenceVertexDegree[i_HighestIncidenceVertexDegree+1].second.size()  != 0) {
 			  //We need to update the value of i_HighestIncidenceVertexDegree
 			  i_HighestIncidenceVertexDegree++;
-			
+
 			}
 			else {
-			  while(vpvi_GroupedIncidenceVertexDegree[i_HighestIncidenceVertexDegree].first.size() + 
+			  while(vpvi_GroupedIncidenceVertexDegree[i_HighestIncidenceVertexDegree].first.size() +
 			    vpvi_GroupedIncidenceVertexDegree[i_HighestIncidenceVertexDegree].second.size()  == 0) {
 			    i_HighestIncidenceVertexDegree--;
 			  }
 			}
-			
+
 			if(vpvi_GroupedIncidenceVertexDegree[i_HighestIncidenceVertexDegree].first.size() != 0) {
 			  //vertex with i_HighestIncidenceVertexDegree is a LeftVertex
 			  i_SelectedVertex = vpvi_GroupedIncidenceVertexDegree[i_HighestIncidenceVertexDegree].first.back();
@@ -690,23 +690,23 @@ namespace ColPack
 					{
 						continue;
 					}
-					
+
 					// move the last element in this bucket to u's position to get rid of expensive erase operation
 					if(vpvi_GroupedIncidenceVertexDegree[vi_IncidenceVertexDegree[u]].second.size() > 1) {
 						l = vpvi_GroupedIncidenceVertexDegree[vi_IncidenceVertexDegree[u]].second.back();
 						vpvi_GroupedIncidenceVertexDegree[vi_IncidenceVertexDegree[u]].second[vi_VertexLocation[u]] = l;
 						vi_VertexLocation[l] = vi_VertexLocation[u];
 					}
-					
+
 					//remove the last element from vpvi_GroupedIncidenceVertexDegree[vi_IncidenceVertexDegree[u]].second
 					vpvi_GroupedIncidenceVertexDegree[vi_IncidenceVertexDegree[u]].second.pop_back();
-					
+
 					// increase incidence degree of u
 					vi_IncidenceVertexDegree[u]++;
 
 					// insert u into appropriate bucket
 					vpvi_GroupedIncidenceVertexDegree[vi_IncidenceVertexDegree[u]].second.push_back(u);
-					
+
 					// update location of u
 					vi_VertexLocation[u] = vpvi_GroupedIncidenceVertexDegree[vi_IncidenceVertexDegree[u]].second.size() - 1;
 				}
@@ -720,29 +720,29 @@ namespace ColPack
 					{
 						continue;
 					}
-					
+
 					// move the last element in this bucket to u's position to get rid of expensive erase operation
 					if(vpvi_GroupedIncidenceVertexDegree[vi_IncidenceVertexDegree[u]].first.size() > 1) {
 						l = vpvi_GroupedIncidenceVertexDegree[vi_IncidenceVertexDegree[u]].first.back();
 						vpvi_GroupedIncidenceVertexDegree[vi_IncidenceVertexDegree[u]].first[vi_VertexLocation[u]] = l;
 						vi_VertexLocation[l] = vi_VertexLocation[u];
 					}
-					
+
 					//remove the last element from vpvi_GroupedIncidenceVertexDegree[vi_IncidenceVertexDegree[u]].first
 					vpvi_GroupedIncidenceVertexDegree[vi_IncidenceVertexDegree[u]].first.pop_back();
-					
+
 					// increase incidence degree of u
 					vi_IncidenceVertexDegree[u]++;
 
 					// insert u into appropriate bucket
 					vpvi_GroupedIncidenceVertexDegree[vi_IncidenceVertexDegree[u]].first.push_back(u);
-					
+
 					// update location of u
 					vi_VertexLocation[u] = vpvi_GroupedIncidenceVertexDegree[vi_IncidenceVertexDegree[u]].first.size() - 1;
 				}
 
 			}
-	
+
 			// Mark that this vertex has been visited
 			vi_IncidenceVertexDegree[i_SelectedVertex] = _UNKNOWN;
 
@@ -805,7 +805,7 @@ namespace ColPack
 		vector< pair<vector<int>, vector<int> > > vpvi_GroupedInducedVertexDegree;
 
 		vector< int > vi_VertexLocation;
-		
+
 
 		i_LeftVertexCount = STEP_DOWN((signed) m_vi_LeftVertices.size());
 		i_RightVertexCount = STEP_DOWN((signed) m_vi_RightVertices.size());
@@ -853,7 +853,7 @@ namespace ColPack
 				m_i_MaximumVertexDegree = i_InducedVertexDegree;
 			}
 		}
-		
+
 		i_HighestInducedVertexDegree = m_i_MaximumVertexDegree;
 
 		m_vi_OrderedVertices.clear();
@@ -865,11 +865,11 @@ namespace ColPack
 		// stop when i_SelectedVertexCount == i_VertexCount, i.e. we have looked through all the vertices
 		while(i_SelectedVertexCount < i_VertexCount)
 		{
-			while(vpvi_GroupedInducedVertexDegree[i_HighestInducedVertexDegree].first.size() + 
+			while(vpvi_GroupedInducedVertexDegree[i_HighestInducedVertexDegree].first.size() +
 			    vpvi_GroupedInducedVertexDegree[i_HighestInducedVertexDegree].second.size()  == 0) {
 			  i_HighestInducedVertexDegree--;
 			}
-			
+
 			if(vpvi_GroupedInducedVertexDegree[i_HighestInducedVertexDegree].first.size() != 0) {
 			  //vertex with i_HighestInducedVertexDegree is a LeftVertex
 			  i_SelectedVertex = vpvi_GroupedInducedVertexDegree[i_HighestInducedVertexDegree].first.back();
@@ -892,23 +892,23 @@ namespace ColPack
 						continue;
 					}
 
-					
+
 					// move the last element in this bucket to u's position to get rid of expensive erase operation
 					if(vpvi_GroupedInducedVertexDegree[vi_InducedVertexDegree[u]].second.size() > 1) {
 						l = vpvi_GroupedInducedVertexDegree[vi_InducedVertexDegree[u]].second.back();
 						vpvi_GroupedInducedVertexDegree[vi_InducedVertexDegree[u]].second[vi_VertexLocation[u]] = l;
 						vi_VertexLocation[l] = vi_VertexLocation[u];
 					}
-					
+
 					//remove the last element from vpvi_GroupedInducedVertexDegree[vi_InducedVertexDegree[u]].second
 					vpvi_GroupedInducedVertexDegree[vi_InducedVertexDegree[u]].second.pop_back();
-					
+
 					// increase incidence degree of u
 					vi_InducedVertexDegree[u]--;
 
 					// insert u into appropriate bucket
 					vpvi_GroupedInducedVertexDegree[vi_InducedVertexDegree[u]].second.push_back(u);
-					
+
 					// update location of u
 					vi_VertexLocation[u] = vpvi_GroupedInducedVertexDegree[vi_InducedVertexDegree[u]].second.size() - 1;
 				}
@@ -929,16 +929,16 @@ namespace ColPack
 						vpvi_GroupedInducedVertexDegree[vi_InducedVertexDegree[u]].first[vi_VertexLocation[u]] = l;
 						vi_VertexLocation[l] = vi_VertexLocation[u];
 					}
-					
+
 					//remove the last element from vpvi_GroupedInducedVertexDegree[vi_InducedVertexDegree[u]].first
 					vpvi_GroupedInducedVertexDegree[vi_InducedVertexDegree[u]].first.pop_back();
-					
+
 					// increase incidence degree of u
 					vi_InducedVertexDegree[u]--;
 
 					// insert u into appropriate bucket
 					vpvi_GroupedInducedVertexDegree[vi_InducedVertexDegree[u]].first.push_back(u);
-					
+
 					// update location of u
 					vi_VertexLocation[u] = vpvi_GroupedInducedVertexDegree[vi_InducedVertexDegree[u]].first.size() - 1;
 				}
@@ -1723,7 +1723,7 @@ namespace ColPack
 		}
 		cout<<endl;
 	}
-	
+
 	double BipartiteGraphOrdering::GetVertexOrderingTime() {
 	  return m_d_OrderingTime;
 	}

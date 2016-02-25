@@ -135,7 +135,7 @@ int main()
 
 	delete ip1_ColorCount;
 	ip1_ColorCount = NULL;
-	
+
 	delete jr1d;
 	jr1d = NULL;
 

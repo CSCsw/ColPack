@@ -39,7 +39,7 @@ namespace ColPack
 	{
 	public: //DOCUMENTED
 
-		///Return the Seed matrix based on existing coloring. This Seed matrix is managed and freed by ColPack 
+		///Return the Seed matrix based on existing coloring. This Seed matrix is managed and freed by ColPack
 		/** Precondition:
 		- the Graph has been colored
 
@@ -47,13 +47,13 @@ namespace ColPack
 		- Size of the returned matrix is (*ip1_SeedRowCount) rows x (*ip1_SeedColumnCount) columns.
 		(*ip1_SeedRowCount) == num of columns of the original matrix == GetVertexCount()
 		(*ip1_SeedColumnCount) == num of colors used to color vertices == GetVertexColorCount().
-		
+
 		Notes:
 		- This Seed matrix is managed and automatically freed by ColPack when the Graph object is deleted. Therefore, the user should NOT attempt to free the Seed matrix again.
 		*/
 		double** GetSeedMatrix(int* ip1_SeedRowCount, int* ip1_SeedColumnCount);
 
-		/// Same as GetSeedMatrix(), except that this Seed matrix is NOT managed by ColPack 
+		/// Same as GetSeedMatrix(), except that this Seed matrix is NOT managed by ColPack
 		/** Notes:
 		- This Seed matrix is NOT managed by ColPack. Therefore, the user should free the Seed matrix manually when the matrix is no longer needed.
 		*/
@@ -182,7 +182,7 @@ namespace ColPack
 		 * - Else, we can just reuse the color of that D2 neighbor
 		 */
 		int RestrictedStarColoring();
-		
+
 		//Public Function 1458
 		/*
 		 * Related paper: A. Gebremedhin, A. Tarafdar, F. Manne and A. Pothen, New Acyclic and Star Coloring Algorithms with Applications to Hessian Computation, SIAM Journal on Scientific Computing, Vol 29, No 3, pp 1042--1072, 2007.
@@ -191,17 +191,17 @@ namespace ColPack
 		 */
 		int StarColoring_serial();
 		int StarColoring_serial2(); // Essentially based on StarColoring_OMP() v1
-		
+
 		// TO BE IMPLEMENTED
 		int StarColoring();
-		
+
 		/// Build the collection of 2-color star from the coloring result
 		/**
 		 * NOTE: At this point, this routine will not work correctly if there are conflicts
 		 */
 		int BuildStarCollection(vector<int> & vi_VerticesToBeRecolored);
 		int PrintStarCollection(vector<int>& vi_EdgeStarMap, vector<int>& vi_StarHubMap, map< int, map<int, int> >& mimi2_VertexEdgeMap);
-		
+
 		struct lt_pii
 		{
 			bool operator()(const pair<int, int> pii_ColorCombination1, const pair<int, int> pii_ColorCombination2) const
@@ -216,7 +216,7 @@ namespace ColPack
 				return (pii_ColorCombination1.second < pii_ColorCombination2.second);
 			}
 		};
-		
+
 		struct Colors2Edge_Value {
 			Colors2Edge_Value() {
 				visited=false;
@@ -230,12 +230,12 @@ namespace ColPack
 		 * If vi_VerticesToBeRecolored.size() == 0, then the coloring is a valid star coloring.
 		 * The algorithm is done in parallel
 		 */
-		int DetectConflictInColorCombination(int i_MaxNumThreads, int i_thread_num, pair<int, int> pii_ColorCombination, map< pair<int, int>, Colors2Edge_Value , lt_pii>* Colors2Edge_Private, 
+		int DetectConflictInColorCombination(int i_MaxNumThreads, int i_thread_num, pair<int, int> pii_ColorCombination, map< pair<int, int>, Colors2Edge_Value , lt_pii>* Colors2Edge_Private,
 					     map< int, vector< pair<int, int> > > *Vertex2ColorCombination_Private, map< int, int> * PotentialHub_Private, vector< pair<int, int> >* ConflictedEdges_Private, vector<int>* ConflictCount_Private);
 		/// This function assume that there is no conflicts in the color assignment
 		int BuildStarFromColorCombination(int i_MaxNumThreads, int i_thread_num, pair<int, int> pii_ColorCombination, map< pair<int, int>, Colors2Edge_Value , lt_pii>* Colors2Edge_Private,
 							 map< int, vector< pair<int, int> > > *Vertex2ColorCombination_Private, map< int, int> * PotentialHub_Private);
-		
+
 		ofstream fout; // !!!
 		int i_ProcessedEdgeCount; // !!!
 		/// Build Vertex2ColorCombination from Vertex2ColorCombination_Private
@@ -244,15 +244,15 @@ namespace ColPack
 		 * After Vertex2ColorCombination is built, Vertex2ColorCombination_Private will be deallocated
 		 */
 		int BuildVertex2ColorCombination(int i_MaxNumThreads, map< int, vector< pair<int, int> > > *Vertex2ColorCombination_Private, vector<  map <int, int > > *Vertex2ColorCombination);
-		/* 
+		/*
 		 * if(i_Mode==1) : stop at the first failure
 		 * else if(i_Mode==0): pause but then continue
-		 * 
+		 *
 		 * Return values:
 		 * - >= 0: Fail. the vertex that causes conflict as this routine progress. Note: this may not be the latest-added vertex that cause coloring conflict in the graph
 		 * - -2: Fail. 2 potential hub are connected
 		 * - -1: Pass.
-		 * 
+		 *
 		 * If pii_ConflictColorCombination is provided (i.e. pii_ConflictColorCombination!=NULL) and this Check fail, pii_ConflictColorCombination will contain the 2 problematic colors
 		 */
 		int CheckStarColoring_OMP(int i_Mode, pair<int,int> *pii_ConflictColorCombination);
@@ -272,7 +272,7 @@ namespace ColPack
 		int PrintVertex2ColorCombination(int i_MaxNumThreads, map< int, vector< pair<int, int> > > *Vertex2ColorCombination_Private);
 		int PrintD1Colors(map<int, int>* D1Colors, int i_thread_num);
 		int PrintVertexColorCombination(map <int, int >* VertexColorCombination);
-		
+
 		/// Note: FDP and CIRCO  are the 2 good filters to display this subgraph
 		/** Sample code:
 		 	map< int, map<int,bool> > *graph = new map< int, map<int,bool> >;
@@ -280,16 +280,16 @@ namespace ColPack
 			(*mib_FilterByColors)[m_vi_VertexColors[i_CurrentVertex]]=true;
 			(*mib_FilterByColors)[color2]=true;
 			(*mib_FilterByColors)[color3]=true;
-		
+
 			BuildSubGraph(graph, i_CurrentVertex, 2, mib_FilterByColors);
-			
-			vector<int> vi_VertexColors; 
+
+			vector<int> vi_VertexColors;
 			GetVertexColors(vi_VertexColors);
 			displayGraph(graph, &vi_VertexColors, true, FDP);
 			delete graph;
 		 */
 		int BuildSubGraph(map< int, map<int,bool> > *graph, int i_CenterVertex, int distance=1, map<int, bool> *mib_FilterByColors=NULL);
-		
+
 		/** Sample code: (see function int BuildSubGraph() )
 		 */
 		int BuildConnectedSubGraph(map< int, map<int,bool> > *graph, int i_CenterVertex, int distance=1, map<int, bool> *mib_FilterByColors=NULL);
@@ -300,10 +300,10 @@ namespace ColPack
 			(*mib_Colors)[m_vi_VertexColors[i_CurrentVertex]]=true;
 			(*mib_Colors)[color2]=true;
 			(*mib_Colors)[color3]=true;
-		
+
 			BuildSubGraph(graph, mib_Colors);
-			
-			vector<int> vi_VertexColors; 
+
+			vector<int> vi_VertexColors;
 			GetVertexColors(vi_VertexColors);
 			displayGraph(graph, &vi_VertexColors, true, FDP);
 			delete graph;

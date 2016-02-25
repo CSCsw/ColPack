@@ -64,7 +64,7 @@ int main()
 	DisplayADICFormat_Value(lvd_Value);
 	cout<<"Finish ConvertRowCompressedFormat2CSR()"<<endl;
 	Pause();
-	
+
 	//Step 2: Coloring.
 	int *ip1_ColorCount = new int; //The number of distinct colors used to color the graph
 
@@ -133,6 +133,6 @@ int main()
 
 	delete g;
 	g=NULL;
-	
+
 	return 0;
 }

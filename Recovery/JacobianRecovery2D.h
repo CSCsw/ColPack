@@ -50,7 +50,7 @@ namespace ColPack
 		Postcondition:
 		- dp3_JacobianValue points to a 2d matrix contains the numerical values of the Jacobian. Row Compressed Format is used.
 		The memory allocated for this output vector is managed by ColPack. The memory will be deallocated when this function is called again or when the Recovery ojbect is deallocated.
-		
+
 		Return value: size of (*dp3_JacobianValue) array
 
 		About input parameters:
@@ -77,8 +77,8 @@ namespace ColPack
 		Algorithm: Basically the combination of RecoverForPD2RowWise() (for dp2_RowCompressedMatrix) and RecoverForPD2ColumnWise() (for dp2_ColumnCompressedMatrix) in BipartiteGraphPartialColoringInterface class
 		*/
 		int DirectRecover_RowCompressedFormat(BipartiteGraphBicoloringInterface* g, double** dp2_RowCompressedMatrix, double** dp2_ColumnCompressedMatrix, unsigned int ** uip2_JacobianSparsityPattern, double*** dp3_JacobianValue);
-		
-		/// Same as DirectRecover_RowCompressedFormat(), except that the output is NOT managed by ColPack 
+
+		/// Same as DirectRecover_RowCompressedFormat(), except that the output is NOT managed by ColPack
 		/** Notes:
 		- The output is NOT managed by ColPack. Therefore, the user should free the output manually using free() (NOT delete) function when it is no longer needed.
 		*/
@@ -92,25 +92,25 @@ namespace ColPack
 		*/
 		int DirectRecover_RowCompressedFormat_usermem(BipartiteGraphBicoloringInterface* g, double** dp2_RowCompressedMatrix, double** dp2_ColumnCompressedMatrix, unsigned int ** uip2_JacobianSparsityPattern, double*** dp3_JacobianValue);
 
-		
+
 		/// A routine for recovering a Jacobian from a Star-Bicoloring based compressed representation.
 		/**
 		Precondition:
 		- (*ip2_RowIndex), (*ip2_ColumnIndex), and (*dp2_JacobianValue) are equal to NULL, i.e. no memory has been allocated for these 3 vectors yet
-		
+
 		Return value: size of (*ip2_RowIndex) array
-		
+
 		Return by recovery routine: three vectors in "Coordinate Format" (zero-based indexing)
 		http://www.intel.com/software/products/mkl/docs/webhelp/appendices/mkl_appA_SMSF.html#mkl_appA_SMSF_5
 		- unsigned int** ip2_RowIndex
 		- unsigned int** ip2_ColumnIndex
 		- double** dp2_JacobianValue // corresponding non-zero values
-		
-		The memory allocated for these 3 output vectors are managed by ColPack.	The memory will be deallocated when this function is called again or when the Recovery ojbect is deallocated.	
+
+		The memory allocated for these 3 output vectors are managed by ColPack.	The memory will be deallocated when this function is called again or when the Recovery ojbect is deallocated.
 		//*/
 		int DirectRecover_CoordinateFormat(BipartiteGraphBicoloringInterface* g, double** dp2_RowCompressedMatrix, double** dp2_ColumnCompressedMatrix, unsigned int ** uip2_JacobianSparsityPattern, unsigned int** ip2_RowIndex, unsigned int** ip2_ColumnIndex, double** dp2_JacobianValue);
-				
-		/// Same as DirectRecover_CoordinateFormat(), except that the output is NOT managed by ColPack 
+
+		/// Same as DirectRecover_CoordinateFormat(), except that the output is NOT managed by ColPack
 		/** Notes:
 		- The output is NOT managed by ColPack. Therefore, the user should free the output manually using free() (NOT delete) function when it is no longer needed.
 		*/
@@ -123,28 +123,28 @@ namespace ColPack
 		*/
 		int DirectRecover_CoordinateFormat_usermem(BipartiteGraphBicoloringInterface* g, double** dp2_RowCompressedMatrix, double** dp2_ColumnCompressedMatrix, unsigned int ** uip2_JacobianSparsityPattern, unsigned int** ip2_RowIndex, unsigned int** ip2_ColumnIndex, double** dp2_JacobianValue);
 
-		
+
 		/// A routine for recovering a Jacobian from a Star-Bicoloring based compressed representation.
 		/**
 		Precondition:
 		- (*ip2_RowIndex), (*ip2_ColumnIndex), and (*dp2_JacobianValue) are equal to NULL, i.e. no memory has been allocated for these 3 vectors yet
-		
+
 		Return value: size of (*ip2_RowIndex) array
-		
+
 		Return by recovery routine: three vectors in "Storage Formats for the Direct Sparse Solvers" (one-based indexing)
 		http://software.intel.com/sites/products/documentation/hpc/mkl/webhelp/appendices/mkl_appA_SMSF.html#mkl_appA_SMSF_1
 		- unsigned int** ip2_RowIndex
 		- unsigned int** ip2_ColumnIndex
 		- double** dp2_JacobianValue // corresponding non-zero values
-		Note: In case of Jacobian (non-symmetric matrix), Sparse Solvers Format is equivalent to 
+		Note: In case of Jacobian (non-symmetric matrix), Sparse Solvers Format is equivalent to
 		one-based indexing, 3 array variation CSR format
 		http://software.intel.com/sites/products/documentation/hpc/mkl/webhelp/appendices/mkl_appA_SMSF.html#table_79228E147DA0413086BEFF4EFA0D3F04
-		
-		The memory allocated for these 3 output vectors are managed by ColPack.	The memory will be deallocated when this function is called again or when the Recovery ojbect is deallocated.	
+
+		The memory allocated for these 3 output vectors are managed by ColPack.	The memory will be deallocated when this function is called again or when the Recovery ojbect is deallocated.
 		//*/
 		int DirectRecover_SparseSolversFormat(BipartiteGraphBicoloringInterface* g, double** dp2_RowCompressedMatrix, double** dp2_ColumnCompressedMatrix, unsigned int ** uip2_JacobianSparsityPattern, unsigned int** ip2_RowIndex, unsigned int** ip2_ColumnIndex, double** dp2_JacobianValue);
-		
-		/// Same as DirectRecover_SparseSolversFormat(), except that the output is NOT managed by ColPack 
+
+		/// Same as DirectRecover_SparseSolversFormat(), except that the output is NOT managed by ColPack
 		/** Notes:
 		- The output is NOT managed by ColPack. Therefore, the user should free the output manually using free() (NOT delete) function when it is no longer needed.
 		*/

@@ -52,7 +52,7 @@ namespace ColPack
 		/// Based on m_s_VertexColoringVariant, either GetLeftSeedMatrix_unmanaged() or GetRightSeedMatrix_unmanaged() will be called.
 		double** GetSeedMatrix_unmanaged(int* i_SeedRowCount, int* i_SeedColumnCount);
 
-		///Generate and return the Left Seed matrix. This Seed matrix is managed and freed by ColPack 
+		///Generate and return the Left Seed matrix. This Seed matrix is managed and freed by ColPack
 		/**Precondition:
 		- the Graph has been colored by PartialDistanceTwoRowColoring()
 
@@ -60,19 +60,19 @@ namespace ColPack
 		- Size of the returned matrix is (*i_SeedRowCount) rows x (*i_SeedColumnCount) columns.
 		(*i_SeedColumnCount) == num of rows of the original matrix == GetRowVertexCount()
 		(*i_SeedRowCount) == num of colors used to color the left (row) vertices == GetVertexColorCount().
-		
+
 		Notes:
 		- This Seed matrix is managed and automatically freed by ColPack when the Graph object is deleted. Therefore, the user should NOT attempt to free the Seed matrix again.
 		*/
 		double** GetLeftSeedMatrix(int* i_SeedRowCount, int* i_SeedColumnCount);
 
-		/// Same as GetLeftSeedMatrix(), except that this Seed matrix is NOT managed by ColPack 
+		/// Same as GetLeftSeedMatrix(), except that this Seed matrix is NOT managed by ColPack
 		/** Notes:
 		- This Seed matrix is NOT managed by ColPack. Therefore, the user should free the Seed matrix manually when the matrix is no longer needed.
 		*/
 		double** GetLeftSeedMatrix_unmanaged(int* i_SeedRowCount, int* i_SeedColumnCount);
 
-		/// Return the Right Seed matrix. This Seed matrix is managed and freed by ColPack 
+		/// Return the Right Seed matrix. This Seed matrix is managed and freed by ColPack
 		/** Precondition:
 		- the Graph has been colored by PartialDistanceTwoColumnColoring()
 
@@ -80,13 +80,13 @@ namespace ColPack
 		- Size of the returned matrix is (*i_SeedRowCount) rows x (*i_SeedColumnCount) columns.
 		(*i_SeedRowCount) == num of columns of the original matrix == GetColumnVertexCount()
 		(*i_SeedColumnCount) == num of colors used to color the right (column) vertices == GetVertexColorCount().
-		
+
 		Notes:
 		- This Seed matrix is managed and automatically freed by ColPack when the Graph object is deleted. Therefore, the user should NOT attempt to free the Seed matrix again.
 		*/
 		double** GetRightSeedMatrix(int* i_SeedRowCount, int* i_SeedColumnCount);
 
-		/// Same as GetRightSeedMatrix(), except that this Seed matrix is NOT managed by ColPack 
+		/// Same as GetRightSeedMatrix(), except that this Seed matrix is NOT managed by ColPack
 		/** Notes:
 		- This Seed matrix is NOT managed by ColPack. Therefore, the user should free the Seed matrix manually when the matrix is no longer needed.
 		*/
@@ -206,9 +206,9 @@ namespace ColPack
 
 		//Public Function 2469
 		void PrintVertexPartialColorClasses();
-		
+
 		double GetVertexColoringTime();
-		
+
 		void SetVertexColoringVariant(string s_VertexColoringVariant);
 	};
 }
