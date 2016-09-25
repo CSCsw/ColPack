@@ -1,39 +1,28 @@
-/* Notes:
- * - This code will crash if the matrix only has patterns (no value)
-//*/
-
 #include "ColPackHeaders.h"
 
 using namespace ColPack;
 using namespace std;
 
-
-
-#include "extra.h" //This .h file contains functions that are used in the below examples:
-					//ReadMM(), MatrixMultiplication...(), Times2Plus1point5(), displayMatrix() and displayCompressedRowMatrix()
-#include "stat.h"
-
+//Order: NATURAL, LARGEST_FIRST, DYNAMIC_LARGEST_FIRST, SMALLEST_LAST, INCIDENCE_DEGREE, RANDOM
+//Color: EXPLICIT_COVERING__STAR_BICOLORING, EXPLICIT_COVERING__MODIFIED_STAR_BICOLORING, IMPLICIT_COVERING__STAR_BICOLORING, IMPLICIT_COVERING__GREEDY_STAR_BICOLORING
 int main(int argc, const char* argv[]) {
-	vector<string> Orderings;
-	Orderings.push_back("NATURAL");
-	Orderings.push_back("LARGEST_FIRST");
-	Orderings.push_back("DYNAMIC_LARGEST_FIRST");
-	Orderings.push_back("SMALLEST_LAST");
-	Orderings.push_back("INCIDENCE_DEGREE");
-	Orderings.push_back("RANDOM");
+    if(argc != 4) {
+        cerr<<"usage: "<<argv[0]<<" GraphName WayToOrder DISTANCE_ONE/TWO"<<endl;
+        cerr<<"Order: NATURAL, LARGEST_FIRST, DYNAMIC_LARGEST_FIRST, SMALLEST_LAST, INCIDENCE_DEGREE, RANDOM"<<endl;
+        cerr<<"Distance: DISTANTCE_ONE, DISTANCE_TWO"<<endl;
+        cerr<<"Color: EXPLICIT_COVERING__STAR_BICOLORING, EXPLICIT_COVERING__MODIFIED_STAR_BICOLORING, IMPLICIT_COVERING__STAR_BICOLORING, IMPLICIT_COVERING__GREEDY_STAR_BICOLORING"<<endl;
+        return 0;
+    }
+	string s_InputFile(argv[1]);
+	string s_order(argv[2]);
+	string s_distance(argv[3]);
 
-	vector<string> Colorings;
-	Colorings.push_back("EXPLICIT_COVERING__STAR_BICOLORING");
-	Colorings.push_back("EXPLICIT_COVERING__MODIFIED_STAR_BICOLORING");
-	Colorings.push_back("IMPLICIT_COVERING__STAR_BICOLORING");
-	Colorings.push_back("IMPLICIT_COVERING__GREEDY_STAR_BICOLORING");
+    GraphColoringInterface * g = new GraphColoringInterface(SRC_FILE, s_InputFile.c_str(), "AUTO_DETECTED");
+	g->Coloring(s_order.c_str(), s_distance.c_str());
+	cout << g->GetVertexColorCount()<<endl;
 
-	map<string, bool> stat_flags;
-	stat_flags["output_append"]=true;
-	stat_flags["NumberOfColors"]=true;
-	stat_flags["Time"]=true;
-
-	toFileBiC("/home/nguyend/Desktop/Duck/Research/Prog/graph/MM_collection/", "test1", Orderings,  Colorings,  stat_flags );
-
+	delete g;
 	return 0;
 }
+
+
