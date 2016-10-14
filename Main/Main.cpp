@@ -7,10 +7,15 @@ using namespace std;
 //Color: EXPLICIT_COVERING__STAR_BICOLORING, EXPLICIT_COVERING__MODIFIED_STAR_BICOLORING, IMPLICIT_COVERING__STAR_BICOLORING, IMPLICIT_COVERING__GREEDY_STAR_BICOLORING
 int main(int argc, const char* argv[]) {
     if(argc != 2) {
-        cerr<<"usage: "<<argv[0]<<" GraphName"<<endl;
-        cerr<<"Order: NATURAL, LARGEST_FIRST, DYNAMIC_LARGEST_FIRST, SMALLEST_LAST, INCIDENCE_DEGREE, RANDOM"<<endl;
-        cerr<<"Distance: DISTANTCE_ONE, DISTANCE_TWO"<<endl;
-        cerr<<"Color: EXPLICIT_COVERING__STAR_BICOLORING, EXPLICIT_COVERING__MODIFIED_STAR_BICOLORING, IMPLICIT_COVERING__STAR_BICOLORING, IMPLICIT_COVERING__GREEDY_STAR_BICOLORING"<<endl;
+        cerr<<endl;
+        cerr<<"### USAGE "<<endl;
+        cerr<<argv[0]<<" <GraphName>"<<endl;
+        //cerr<<"Order: NATURAL, LARGEST_FIRST, DYNAMIC_LARGEST_FIRST, SMALLEST_LAST, INCIDENCE_DEGREE, RANDOM"<<endl;
+        //cerr<<"Distance: DISTANTCE_ONE, DISTANCE_TWO"<<endl;
+        cerr<<endl;
+        cerr<<"### EXAMPLE "<<endl;
+        cerr<<argv[0]<<" Graphs/bcsstk01.mtx"<<endl; 
+        cerr<<endl<<endl;
         return 0;
     }
 
