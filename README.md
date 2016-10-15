@@ -75,3 +75,84 @@ In the `ColPack` directory run the following:
     make install
 
 
+
+
+### USAGE 
+
+	$./ColPack <GraphName> [order_option] [coloring_option]
+	$./ColPack --graph <GraphName> [--order <order_option>] [--color <coloring_option>]
+	$./ColPack -g <GraphName> [-o <order_option>] [-c <coloring_option>]
+
+-g or --graph can be changed to -f --file in case needed.
+
+### HELP 
+	$./ColPack -h
+	$./ColPack --help
+
+### OPTIONs 
+* order: `NATURAL, LARGEST_FIRST, DYNAMIC_LARGEST_FIRST, SMALLEST_LAST, INCIDENCE_DEGREE, RANDOM`  
+* color: `DISTANCE_ONE, ACYCLIC, ACYCLIC_FOR_INDIRECT_RECOVERY, STAR, RESTRICTED_STAR, DISTANCE_TWO`
+
+### EXAMPLE 
+	$./ColPack Graphs/bcsstk01.mtx
+	$./ColPack Graphs/bcsstk01.mtx LARGEST_FIRST DISTANCE_ONE
+	$./ColPack --graph Graphs/bcsstk01.mtx --order SMALLEST_LAST -d DISTANCE_TWO
+	$./ColPack -f Graphs/bcsstk01.mtx -o RANDOM -distance DISTANCE_ONE
+
+### EXAMPLE OUTPUT
+
+	ReadMatrixMarketAdjacencyGraph
+	Found file Graphs/bcsstk01.mtx
+	Graph of Market Market type: [matrix coordinate real symmetric]
+			Graph structure and VALUES will be read
+
+	#DISTANCE_ONE Result: 
+	6  : (NATURAL)
+	6  : (LARGEST_FIRST)
+	6  : (DYNAMIC_LARGEST_FIRST)
+	6  : (SMALLEST_LAST)
+	6  : (INCIDENCE_DEGREE)
+	6  : (RANDOM)
+
+	#ACYCLIC Result: 
+	8  : (NATURAL)
+	8  : (LARGEST_FIRST)
+	8  : (DYNAMIC_LARGEST_FIRST)
+	8  : (SMALLEST_LAST)
+	8  : (INCIDENCE_DEGREE)
+	8  : (RANDOM)
+
+	#ACYCLIC_FOR_INDIRECT_RECOVERY Result: 
+	8  : (NATURAL)
+	8  : (LARGEST_FIRST)
+	8  : (DYNAMIC_LARGEST_FIRST)
+	8  : (SMALLEST_LAST)
+	8  : (INCIDENCE_DEGREE)
+	8  : (RANDOM)
+
+	#STAR Result: 
+	12  : (NATURAL)
+	12  : (LARGEST_FIRST)
+	12  : (DYNAMIC_LARGEST_FIRST)
+	12  : (SMALLEST_LAST)
+	12  : (INCIDENCE_DEGREE)
+	12  : (RANDOM)
+
+	#RESTRICTED_STAR Result: 
+	15  : (NATURAL)
+	15  : (LARGEST_FIRST)
+	15  : (DYNAMIC_LARGEST_FIRST)
+	15  : (SMALLEST_LAST)
+	15  : (INCIDENCE_DEGREE)
+	15  : (RANDOM)
+
+	#DISTANCE_TWO Result: 
+	15  : (NATURAL)
+	15  : (LARGEST_FIRST)
+	15  : (DYNAMIC_LARGEST_FIRST)
+	15  : (SMALLEST_LAST)
+	15  : (INCIDENCE_DEGREE)
+	15  : (RANDOM)
+
+
+
