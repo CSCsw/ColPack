@@ -10,13 +10,13 @@ int main(int argc, char* argv[]) {
         exit(1);
     }
 
-    std::string gname(""),order(""),distance("");
+    std::string gname(""),order(""),color("");
     while(1){
         static struct option long_options[]={
             {"graph", required_argument, 0, 'g'},
             {"file" , required_argument, 0, 'f'},
             {"order", required_argument, 0, 'o'},
-            {"distance", required_argument, 0, 'd'},
+            {"color", required_argument, 0, 'c'},
             {"help",  no_argument,       0, 'h'},
             {0,0,0,0}
         };
@@ -36,8 +36,8 @@ int main(int argc, char* argv[]) {
             case 'o':
                 order=optarg;
                 break;
-            case 'd':
-                distance=optarg;
+            case 'c':
+                color=optarg;
                 break;
             default:
                 std::cout<<"using --help or -h for more details"<<std::endl;
@@ -45,10 +45,10 @@ int main(int argc, char* argv[]) {
         }
     }
 
-    if(gname.empty() && order.empty() && distance.empty() && optind<argc && argc-optind<=3)
+    if(gname.empty() && order.empty() && color.empty() && optind<argc && argc-optind<=3)
         switch(argc-optind){
             case 3:
-                distance=argv[optind+2];
+                color=argv[optind+2];
             case 2:
                 order=argv[optind+1];
             case 1:
@@ -60,14 +60,14 @@ int main(int argc, char* argv[]) {
         }
     if(gname.empty())
         official_example("Graphs/bcsstk01.mtx");
-    else if(order.empty() || distance.empty())
+    else if(order.empty() || color.empty())
         official_example(gname);
     else{
         GraphColoringInterface *g = new GraphColoringInterface(SRC_FILE, gname.c_str(), "AUTO_DETECTED");
-        g->Coloring(order.c_str(), distance.c_str());
+        g->Coloring(order.c_str(), color.c_str());
         std::cout<<"graph :"<<gname<<std::endl;
         std::cout<<"order :"<<order<<std::endl;
-        std::cout<<"dists :"<<distance<<std::endl;
+        std::cout<<"color :"<<color<<std::endl;
         std::cout<<"result:"<<g->GetVertexColorCount()<<std::endl;
         delete g;
     }
@@ -80,9 +80,9 @@ void usage(std::string appname){
     std::cerr<<std::endl;
     std::cerr<<"Welcome to use ColPack!"<<std::endl;
     std::cerr<<"### USAGE "<<std::endl;
-    std::cerr<<"$"<<appname<<" <GraphName> [order_option] [distance_option]"<<std::endl;
-    std::cerr<<"$"<<appname<<" --graph <GraphName> [--order <order_option>] [--distance <distance_option>]"<<std::endl;
-    std::cerr<<"$"<<appname<<" -g <GraphName> [-o <order_option>] [-d <distance_option>]"<<std::endl;
+    std::cerr<<"$"<<appname<<" <GraphName> [order_option] [coloring_option]"<<std::endl;
+    std::cerr<<"$"<<appname<<" --graph <GraphName> [--order <order_option>] [--color <coloring_option>]"<<std::endl;
+    std::cerr<<"$"<<appname<<" -g <GraphName> [-o <order_option>] [-c <coloring_option>]"<<std::endl;
     std::cerr<<std::endl;
     std::cerr<<"-g or --graph can be changed to -f --file in case needed."<<std::endl;
     std::cerr<<std::endl;
@@ -92,7 +92,7 @@ void usage(std::string appname){
     std::cerr<<std::endl;
     std::cerr<<"### OPTIONs "<<std::endl;
     std::cerr<<"order: NATURAL, LARGEST_FIRST, DYNAMIC_LARGEST_FIRST, SMALLEST_LAST, INCIDENCE_DEGREE, RANDOM"<<std::endl;
-    std::cerr<<"distance:DISTANCE_ONE, DISTANCE_TWO"<<std::endl;
+    std::cerr<<"color: DISTANCE_ONE, ACYCLIC, ACYCLIC_FOR_INDIRECT_RECOVERY, STAR, RESTRICTED_STAR, DISTANCE_TWO"<<std::endl;
     std::cerr<<std::endl;
     std::cerr<<"### EXAMPLE "<<std::endl;
     std::cerr<<"$"<<appname<<" Graphs/bcsstk01.mtx"<<std::endl; 
@@ -110,33 +110,19 @@ void official_example(std::string gname){
     std::cout<<"List common coloring result for example graph:"<<gname<<std::endl;
     std::cout<<"using --help or -h for more details"<<std::endl;
     GraphColoringInterface * g = new GraphColoringInterface(SRC_FILE, gname.c_str(), "AUTO_DETECTED");
-    std::cout<< "DISTANCE_ONE COLOR Result:" <<std::endl;
-    g->Coloring("NATURAL", "DISTANCE_ONE");
-    std::cout<<"  NATURAL              : " << g->GetVertexColorCount()<<std::endl;
-    g->Coloring("LARGEST_FIRST", "DISTANCE_ONE");
-    std::cout<<"  LARGEST_FIRST        : " << g->GetVertexColorCount()<<std::endl;
-    g->Coloring("DYNAMIC_LARGEST_FIRST", "DISTANCE_ONE");
-    std::cout<<"  DYNAMIC_LARGEST_FIRST: " << g->GetVertexColorCount()<<std::endl;
-    g->Coloring("SMALLEST_LAST", "DISTANCE_ONE");
-    std::cout<<"  SMALLEST_LAST        : " << g->GetVertexColorCount()<<std::endl;
-    g->Coloring("INCIDENCE_DEGREE", "DISTANCE_ONE");
-    std::cout<<"  INCIDENCE_DEGREE     : " << g->GetVertexColorCount()<<std::endl;
-    g->Coloring("RANDOM", "DISTANCE_ONE");
-    std::cout<<"  RANDOM               : " << g->GetVertexColorCount()<<std::endl;
-    std::cout<<endl;
-    std::cout<< "DISTANCE_TWO COLOR Result:" << endl;
-    g->Coloring("NATURAL", "DISTANCE_TWO");
-    std::cout<<"  NATURAL              : " << g->GetVertexColorCount()<<std::endl;
-    g->Coloring("LARGEST_FIRST", "DISTANCE_ONE");
-    std::cout<<"  LARGEST_FIRST        : " << g->GetVertexColorCount()<<std::endl;
-    g->Coloring("DYNAMIC_LARGEST_FIRST", "DISTANCE_ONE");
-    std::cout<<"  DYNAMIC_LARGEST_FIRST: " << g->GetVertexColorCount()<<std::endl;
-    g->Coloring("SMALLEST_LAST", "DISTANCE_ONE");
-    std::cout<<"  SMALLEST_LAST        : " << g->GetVertexColorCount()<<std::endl;
-    g->Coloring("INCIDENCE_DEGREE", "DISTANCE_ONE");
-    std::cout<<"  INCIDENCE_DEGREE     : " << g->GetVertexColorCount()<<std::endl;
-    g->Coloring("RANDOM", "DISTANCE_ONE");
-    std::cout<<"  RANDOM               : " << g->GetVertexColorCount()<<std::endl;
+    string orderpool[6]={"NATURAL", "LARGEST_FIRST", "DYNAMIC_LARGEST_FIRST", "SMALLEST_LAST", "INCIDENCE_DEGREE", "RANDOM"};
+    string colorpool[6]={"DISTANCE_ONE", "ACYCLIC", "ACYCLIC_FOR_INDIRECT_RECOVERY", "STAR", "RESTRICTED_STAR", "DISTANCE_TWO"};
+    std::vector<std::string> order(orderpool,orderpool+6);
+    std::vector<std::string> color(colorpool,colorpool+6);
+    std::cout<<std::endl;    
+    for(std::vector<std::string>::const_iterator itc=color.begin(); itc!=color.end(); itc++){
+        std::cout<<"#"<<*itc<<" Result: "<<std::endl;
+        for(std::vector<std::string>::const_iterator ito=order.begin(); ito!=order.end(); ito++){
+            g->Coloring(ito->c_str(), itc->c_str());
+            std::cout<<g->GetVertexColorCount()<<"  : ("<<*ito<<")"<<std::endl;
+        }
+        std::cout<<std::endl;
+    }
     delete g;
     return;
 }
