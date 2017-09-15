@@ -67,17 +67,33 @@ ColPack is written in an object-oriented fashion in C++ heavily using the Standa
 
 Ubuntu Build Instructions
 =========================
-In the `ColPack` directory run the following:
+To build ColPack using autotools, run the following in the `ColPack`:
 
     autoreconf -vif
     ./configure --prefix=/path/to/install/
     make -j 4   #Where "4" is the number of cores on your machine
     make install
 
+ColPack also has experimental support for building with CMake, which you can do
+via the following:
 
+    mkdir build
+    cd build
+    cmake ..
+    make -j 4   #Where "4" is the number of cores on your machine
+    ctest       #Run the examples in SampleDrivers/Basic folder
+    make install
 
+Use `cmake -LH .` or `ccmake .` in the build directory to see a list of
+options, such as `ENABLE_EXAMPLES` and `ENABLE_OPENMP`, which you can set by
+running the following from the build directory:
+
+    cmake .. -DENABLE_OPENMP=ON
 
 ### USAGE 
+
+After building, you can run the following commands (from this directory  if
+using autotools, or from the build directory if using CMake):
 
 	$./ColPack <GraphName> [order_option] [coloring_option]
 	$./ColPack --graph <GraphName> [--order <order_option>] [--color <coloring_option>]
