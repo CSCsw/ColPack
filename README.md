@@ -170,5 +170,24 @@ using autotools, or from the build directory if using CMake):
 	15  : (INCIDENCE_DEGREE)
 	15  : (RANDOM)
 
+    
+Windows Build Instructions
+==========================
+You can build ColPack's static library on Windows using Visual Studio 
+(tested with Visual Studio 2015) and CMake. Note, however, that you are not
+able to use OpenMP (Visual Studio supports only OpenMP 2.0), and cannot
+compile the ColPack executable (it depends on the POSIX getopt.h).
 
+If you are using CMake 3.4 or greater, you can build and use ColPack's
+shared library. If you have an older CMake, we still build the shared
+library, but you will not be able to use it because none of the symbols will
+be exported (Visual Studio will not generate a .lib file).
 
+On Windows, the examples link to the static library instead of the shared
+library.
+
+Unlike on UNIX, the static library is named ColPack_static (ColPack_static.lib)
+to avoid a name conflict with the shared library's ColPack.lib.
+
+Finally, some of the examples do not compile, seemingly because their
+filenames are too long.

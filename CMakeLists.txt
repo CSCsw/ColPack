@@ -18,6 +18,11 @@ set(COLPACK_VERSION 1.0.11)
 # The Basic examples are always built and installed, and are used as tests
 # via CTest. The non-Basic tests are built and installed if ENABLE_EXAMPLES is
 # ON. The only example that we do not compile is SMB.
+#
+# When using Visual Studio, we cannot use OpenMP or build the ColPack executable,
+# and we can only make use of the shared library if using CMake 3.4 or greater.
+# Also, the examples are linked to the static library rather than to the shared
+# library.
 
 # User options.
 # -------------
@@ -39,9 +44,25 @@ if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
     set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS
         "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
 endif()
+set(ColPack_lib_to_use ColPack_shared)
+if(WIN32)
+    # Since we do not use __declspec(dllexport) etc, the shared library
+    # does not export symbols and cannot be used in general. Use the the static
+    # library for the examples.
+    set(ColPack_lib_to_use ColPack_static)
+    if(${CMAKE_VERSION} VERSION_LESS 3.4)
+        message(STATUS "Cannot use ColPack's shared library on Windows if using CMake older than 3.4 (because no symbols are exported).")
+    else()
+        # CMake can export symbols for us, allowing use of the shared library.
+        set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
+    endif()
+endif()
 
 if(ENABLE_OPENMP)
     find_package(OpenMP REQUIRED)
+    if(MSVC)
+        message(WARNING "ColPack requires a version of OpenMP greater than what Visual Studio provides.")
+    endif()
 endif()
 
 # Define variables to use for organizing the installation.
@@ -78,7 +99,8 @@ file(GLOB SOURCES
 # ---------------
 add_library(ColPack_static STATIC ${HEADERS} ${SOURCES})
 if(NOT WIN32)
-    # TODO explain
+    # On Windows, the static and shared libraries can't have the same
+    # name (because both have .lib files that will conflict).
     set_target_properties(ColPack_static PROPERTIES OUTPUT_NAME ColPack)
 endif()
 
@@ -144,9 +166,16 @@ install(TARGETS ColPack_shared EXPORT ColPackTargets
 
 # ColPack executable.
 # -------------------
-add_executable(ColPack Main/Main.cpp)
-target_link_libraries(ColPack ColPack_shared)
-# TODO install this executable?
+# The ColPack executable depends on getopt.h, which is POSIX
+# and not readily available when using Visual Studio.
+find_path(HAS_GETOPT getopt.h)
+if(HAS_GETOPT)
+    add_executable(ColPack Main/Main.cpp)
+    target_link_libraries(ColPack ${ColPack_lib_to_use})
+    # TODO install this executable?
+else()
+    message(STATUS "Cannot find getopt.h; not building the ColPack executable.")
+endif()
 # To facilitate running the ColPack executable from the build directory.
 file(COPY Graphs DESTINATION "${CMAKE_BINARY_DIR}")
 
@@ -169,6 +198,7 @@ if(ENABLE_EXAMPLES)
         )
     list(APPEND EXAMPLES ${SAMPLE_DRIVERS_MATRIX_COMPRESSION_AND_RECOVERY})
 endif()
+
 # Now create targets for each example.
 foreach(example_cpp ${EXAMPLES})
     # Get the file name without extension ("_WE"), and store it in `example`.
@@ -177,7 +207,7 @@ foreach(example_cpp ${EXAMPLES})
     get_filename_component(example_rel_dir ${example_cpp} DIRECTORY
         BASE_DIR SampleDrivers)
     add_executable(${example} SampleDrivers/${example_cpp})
-    target_link_libraries(${example} ColPack_shared)
+    target_link_libraries(${example} ${ColPack_lib_to_use})
     # Autools installs the examples in CSR_input into a dir. named CSR.
     string(REPLACE "CSR_input" "CSR" example_rel_dir ${example_rel_dir})
     install(TARGETS ${example} DESTINATION
