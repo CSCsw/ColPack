@@ -69,6 +69,7 @@ Ubuntu Build Instructions
 =========================
 In the `ColPack` directory run the following:
 
+    cd Compile
     autoreconf -vif
     ./configure --prefix=/path/to/install/
     make -j 4   #Where "4" is the number of cores on your machine
