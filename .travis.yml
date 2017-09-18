@@ -14,7 +14,7 @@ script:
   - # Now try building with CMake.
   - mkdir build
   - cd build
-  - cmake .. -DCMAKE_INSTALL_DIR=~/ColPack
+  - cmake .. -DCMAKE_INSTALL_PREFIX=~/ColPack
   - make
   - ctest
   - make install
