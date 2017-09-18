@@ -6,6 +6,10 @@ http://cscapes.cs.purdue.edu/coloringpage/software.htm
 ColPack's project home page:
 http://cscapes.cs.purdue.edu/coloringpage/
 
+ColPack's github home page:
+https://github/CSCsw/ColPack/
+
+
 # ColPack 
 
 ColPack is a package comprising of implementations of algorithms for the specialized vertex coloring problems discussed in the previous section as well as algorithms for a variety of related supporting tasks in derivative computation.
@@ -71,23 +75,46 @@ In the `ColPack` directory run the following:
 
     cd Compile/
     autoreconf -vif
-    ./configure --prefix=/path/to/install/
+    ./configure --prefix=/path/to/install
     make -j 4   #Where "4" is the number of cores on your machine
     make install
 
+Automake system would automatically install ColPack's Dynamically Linked Libraries `libColPack.so` in `/path/to/install/lib`. So that you can use it later.  On default, `/path/to/install` folder is the current folder.
 
-After the automake install process done, you would get ColPack Dynamically Linked Libraries `libColPack.so` installed in `/path/to/install/`. Then you can use it.
 
-### I only want to use ColPack, I mean my program only want to use ColPack as an library.
-Just write your own code. When you need to compile your code, add '-I' flag followd with ColPack include folder path. After that, when you need to link your code, add `-ldl` flag follwd with `path/to/lib/libColPack.so`.
-When you need to run your code. first `export LD_LIBRARY=$LD_LIBRARY:/path/to/lib` and run your code.
+### How to use and test ColPack's API ?
+* Prerequisite: (Download latest copy, install and export library folder to your environment variables.) 
+* Write Code : (include `"ColPackHeader.h"`)
+* Compile : (added a bounch of `-I` flags)
+* Link : (add link flags)
+* Execute : (execute)
 
-### I want to modify ColPack.
-After modifing the source code, go to Compile folder,`make`(if modified head file, may need `make clean` first) 
-and Then `make install` to update the Dynamically Linked Libraries.
+To save your work, we have already provide an `Makefile` as an template in `Example/example1`.
 
-### Is there is any example 
-Yep, check example folder
+#### Example of use and test ColPack's API
+	git clone https://github.com/ProbShin/ColPack.git
+	cd ColPack/Compile/
+	autoreconfig -vif
+	mkdir build
+	./configure --prefix=./build
+	make -j
+	make install
+Suppose the full path of the ./build is /home/cheng172/ColPack/Compile/build
+	
+	export LD_LIBRARY=$LD_LIBRARY:/home/cheng172/ColPack/Compile/build
+	
+now go to your own project folder to write your own code. For example go to `Example/example1`
+	
+	cd ../Examples/example1/
+	cat Main.cpp
+
+now compile your code
+
+	make
+	
+now run you code
+
+	./ColPack.out
 
 
 ### USAGE 
