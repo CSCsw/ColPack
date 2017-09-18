@@ -22,18 +22,23 @@ define([COLPACK_VER], [1])
 define([COLPACK_SUB], [0])
 define([COLPACK_LVL], [10])
 define([COLPACK_ROOT],[..])
+define([COLPACK_CMPL],[.])
+define([COLPACK_SRC],[COLPACK_ROOT/Source])
+define([COLPACK_INC],[COLPACK_ROOT/Include])
+define([COLPACK_UTL],[COLPACK_ROOT/Source/Utilities])
+define([COLPACK_EXP],[COLPACK_ROOT/Examples])
 
 AC_INIT([ColPack],[COLPACK_VER.COLPACK_SUB.COLPACK_LVL],[assefaw@eecs.wsu.edu],[ColPack],[http://cscapes.cs.purdue.edu/coloringpage/])
 AC_PREREQ([2.57])
 AC_CONFIG_SRCDIR([COLPACK_ROOT/Include/ColPackHeaders.h])
-AC_CONFIG_MACRO_DIR([COLPACK_ROOT/m4])
+AC_CONFIG_MACRO_DIR([COLPACK_CMPL/m4])
 AM_INIT_AUTOMAKE([foreign 1.10 no-define subdir-objects -Wall])
 AM_SILENT_RULES([yes])
 AC_CONFIG_HEADERS(config.h)
 AC_PROG_CXX
 AX_CXXFLAGS_WARN_ALL
 AC_CONFIG_FILES(Makefile)
-AM_PROG_AR
+m4_ifdef([AM_PROG_AR], [AM_PROG_AR])
 LT_INIT
 
 AC_MSG_CHECKING(Build examples)
