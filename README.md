@@ -69,17 +69,29 @@ Ubuntu Build Instructions
 =========================
 In the `ColPack` directory run the following:
 
-    cd Compile
+    cd Compile/
     autoreconf -vif
     ./configure --prefix=/path/to/install/
     make -j 4   #Where "4" is the number of cores on your machine
     make install
 
 
+After the automake install process done, you would get ColPack Dynamically Linked Libraries `libColPack.so` installed in `/path/to/install/`. Then you can use it.
+
+### I only want to use ColPack, I mean my program only want to use ColPack as an library.
+Just write your own code. When you need to compile your code, add '-I' flag followd with ColPack include folder path. After that, when you need to link your code, add `-ldl` flag follwd with `path/to/lib/libColPack.so`.
+When you need to run your code. first `export LD_LIBRARY=$LD_LIBRARY:/path/to/lib` and run your code.
+
+### I want to modify ColPack.
+After modifing the source code, go to Compile folder,`make`(if modified head file, may need `make clean` first) 
+and Then `make install` to update the Dynamically Linked Libraries.
+
+### Is there is any example 
+Yep, check example folder
 
 
 ### USAGE 
-
+After make, there should be a compiled example named ColPack, you can try.(Source code is in `Examples/example1/Main.cpp`)
 	$./ColPack <GraphName> [order_option] [coloring_option]
 	$./ColPack --graph <GraphName> [--order <order_option>] [--color <coloring_option>]
 	$./ColPack -g <GraphName> [-o <order_option>] [-c <coloring_option>]
