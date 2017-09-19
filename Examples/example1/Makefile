@@ -11,7 +11,7 @@ COMPILE = g++      # gnu
 CCFLAGS = -Wall -fopenmp -O3 -std=c++11
 
 # link flags
-LDFLAGS = -Wall -fopenmp -O3 -std=c++11 -ldl ${COLPACK_ROOT}/Compile/build/lib/libColPack.so 
+LDFLAGS = -Wall -fopenmp -O3 -std=c++11 -ldl ${COLPACK_ROOT}/Compile/lib/libColPack.so 
 
 INCLUDES = -I./
 INCLUDES+= -I${COLPACK_ROOT}/Include
