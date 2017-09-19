@@ -98,9 +98,9 @@ To save your work, we have already provide an `Makefile` as an template in `Exam
 	./configure 
 	make -j
 	make install
-Suppose the full path of the ./build is /home/cheng172/ColPack/Compile/
+Suppose the full path of the build folder is `/home/cheng172/ColPack/Compile`
 	
-	export LD_LIBRARY=$LD_LIBRARY:/home/cheng172/ColPack/Compile/
+	export LD_LIBRARY=$LD_LIBRARY:/home/cheng172/ColPack/Compile
 	
 now go to your own project folder to write your own code. For example go to `Example/example1`
 	
