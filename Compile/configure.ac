@@ -21,30 +21,25 @@
 define([COLPACK_VER], [1])
 define([COLPACK_SUB], [0])
 define([COLPACK_LVL], [10])
-
+define([COLPACK_ROOT],[..])
+define([COLPACK_CMPL],[.])
+define([COLPACK_SRC],[COLPACK_ROOT/Source])
+define([COLPACK_INC],[COLPACK_ROOT/Include])
+define([COLPACK_UTL],[COLPACK_ROOT/Source/Utilities])
+define([COLPACK_EXP],[COLPACK_ROOT/Examples])
 
 AC_INIT([ColPack],[COLPACK_VER.COLPACK_SUB.COLPACK_LVL],[assefaw@eecs.wsu.edu],[ColPack],[http://cscapes.cs.purdue.edu/coloringpage/])
 AC_PREREQ([2.57])
-AC_CONFIG_SRCDIR([Main/ColPackHeaders.h])
+AC_CONFIG_SRCDIR([COLPACK_ROOT/Include/ColPackHeaders.h])
 AC_CONFIG_MACRO_DIR([m4])
 AM_INIT_AUTOMAKE([foreign 1.10 no-define subdir-objects -Wall])
 AM_SILENT_RULES([yes])
 AC_CONFIG_HEADERS(config.h)
 AC_PROG_CXX
-AX_CXXFLAGS_WARN_ALL
+#AX_CXXFLAGS_WARN_ALL
 AC_CONFIG_FILES(Makefile)
-AM_PROG_AR
+m4_ifdef([AM_PROG_AR], [AM_PROG_AR])
 LT_INIT
-
-AC_MSG_CHECKING(Build examples)
-AC_ARG_ENABLE([examples],
-     [AS_HELP_STRING([--enable-examples],[Build examples])],
-     [case "${enableval}" in
-       yes) examples=true ;;
-       no)  examples=false ;;
-       *) AC_MSG_ERROR([bad value ${enableval} for --enable-examples]) ;;
-     esac],[examples=false])
-     AM_CONDITIONAL([EXAMPLES], [test x$examples = xtrue])
 
 AC_MSG_CHECKING(OpenMP)
 AC_ARG_ENABLE([openmp],
@@ -53,8 +48,22 @@ AC_ARG_ENABLE([openmp],
        yes) openmp=true ;;
        no)  openmp=false ;;
        *) AC_MSG_ERROR([bad value ${enableval} for --enable-openmp]) ;;
-     esac],[openmp=false])
-     AM_CONDITIONAL([ENABLE_OPENMP], [test x$openmp = xtrue])
+     esac],
+     [openmp=false])
+AM_CONDITIONAL([ENABLE_OPENMP], [test x$openmp = xtrue])
+
+AC_MSG_CHECKING(Examples)
+AC_ARG_ENABLE([examples],
+     [AS_HELP_STRING([--enable-examples],[Build examples])],
+     [case "${enableval}" in
+       yes) examples=true ;;
+       no)  examples=false ;;
+       *) AC_MSG_ERROR([bad value ${enableval} for --enable-examples]) ;;
+     esac],
+     [examples=false])
+AM_CONDITIONAL([EXAMPLES], [test x$examples = xtrue])
+
+AC_SUBST(WFKS,COLPACK_ROOT)
 
 AC_OUTPUT
 

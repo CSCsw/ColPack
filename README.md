@@ -1,10 +1,14 @@
-[![Build Status](https://travis-ci.org/CSCsw/ColPack.svg?branch=master)](https://travis-ci.org/CSCsw/ColPack)
+[![Build Status](https://travis-ci.org/ProbShin/ColPack.svg?branch=master)](https://travis-ci.org/ProbShin/ColPack)
 
 ColPack's Doxygen documentation is available here:
 http://cscapes.cs.purdue.edu/coloringpage/software.htm
 
 ColPack's project home page:
 http://cscapes.cs.purdue.edu/coloringpage/
+
+ColPack's github home page:
+https://github/CSCsw/ColPack/
+
 
 # ColPack 
 
@@ -69,16 +73,51 @@ Ubuntu Build Instructions
 =========================
 In the `ColPack` directory run the following:
 
+    cd Compile/
     autoreconf -vif
-    ./configure --prefix=/path/to/install/
+    ./configure --prefix=/path/to/install
     make -j 4   #Where "4" is the number of cores on your machine
     make install
 
+Automake system would automatically install ColPack's Dynamically Linked Libraries `libColPack.so` in `/path/to/install/lib`. So that you can use it later.  On default, `/path/to/install` folder is the current folder.
 
+
+### How to use and test ColPack's API ?
+* Prerequisite: (Download latest copy, install and export library folder to your environment variables.) 
+* Write Code : (include `"ColPackHeader.h"`)
+* Compile : (added a bounch of `-I` flags)
+* Link : (add link flags)
+* Execute : (execute)
+
+To save your work, we have already provide an `Makefile` as an template in `Example/example1`.
+
+#### Example of use and test ColPack's API
+	git clone https://github.com/ProbShin/ColPack.git
+	cd ColPack/Compile/
+	autoreconfig -vif
+	./configure 
+	make -j
+	make install
+Suppose the full path of the build folder is `/home/cheng172/ColPack/Compile`
+	
+	export LD_LIBRARY=$LD_LIBRARY:/home/cheng172/ColPack/Compile
+	
+now go to your own project folder to write your own code. For example go to `Example/example1`
+	
+	cd ../Examples/example1/
+	cat Main.cpp
+
+now compile your code
+
+	make
+	
+now run you code
+
+	./ColPack.out
 
 
 ### USAGE 
-
+After make, there should be a compiled example named ColPack, you can try.(Source code is in `Examples/example1/Main.cpp`)
 	$./ColPack <GraphName> [order_option] [coloring_option]
 	$./ColPack --graph <GraphName> [--order <order_option>] [--color <coloring_option>]
 	$./ColPack -g <GraphName> [-o <order_option>] [-c <coloring_option>]
