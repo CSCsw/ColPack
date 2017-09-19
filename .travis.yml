@@ -6,6 +6,7 @@ compiler:
 
 
 before_script:
+  - cd Compile/
   - autoreconf -fi
 
 script:
