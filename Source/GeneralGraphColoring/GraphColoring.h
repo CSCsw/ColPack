@@ -167,8 +167,9 @@ namespace ColPack
 
 		//Public Function 1454
 		int DistanceOneColoring();
+                int DistanceOneColoring_OMP();
 
-		//Public Function 1455
+                    //Public Function 1455
 		int DistanceTwoColoring();
 
 		//Public Function 1456
@@ -386,6 +387,8 @@ namespace ColPack
 
 		//Public Function 1478
 		void PrintVertexColorClasses();
+
+
 	};
 }
 #endif

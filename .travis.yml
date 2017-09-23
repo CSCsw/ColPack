@@ -1,11 +1,15 @@
 language: cpp
 
+sudo:
+  - false
+  
 compiler:
   - gcc
   - clang
 
 
 before_script:
+  - cd Compile/
   - autoreconf -fi
 
 script:

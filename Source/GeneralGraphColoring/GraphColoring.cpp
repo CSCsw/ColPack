@@ -6056,4 +6056,127 @@ namespace ColPack
 	{
 		m_i_VertexColorCount = i_VertexColorCount;
 	}
-}
+
+
+
+    //Public Function 
+    int GraphColoring::DistanceOneColoring_OMP(){
+        int nT; //
+        const size_t MAXDEGREEp1 = m_i_MaximumVertexDegree+1;
+        const size_t N = m_vi_Vertices.size()-1;
+
+        omp_lock_t Qtmp_lock;
+        omp_init_lock(&Qtmp_lock);
+        m_i_VertexColorCount = _UNKNOWN; //number of assigned colors
+        m_vi_VertexColors.clear();
+        m_vi_VertexColors.resize((unsigned)N, _UNKNOWN);
+        vector<int> &vtxColor = m_vi_VertexColors;
+        vector<int> &vtxIdx   = m_vi_Edges; 
+        //omp_set_num_threads(nThreads);
+#pragma omp parallel
+        {
+            nT = omp_get_num_threads();
+        }
+        cout<<"Actual number of threads: "<<nT<<endl;
+
+        int *Q = new int[N];
+        int *Qtmp = new int[N];
+        int *Qswap = NULL;
+        if(!Q && !Qtmp) {cerr<<"Not enough memory for two queue"<<endl; exit(1);}
+        size_t QTail, QtmpTail=QTail=0;
+
+#pragma omp parallel for
+        for(size_t i=0; i<N; ++i) {
+            Q[i]=m_vi_OrderedVertices[i];
+            Qtmp[i]=-1;
+        }
+        QTail=N;
+
+
+        double time1=0., time2=0., totalTime=0.;
+
+        cout<<"Results from parallel coloring:"<<endl;
+
+        for(int nLoop=0; QTail>0; ++nLoop){
+            cout<<"**Iteration "<<nLoop<<"\n";
+            time1 = omp_get_wtime();
+            //////////////////////////// Part 1 color vertices in parallel /////////////////
+#pragma omp parallel for
+            for(int Qi=0;Qi<QTail; ++Qi){
+                int v = Q[Qi];
+                vector<bool> ban(MAXDEGREEp1, false);
+                int max_c;
+                for(int it=m_vi_Vertices[v]; it<m_vi_Vertices[v+1]; ++it){
+                    int c=vtxColor[vtxIdx[it]];
+                    if(c== _UNKNOWN)
+                        continue;
+                    ban[c]=true;
+                    max_c = max_c<c?c:max_c;
+                } //end of loop travers neighbor of v
+                int mColor;
+                for(mColor=0; mColor<=max_c; mColor++){
+                    if(ban[mColor]==false)
+                        break;
+                }
+                vtxColor[v]= (mColor==max_c)?mColor+1:mColor;
+            } //end of loop part1
+
+            time1  = omp_get_wtime() - time1;
+
+            time2 = omp_get_wtime();
+            //////////////////////////// Part 2 resolve conflicts          /////////////////
+#pragma omp parallel for
+            for(int Qi=0;Qi<QTail; ++Qi){
+                int v=Q[Qi];
+                for(int it=m_vi_Vertices[v]; it<m_vi_Vertices[v+1]; ++it){
+                    if( vtxColor[v]==vtxColor[vtxIdx[it]] ){
+                        if(v<vtxColor[vtxIdx[it]]){ //!!
+                            int pos;
+                            omp_set_lock(&Qtmp_lock);
+                            pos = QtmpTail++;
+                            omp_unset_lock(&Qtmp_lock);
+                            Qtmp[pos] =v;
+                            vtxColor[v]=-1;//??
+                            break;
+                        }
+                    }
+                }
+            } //end of loop part 2 
+
+            time2 = omp_get_wtime()-time2;
+            ////////////////////////// Part 3 misc for debug             //////////////////////
+            Qswap = Q;
+            Q = Qtmp;
+            Qtmp = Qswap;
+            QTail = QtmpTail;
+            QtmpTail=0;
+
+            totalTime=time1+time2;
+            cout<<"   time : "<<totalTime<<" = "<<time1<<" + "<<time2<<endl;
+
+        }  //end of for(nLoop; Qtail>0;++nLoop) //paralle alg out layer
+
+        int chrom = -1;
+        for(int v=0; v<N; ++v)
+            chrom = chrom<vtxColor[v]?vtxColor[v]:chrom;
+
+        m_i_VertexColorCount=chrom-1; 
+        //cout<<"number of colors "<<chrom<<endl;
+        //fprintf(stderr, "%d %d %.10lg %.10lg %.10lg\n",nT, chrom, totalTime, time1, time2);
+        //cerr<<nT<<" "<<chrom<<" "<<totalTime<<" "<<time1<<" "<<time2<<endl;
+        delete Q;
+        delete Qtmp;
+        return(_TRUE);
+    }//end of function DistanceOneColoring_omp_cx
+
+
+
+
+
+
+
+
+
+
+
+}//end of namespcae 
