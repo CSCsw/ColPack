@@ -160,6 +160,40 @@ namespace ColPack
 		return;
 	}
 
+
+	//Public Function 
+	int GraphColoringInterface::DistanceOneColoring_OMP(string s_OrderingVariant)
+	{
+		m_T_Timer.Start();
+
+		int i_OrderingStatus = OrderVertices(s_OrderingVariant);
+
+		m_T_Timer.Stop();
+
+		m_d_OrderingTime = m_T_Timer.GetWallTime();
+
+		if(i_OrderingStatus != _TRUE)
+		{
+			cerr<<endl;
+			cerr<<s_OrderingVariant<<" Ordering Failed";
+			cerr<<endl;
+
+			return(1);
+		}
+
+		m_T_Timer.Start();
+
+		int i_ColoringStatus = GraphColoring::DistanceOneColoring_OMP();
+
+		m_T_Timer.Stop();
+
+		m_d_ColoringTime = m_T_Timer.GetWallTime();
+
+		return(i_ColoringStatus);
+	}
+
+
+
 	//Public Function 1604
 	int GraphColoringInterface::DistanceOneColoring(string s_OrderingVariant)
 	{
@@ -545,7 +579,9 @@ namespace ColPack
 			return RestrictedStarColoring(s_OrderingVariant);
 		} else if (s_ColoringVariant == "DISTANCE_TWO") {
 			return DistanceTwoColoring(s_OrderingVariant);
-		} else {
+		} else if (s_ColoringVariant == "DISTANCE_ONE_OMP" ){
+                        return DistanceOneColoring_OMP(s_OrderingVariant);
+                } else {
 			cout<<" Unknown Coloring Method "<<s_ColoringVariant<<". Please use a legal Coloring Method."<<endl;
 			return (_FALSE);
 		}

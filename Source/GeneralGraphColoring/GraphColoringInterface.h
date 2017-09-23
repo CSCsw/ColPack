@@ -94,6 +94,7 @@ namespace ColPack
 			- "STAR"
 			- "RESTRICTED_STAR"
 			- "DISTANCE_TWO"
+                        - "DISTANCE_ONE_OMP"
 
 		Postcondition:
 		- The Graph is colored, i.e., m_vi_VertexColors will be populated.
@@ -147,6 +148,7 @@ namespace ColPack
 
 		//Public Function 1604
 		int DistanceOneColoring(string s_OrderingVariant);
+		int DistanceOneColoring_OMP(string s_OrderingVariant);
 
 		//Public Function 1605
 		int DistanceTwoColoring(string s_OrderingVariant);
