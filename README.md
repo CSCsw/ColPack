@@ -72,42 +72,45 @@ ColPack is written in an object-oriented fashion in C++ heavily using the Standa
 Ubuntu Build Instructions
 =========================
 
-####1. Build ColPack as Libaray
+#### 1. Build ColPack as Libaray
 
 * Download `Colpack`;
 * Go to `ColPack` compile directory Compile and install;
 * export `ColPack` installed path to environment variable `LD_LIBRARY`;
-* Go to your own project write code;
-* `#include "ColPackHeaders.h"` before using the functions;
-* compile with link flag -ldl library
-* run the code;
+* Go to your own project write your code;
+* `#include "ColPackHeaders.h"` before using the `ColPack` functions;
+* compile the code with link flag -ldl with the genrated library;
+* run the code.
 
 
 For Example:
-	git clone https://github.com/ProbShin/ColPack.git
-        cd ColPack/Compile/
-        autoreconf -vif
-        ./configure #using --prefix=/path/to/install if you want to install to different folder
-        make -j 4   #Where "4" is the number of cores on your machine
-        make install
-        export LD_LIBRARY=$LD_LIBRARY:~/ColPack/Compile/.libs/  
-        cd ../Examples/example1/
-        cat Main.cpp  #Main.cpp is a template main file
-        cat Makefile  #Makefile is a template make file
-        make
-        ./ColPack.out
+
+    git clone https://github.com/ProbShin/ColPack.git
+    cd ColPack/Compile/
+    autoreconf -vif
+    ./configure #using --prefix=/path/to/install if you want to install to different folder
+    make -j 4   #Where "4" is the number of cores on your machine
+    make install
+    export LD_LIBRARY=$LD_LIBRARY:~/ColPack/Compile/.libs/  
+    cd ../Examples/example1/
+    cat Main.cpp  #Main.cpp is a template main file
+    cat Makefile  #Makefile is a template make file
+    make
+    ./ColPack.out
 
 Automake system would automatically install ColPack's Dynamically Linked Libraries `libColPack.so` in `/path/to/install/lib`. So that you can use it later.  On default, `/path/to/install` folder is the current folder.
 
 
-####2. Using ColPack's Source Code
+#### 2. Using ColPack's Source Code
 
 * Download `Colpack`;
-* Go to your own project write code;
-* `#include "ColPackHeaders.h"` before using the functions;
-* compile and run the code;
+* Go to your own project write your code;
+* `#include "ColPackHeaders.h"` before using the `ColPack` functions;
+* compile with proper source code and library;
+* run the code.
 
 For Example:
+
     git clone https://github.com/ProbShin/ColPack.git
     cd ColPack/Examples/example2/
     cat Main.cpp
