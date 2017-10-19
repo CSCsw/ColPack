@@ -1,9 +1,9 @@
 AUTOMAKE_OPTIONS = foreign
 ACLOCAL_AMFLAGS = ${ACLOCAL_FLAGS} -I m4
 
-if ENABLE_OPENMP 
+#if ENABLE_OPENMP 
 AM_CXXFLAGS = -fopenmp
-endif
+#endif
 
 bin_PROGRAMS = ColPack
 ColPack_SOURCES =../Examples/example1/Main.cpp

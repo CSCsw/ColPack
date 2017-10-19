@@ -7,8 +7,10 @@
 *.lo
 *.o
 *.so
+*.out
 .deps/
 .dirstamp
 .libs/
 .svn/
 Compile/
+tags

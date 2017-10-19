@@ -41,16 +41,17 @@ AC_CONFIG_FILES(Makefile)
 m4_ifdef([AM_PROG_AR], [AM_PROG_AR])
 LT_INIT
 
-AC_MSG_CHECKING(OpenMP)
-AC_ARG_ENABLE([openmp],
-     [AS_HELP_STRING([--enable-openmp],[Enable OpenMP])],
-     [case "${enableval}" in
-       yes) openmp=true ;;
-       no)  openmp=false ;;
-       *) AC_MSG_ERROR([bad value ${enableval} for --enable-openmp]) ;;
-     esac],
-     [openmp=false])
-AM_CONDITIONAL([ENABLE_OPENMP], [test x$openmp = xtrue])
+#define([openmp],[true])
+#AC_MSG_CHECKING(OpenMP)
+#AC_ARG_ENABLE([openmp],
+#     [AS_HELP_STRING([--enable-openmp],[Enable OpenMP])],
+#     [case "${enableval}" in
+#       yes) openmp=true ;;
+#       no)  openmp=false ;;
+#       *) AC_MSG_ERROR([bad value ${enableval} for --enable-openmp]) ;;
+#     esac],
+#     [openmp=false])
+#AM_CONDITIONAL([ENABLE_OPENMP], [test x$openmp = xtrue])
 
 AC_MSG_CHECKING(Examples)
 AC_ARG_ENABLE([examples],

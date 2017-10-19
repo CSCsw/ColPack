@@ -19,7 +19,8 @@
 ************************************************************************************/
 
 #include "ColPackHeaders.h"
-
+#include <cassert>  //assert
+#include <random>   //mt19937 uniform_real_distribution
 using namespace std;
 
 namespace ColPack
@@ -971,7 +972,7 @@ namespace ColPack
 						i_ConflictVertex[i_thread_num] = BuildStarFromColorCombination_forChecking(i_Mode, i_MaxNumThreads, i_thread_num, iter->first, Colors2Edge_Private, PotentialHub_Private);
 
 						if(i_ConflictVertex[i_thread_num]  != -1) {
-							#pragma omp critial
+							//#pragma omp critial
 							{
 								if(pii_ConflictColorCombination!=NULL) {
 									(*pii_ConflictColorCombination).first = iter->first.first;
@@ -6061,122 +6062,182 @@ namespace ColPack
 
     //Public Function 
     int GraphColoring::DistanceOneColoring_OMP(){
-        int nT; //
-        const size_t MAXDEGREEp1 = m_i_MaximumVertexDegree+1;
-        const size_t N = m_vi_Vertices.size()-1;
+        const bool Verbose(false);
+        const bool Verify(true);
+        const unsigned int seed = 12345;//time(0);
 
-        omp_lock_t Qtmp_lock;
-        omp_init_lock(&Qtmp_lock);
-        m_i_VertexColorCount = _UNKNOWN; //number of assigned colors
-        m_vi_VertexColors.clear();
-        m_vi_VertexColors.resize((unsigned)N, _UNKNOWN);
-        vector<int> &vtxColor = m_vi_VertexColors;
-        vector<int> &vtxIdx   = m_vi_Edges; 
-        //omp_set_num_threads(nThreads);
+        const size_t MaxDegree = m_i_MaximumVertexDegree+1; //maxDegree
+        const size_t N = m_vi_Vertices.size()-1;              //Number of Vertex
+        vector<int> &vtxColor = m_vi_VertexColors;            //Vertex Color
+        vector<int> &vtxIdx   = m_vi_Edges;                   //Vertex Neighbor?
+        
+        int nThread(1);             //Number of Threads
+        omp_lock_t Qtmp_lock;       //Locker
+
+        double tim_part1(0),        //Time Part 1  
+               tim_part2(0),        //Time Part 2
+               totalTime(0);        //Time Part All
+        double *RndValues;          //Random Value for confliction
+        int *Q(NULL),               //Queue of vertex
+            *Qtmp(NULL),            //Queue of vertex
+            *Qswap(NULL);           //Queue of vertex
+        size_t TailQ(0),            //Queue Tail
+               TailQtmp(0);         //Queue tail
+    
+        int nConflicts(0);          //Number of conflictions
+        int nLoops(0);              //Number of outer loop
+        //assert(_UNKNOWN==-1)
+
+        ///////////////////////////////////////////////////
+        // Initialize the data structure 
+        ///////////////////////////////////////////////////
 #pragma omp parallel
         {
-            nT = omp_get_num_threads();
+            nThread = omp_get_num_threads();
         }
-        cout<<"Actual number of threads: "<<nT<<endl;
+        omp_init_lock(&Qtmp_lock); 
+        vtxColor.assign(N, _UNKNOWN);
+        RndValues = new double[N]; assert(RndValues!=NULL);
+        Q    = new int[N]; assert(Q!=NULL);
+        Qtmp = new int[N]; assert(Qtmp !=NULL);
+        Qswap = NULL;
+        
+        //srand(seed);
+        //for(int i=0; i<N; i++)
+        //    RndValues[i]= double(rand())/(RAND_MAX+1.0);
 
-        int *Q = new int[N];
-        int *Qtmp = new int[N];
-        int *Qswap = NULL;
-        if(!Q && !Qtmp) {cerr<<"Not enough memory for two queue"<<endl; exit(1);}
-        size_t QTail, QtmpTail=QTail=0;
 
+#pragma omp parallel
+        {
+            
+            //std::mt19937 rng(seed+omp_get_thread_num());
+            int seed_r = seed+omp_get_thread_num();
+            struct drand48_data randBuffer;
+            srand48_r(seed_r, &randBuffer);
+
+            //std::uniform_int_distribution<> unif(1,6);
+#pragma omp for
+            for (size_t i=0; i<N; i++){
+                //RndValues[i]=unif(rng);
+                drand48_r(&randBuffer, &RndValues[i]);
+                //RndValues[i]=rand_r(&seed_r)/(RAND_MAX + 1.);
+            }
+        }
 #pragma omp parallel for
         for(size_t i=0; i<N; ++i) {
-            Q[i]=m_vi_OrderedVertices[i];
+            Q[i]=m_vi_OrderedVertices[i];  
             Qtmp[i]=-1;
         }
-        QTail=N;
+        TailQ=N;
 
 
-        double time1=0., time2=0., totalTime=0.;
+        if(Verbose) fprintf(stdout, "Actual number of threads: %d\n",nThread);
 
-        cout<<"Results from parallel coloring:"<<endl;
-
-        for(int nLoop=0; QTail>0; ++nLoop){
-            cout<<"**Iteration "<<nLoop<<"\n";
-            time1 = omp_get_wtime();
-            //////////////////////////// Part 1 color vertices in parallel /////////////////
-#pragma omp parallel for
-            for(int Qi=0;Qi<QTail; ++Qi){
-                int v = Q[Qi];
-                vector<bool> ban(MAXDEGREEp1, false);
-                int max_c;
+        ///////////////////////////////////////////////////
+        // Outer loop
+        ///////////////////////////////////////////////////
+        while(TailQ>0){
+            if(Verbose) fprintf(stdout,"Loop %d: Part1 start\n",nLoops);
+            ///////////////////////////////////////////////
+            // Inner Loop Part1
+            ///////////////////////////////////////////////
+            tim_part1 -= omp_get_wtime();
+#pragma omp parallel
+            {
+                vector<bool> ban;
+                ban.reserve(MaxDegree+1);
+//#pragma omp parallel for
+#pragma omp for schedule(dynamic, 1000000)
+                for(size_t itQ=0;itQ<TailQ;++itQ){
+                    int v = Q[itQ];
+                    //vector<bool> ban(MaxDegree+1, false); 
+                    ban.assign(MaxDegree+1, false); 
+                    int max_c(_UNKNOWN);
+                    for(int it=m_vi_Vertices[v]; it<m_vi_Vertices[v+1]; ++it){
+                        int c=vtxColor[vtxIdx[it]];
+                        if(c== _UNKNOWN) continue;
+                        ban[c]=true;
+                        max_c = max_c<c?c:max_c;
+                    } //end of loop travers neighbor of v
+                    int mColor(0);
+                    for(mColor=0; mColor<=max_c; mColor++){
+                        if(ban[mColor]==false) break;
+                    }
+                    vtxColor[v] = mColor;
+                } //end of loop part1
+            }
+            tim_part1 += omp_get_wtime();
+            if(Verbose) fprintf(stdout,"Loop %d: Part1 end, Part start\n",nLoops);
+            ///////////////////////////////////////////////
+            // Inner Loop Part2
+            ///////////////////////////////////////////////
+            tim_part2 -= omp_get_wtime();
+            int conflict_cnt=0;
+#pragma omp parallel for reduction(+:conflict_cnt)
+            for(size_t itQ=0;itQ<TailQ; ++itQ){
+                int v=Q[itQ];
                 for(int it=m_vi_Vertices[v]; it<m_vi_Vertices[v+1]; ++it){
-                    int c=vtxColor[vtxIdx[it]];
-                    if(c== _UNKNOWN)
+                    if( vtxColor[v]!=vtxColor[vtxIdx[it]] ) 
                         continue;
-                    ban[c]=true;
-                    max_c = max_c<c?c:max_c;
-                } //end of loop travers neighbor of v
-                int mColor;
-                for(mColor=0; mColor<=max_c; mColor++){
-                    if(ban[mColor]==false)
+                    conflict_cnt++;
+                    if( RndValues[v] <  RndValues[vtxIdx[it]]  ||
+                       ((v<vtxIdx[it]) && 
+                        (RndValues[v] == RndValues[vtxIdx[it]])
+                        )){
+                        int pos;
+                        omp_set_lock(&Qtmp_lock);
+                        pos = TailQtmp++;
+                        omp_unset_lock(&Qtmp_lock);
+                        Qtmp[pos] =v;
+                        vtxColor[v]=-1;//prevent further confliction
                         break;
-                }
-                vtxColor[v]= (mColor==max_c)?mColor+1:mColor;
-            } //end of loop part1
-
-            time1  = omp_get_wtime() - time1;
-
-            time2 = omp_get_wtime();
-            //////////////////////////// Part 2 resolve conflicts          /////////////////
-#pragma omp parallel for
-            for(int Qi=0;Qi<QTail; ++Qi){
-                int v=Q[Qi];
-                for(int it=m_vi_Vertices[v]; it<m_vi_Vertices[v+1]; ++it){
-                    if( vtxColor[v]==vtxColor[vtxIdx[it]] ){
-                        if(v<vtxColor[vtxIdx[it]]){ //!!
-                            int pos;
-                            omp_set_lock(&Qtmp_lock);
-                            pos = QtmpTail++;
-                            omp_unset_lock(&Qtmp_lock);
-                            Qtmp[pos] =v;
-                            vtxColor[v]=-1;//??
-                            break;
-                        }
                     }
                 }
             } //end of loop part 2 
-
-            time2 = omp_get_wtime()-time2;
-            ////////////////////////// Part 3 misc for debug             //////////////////////
+            fprintf(stdout,"conflict %d\n",conflict_cnt);
             Qswap = Q;
             Q = Qtmp;
             Qtmp = Qswap;
-            QTail = QtmpTail;
-            QtmpTail=0;
+            TailQ = TailQtmp;
+            TailQtmp=0;
+            tim_part2 += omp_get_wtime();
+            //if(Verbose) fprintf(stdout, "Loop %d: Part2 end, find %d ,total %d conflictions\n",nLoops,(int)TailQ, nConflicts+TailQ);
+            nLoops++;
+            nConflicts += TailQ;
+        }//end of loop TailQ>0
 
-            totalTime=time1+time2;
-            cout<<"   time : "<<totalTime<<" = "<<time1<<" + "<<time2<<endl;
-
-        }  //end of for(nLoop; Qtail>0;++nLoop) //paralle alg out layer
-
-        int chrom = -1;
-        for(int v=0; v<N; ++v)
-            chrom = chrom<vtxColor[v]?vtxColor[v]:chrom;
-
-        m_i_VertexColorCount=chrom-1; 
-        //cout<<"number of colors "<<chrom<<endl;
-        //fprintf(stderr, "%d %d %.10lg %.10lg %.10lg\n",nT, chrom, totalTime, time1, time2);
-        //cerr<<nT<<" "<<chrom<<" "<<totalTime<<" "<<time1<<" "<<time2<<endl;
-        delete Q;
-        delete Qtmp;
+        totalTime= tim_part1+tim_part2;
+        
+        int maxColor = -1;
+        for(size_t v=0; v<N; ++v)
+            maxColor = maxColor<vtxColor[v]?vtxColor[v]:maxColor;
+        
+        m_i_VertexColorCount=(unsigned int)(maxColor);  //number of colors is maxColor +1 //0 is valid color 
+        if(Verbose)  fprintf(stdout, 
+                "time : %lg=%lg+%lg\nLoops : %d\nnumber of colors : %d\n",
+                totalTime,tim_part1,tim_part2,nLoops,m_i_VertexColorCount);
+        
+        fprintf(stderr, "%d %d %.10lg %.10lg %.10lg %d\n",nThread, maxColor+1, totalTime, tim_part1, tim_part2, nLoops);
+       
+        if(Verify){
+            bool Correct = true;
+#pragma omp parallel for reduction(&& : Correct)
+            for(size_t v=0; v<N; ++v){
+                if(!Correct) continue;
+                for(int it=m_vi_Vertices[v]; it<m_vi_Vertices[v+1]; ++it){
+                    if(vtxColor[v] == vtxColor[vtxIdx[it]]){
+                        Correct = false;
+                        break;
+                    }
+                }
+            }
+            if(Correct) fprintf(stdout,"Verified. The Coloring result is valid!\n");
+            else fprintf(stderr, "WARNING:The Coloing result contains conflict!\n");
+        }
+        delete []Q;
+        delete []Qtmp;
+        delete []RndValues;
         return(_TRUE);
     }//end of function DistanceOneColoring_omp_cx
-
-
-
-
-
-
-
-
-
-
 
 }//end of namespcae 
