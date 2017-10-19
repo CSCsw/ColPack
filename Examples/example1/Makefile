@@ -1,7 +1,9 @@
 # source files
+COLPACK_INSTALL_PATH = ../../Compile/.libs/libColPack.so
+
 SRC = $(wildcard *.cpp)
 OBJ = $(SRC:%.cpp=%.o)
-EXE = ColPack
+EXE = ColPack.out
 COLPACK_ROOT = ../..
 
 # compiler
@@ -11,7 +13,7 @@ COMPILE = g++      # gnu
 CCFLAGS = -Wall -fopenmp -O3 -std=c++11
 
 # link flags
-LDFLAGS = -Wall -fopenmp -O3 -std=c++11 -ldl ${COLPACK_ROOT}/Compile/lib/libColPack.so 
+LDFLAGS = -Wall -fopenmp -O3 -std=c++11 -ldl ${COLPACK_INSTALL_PATH}
 
 INCLUDES = -I./
 INCLUDES+= -I${COLPACK_ROOT}/Include

@@ -41,7 +41,7 @@ AC_CONFIG_FILES(Makefile)
 m4_ifdef([AM_PROG_AR], [AM_PROG_AR])
 LT_INIT
 
-#define([openmp],[true])
+openmp=true;
 #AC_MSG_CHECKING(OpenMP)
 #AC_ARG_ENABLE([openmp],
 #     [AS_HELP_STRING([--enable-openmp],[Enable OpenMP])],

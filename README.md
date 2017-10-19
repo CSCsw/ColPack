@@ -71,52 +71,53 @@ ColPack is written in an object-oriented fashion in C++ heavily using the Standa
 
 Ubuntu Build Instructions
 =========================
-In the `ColPack` directory run the following:
 
-    cd Compile/
-    autoreconf -vif
-    ./configure --prefix=/path/to/install
-    make -j 4   #Where "4" is the number of cores on your machine
-    make install
+####1. Build ColPack as Libaray
+
+* Download `Colpack`;
+* Go to `ColPack` compile directory Compile and install;
+* export `ColPack` installed path to environment variable `LD_LIBRARY`;
+* Go to your own project write code;
+* `#include "ColPackHeaders.h"` before using the functions;
+* compile with link flag -ldl library
+* run the code;
+
+
+For Example:
+	git clone https://github.com/ProbShin/ColPack.git
+        cd ColPack/Compile/
+        autoreconf -vif
+        ./configure #using --prefix=/path/to/install if you want to install to different folder
+        make -j 4   #Where "4" is the number of cores on your machine
+        make install
+        export LD_LIBRARY=$LD_LIBRARY:~/ColPack/Compile/.libs/  
+        cd ../Examples/example1/
+        cat Main.cpp  #Main.cpp is a template main file
+        cat Makefile  #Makefile is a template make file
+        make
+        ./ColPack.out
 
 Automake system would automatically install ColPack's Dynamically Linked Libraries `libColPack.so` in `/path/to/install/lib`. So that you can use it later.  On default, `/path/to/install` folder is the current folder.
 
 
-### How to use and test ColPack's API ?
-* Prerequisite: (Download latest copy, install and export library folder to your environment variables.) 
-* Write Code : (include `"ColPackHeader.h"`)
-* Compile : (added a bounch of `-I` flags)
-* Link : (add link flags)
-* Execute : (execute)
+####2. Using ColPack's Source Code
 
-To save your work, we have already provide an `Makefile` as an template in `Example/example1`.
+* Download `Colpack`;
+* Go to your own project write code;
+* `#include "ColPackHeaders.h"` before using the functions;
+* compile and run the code;
 
-#### Example of use and test ColPack's API
-	git clone https://github.com/ProbShin/ColPack.git
-	cd ColPack/Compile/
-	autoreconfig -vif
-	./configure 
-	make -j
-	make install
-Suppose the full path of the build folder is `/home/cheng172/ColPack/Compile`
-	
-	export LD_LIBRARY=$LD_LIBRARY:/home/cheng172/ColPack/Compile
-	
-now go to your own project folder to write your own code. For example go to `Example/example1`
-	
-	cd ../Examples/example1/
-	cat Main.cpp
-
-now compile your code
-
-	make
-	
-now run you code
-
-	./ColPack.out
+For Example:
+    git clone https://github.com/ProbShin/ColPack.git
+    cd ColPack/Examples/example2/
+    cat Main.cpp
+    cat Makefile
+    make
+    ./ColPack.out
 
 
-### USAGE 
+
+### Typical USAGE 
 After make, there should be a compiled example named ColPack, you can try.(Source code is in `Examples/example1/Main.cpp`)
 	$./ColPack <GraphName> [order_option] [coloring_option]
 	$./ColPack --graph <GraphName> [--order <order_option>] [--color <coloring_option>]
