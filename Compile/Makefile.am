@@ -5,7 +5,7 @@ ACLOCAL_AMFLAGS = ${ACLOCAL_FLAGS} -I m4
 AM_CXXFLAGS = -fopenmp
 #endif
 
-bin_PROGRAMS = ColPack
+bin_PROGRAMS = ColPack.out
 ColPack_SOURCES =../Examples/example1/Main.cpp
 
 
