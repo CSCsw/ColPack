@@ -26,8 +26,7 @@ set(COLPACK_VERSION 1.0.11)
 
 # User options.
 # -------------
-option(ENABLE_EXAMPLES
-    "Build the examples in SampleDrivers/Matrix_Compression_and_Recovery." OFF)
+option(ENABLE_EXAMPLES "Build the examples in SampleDrivers." OFF)
 option(ENABLE_OPENMP "Enable OpenMP." OFF)
 
 # Configuring variables, etc.
