@@ -182,13 +182,13 @@ file(COPY Graphs DESTINATION "${CMAKE_BINARY_DIR}")
 # Examples.
 # ---------
 enable_testing()
-# To replicate the behavior of autotools, we build and install the Basic
-# examples regardless of the setting for ENABLE_EXAMPLES.
+# The behavior here is different from autotools, because ENABLE_EXAMPLES
+# also affects the Basic examples.
 # First, gather up all the example files.
-file(GLOB SAMPLE_DRIVERS_BASIC RELATIVE "${CMAKE_SOURCE_DIR}/SampleDrivers"
-    SampleDrivers/Basic/*.cpp)
-set(EXAMPLES ${SAMPLE_DRIVERS_BASIC})
 if(ENABLE_EXAMPLES)
+    file(GLOB SAMPLE_DRIVERS_BASIC RELATIVE "${CMAKE_SOURCE_DIR}/SampleDrivers"
+        SampleDrivers/Basic/*.cpp)
+    set(EXAMPLES ${SAMPLE_DRIVERS_BASIC})
     file(GLOB SAMPLE_DRIVERS_MATRIX_COMPRESSION_AND_RECOVERY
         RELATIVE "${CMAKE_SOURCE_DIR}/SampleDrivers"
         SampleDrivers/Matrix_Compression_and_Recovery/ADIC/*.cpp
