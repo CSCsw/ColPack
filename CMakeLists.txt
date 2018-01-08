@@ -208,7 +208,7 @@ foreach(example_cpp ${EXAMPLES})
         BASE_DIR SampleDrivers)
     add_executable(${example} SampleDrivers/${example_cpp})
     target_link_libraries(${example} ${ColPack_lib_to_use})
-    # Autools installs the examples in CSR_input into a dir. named CSR.
+    # Autotools installs the examples in CSR_input into a dir. named CSR.
     string(REPLACE "CSR_input" "CSR" example_rel_dir ${example_rel_dir})
     install(TARGETS ${example} DESTINATION
         ${COLPACK_INSTALL_EXAMPLESBINDIR}/${example_rel_dir})
