@@ -140,7 +140,7 @@ namespace ColPack
 		m_vi_OrderedVertices.clear();
 		m_vi_OrderedVertices.resize((unsigned) i_LeftVertexCount);
 
-		for(unsigned int i = 0; i<i_LeftVertexCount; i++) {
+		for(int i = 0; i<i_LeftVertexCount; i++) {
 			m_vi_OrderedVertices[i] = i;
 		}
 
@@ -163,7 +163,7 @@ namespace ColPack
 		m_vi_OrderedVertices.clear();
 		m_vi_OrderedVertices.resize((unsigned) i_RightVertexCount);
 
-		for(unsigned int i = 0; i<i_RightVertexCount; i++) {
+		for(int i = 0; i<i_RightVertexCount; i++) {
 			m_vi_OrderedVertices[i] = i + i_LeftVertexCount;
 		}
 
@@ -351,9 +351,9 @@ namespace ColPack
 
 // 		PrintBipartiteGraph();
 
-		int j, k, l, u;
+		//int j, k, l, u; //unused variable
 		int i_LeftVertexCount = (signed) m_vi_LeftVertices.size() - 1;
-		int i_RightVertexCount = (signed) m_vi_RightVertices.size() - 1;
+		//int i_RightVertexCount = (signed) m_vi_RightVertices.size() - 1;
 		vector<int> vi_Visited;
 		vi_Visited.clear();
 		vi_Visited.resize ( i_LeftVertexCount, _UNKNOWN );
@@ -462,7 +462,7 @@ namespace ColPack
 #endif
 		for(int k=0; k< i_MaxNumThreads; k++) {
 			//reset vi_Visited
-			for(int i=0; i< vi_Visited.size();i++) vi_Visited[i] = _UNKNOWN;
+			for(size_t i=0; i< vi_Visited.size();i++) vi_Visited[i] = _UNKNOWN;
 
 			//Line 7: while i_NumOfVerticesToBeColored >= 0 do // !!! ??? why not i_NumOfVerticesToBeColored > 0
 			while(i_NumOfVerticesToBeColored > 0) {
@@ -520,7 +520,7 @@ namespace ColPack
 // 							cout<<"*** i_w_location<0"<<endl<<flush;
 // 						}
 // 						cout<<"i_w_location after="<<i_w_location<<endl;
-						if(i_w_location != (B[ i_thread_num ][ d[w] ].size() - 1) ) B[ i_thread_num ] [ d[w] ][i_w_location] = B[ i_thread_num ] [ d[w] ][ B[ i_thread_num ][ d[w] ].size() - 1 ];
+						if(i_w_location != (((int)B[ i_thread_num ][ d[w] ].size()) - 1) ) B[ i_thread_num ] [ d[w] ][i_w_location] = B[ i_thread_num ] [ d[w] ][ B[ i_thread_num ][ d[w] ].size() - 1 ];
 						B[ i_thread_num ] [ d[w] ].pop_back();
 
 						//Line 14: d (w) <- d (w) - 1
@@ -751,7 +751,7 @@ namespace ColPack
 
 // 		PrintBipartiteGraph();
 
-		int j, k, l, u;
+		//int j, k, l, u; //unused variable
 		int i_LeftVertexCount = (signed) m_vi_LeftVertices.size() - 1;
 		int i_RightVertexCount = (signed) m_vi_RightVertices.size() - 1;
 		vector<int> vi_Visited;
@@ -862,7 +862,7 @@ namespace ColPack
 #endif
 		for(int k=0; k< i_MaxNumThreads; k++) {
 			//reset vi_Visited
-			for(int i=0; i< vi_Visited.size();i++) vi_Visited[i] = _UNKNOWN;
+			for(size_t i=0; i< vi_Visited.size();i++) vi_Visited[i] = _UNKNOWN;
 
 			//Line 7: while i_NumOfVerticesToBeColored >= 0 do // !!! ??? why not i_NumOfVerticesToBeColored > 0
 			while(i_NumOfVerticesToBeColored > 0) {
@@ -882,7 +882,7 @@ namespace ColPack
 // 				cout<<"delta[i_thread_num] 2="<< delta[i_thread_num] <<endl;
 
 				//Line 9: Let v be a vertex drawn from B_k [delta]
-				int v;
+				int v=0;
 
 				for(int i=delta[i_thread_num] ; i<i_MaxDegree_Private[i_thread_num]; i++) {
 					if(B[ i_thread_num ][ i ].size()!=0) {
@@ -920,7 +920,7 @@ namespace ColPack
 // 							cout<<"*** i_w_location<0"<<endl<<flush;
 // 						}
 // 						cout<<"i_w_location after="<<i_w_location<<endl;
-						if(i_w_location != (B[ i_thread_num ][ d[w] ].size() - 1) ) B[ i_thread_num ] [ d[w] ][i_w_location] = B[ i_thread_num ] [ d[w] ][ B[ i_thread_num ][ d[w] ].size() - 1 ];
+						if(i_w_location != (((signed)B[ i_thread_num ][ d[w] ].size()) - 1) ) B[ i_thread_num ] [ d[w] ][i_w_location] = B[ i_thread_num ] [ d[w] ][ B[ i_thread_num ][ d[w] ].size() - 1 ];
 						B[ i_thread_num ] [ d[w] ].pop_back();
 
 						//Line 14: d (w) <- d (w) - 1
@@ -1504,7 +1504,8 @@ namespace ColPack
 
 		int i, j, k, l, u;
 		int i_Current;
-		int i_HighestDegreeVertex, m_i_MaximumVertexDegree;
+		//int i_HighestDegreeVertex; //unused variable
+                int m_i_MaximumVertexDegree;
 		int i_VertexCount, i_VertexDegree, i_IncidenceVertexDegree;
 		int i_SelectedVertex, i_SelectedVertexCount;
 		vector<int> vi_IncidenceVertexDegree;
@@ -1517,7 +1518,7 @@ namespace ColPack
 		i_VertexCount = (int)m_vi_LeftVertices.size () - 1;
 		vvi_GroupedIncidenceVertexDegree.clear();
 		vvi_GroupedIncidenceVertexDegree.resize ( i_VertexCount );
-		i_HighestDegreeVertex = _UNKNOWN;
+		//i_HighestDegreeVertex = _UNKNOWN;//unused variable
 		m_i_MaximumVertexDegree = _UNKNOWN;
 		i_IncidenceVertexDegree = 0;
 		vi_Visited.resize ( i_VertexCount, _UNKNOWN );
@@ -1558,7 +1559,7 @@ namespace ColPack
 			if ( m_i_MaximumVertexDegree < i_VertexDegree )
 			{
 				m_i_MaximumVertexDegree = i_VertexDegree;
-				i_HighestDegreeVertex = i;
+				//i_HighestDegreeVertex = i; //unused variable
 			}
 		}
 
@@ -1666,7 +1667,8 @@ namespace ColPack
 
 		int i, j, k, l, u;
 		int i_Current;
-		int i_HighestDegreeVertex, m_i_MaximumVertexDegree;
+		//int i_HighestDegreeVertex; //unused variable
+                int m_i_MaximumVertexDegree;
 		int i_VertexCount, i_VertexDegree, i_IncidenceVertexDegree;
 		int i_SelectedVertex, i_SelectedVertexCount;
 		vector<int> vi_IncidenceVertexDegree;
@@ -1678,7 +1680,7 @@ namespace ColPack
 		i_SelectedVertex = _UNKNOWN;
 		i_VertexCount = (int)m_vi_RightVertices.size () - 1;
 		vvi_GroupedIncidenceVertexDegree.resize ( i_VertexCount );
-		i_HighestDegreeVertex = _UNKNOWN;
+		//i_HighestDegreeVertex = _UNKNOWN;//unused variable
 		m_i_MaximumVertexDegree = _UNKNOWN;
 		i_IncidenceVertexDegree = 0;
 		vi_Visited.resize ( i_VertexCount, _UNKNOWN );
@@ -1717,7 +1719,7 @@ namespace ColPack
 			if ( m_i_MaximumVertexDegree < i_VertexDegree )
 			{
 				m_i_MaximumVertexDegree = i_VertexDegree;
-				i_HighestDegreeVertex = i;
+				//i_HighestDegreeVertex = i;//unused variable
 			}
 		}
 

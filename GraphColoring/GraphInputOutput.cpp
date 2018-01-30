@@ -182,7 +182,7 @@ namespace ColPack
 		//initialize local data
 		int col=0, row=0, rowIndex=0, colIndex=0;
 		int entry_counter = 0, num_of_entries = 0;
-		bool value_not_specified = false;
+		//bool value_not_specified = false; //unused variable
 		//int num=0, numCount=0;
 		double value;
 		bool b_getValue = !b_getStructureOnly, b_symmetric;
@@ -377,7 +377,8 @@ namespace ColPack
 		{
 			cout<<"Found File "<<m_s_InputFile<<endl;
 		}
-		int i_Dummy, i, j;
+		//int i_Dummy; //unused variable
+                int i, j;
 		int num, counter;
 		double d;
 		int nnz;
@@ -524,7 +525,7 @@ namespace ColPack
 		//populate the m_vi_Vertices, their Edges and Values at the same time
 		m_vi_Vertices[0]=0;
 		for(i=0; i<NROW; i++) {
-		  for(j=0; j<vvi_VertexAdjacency[i].size();j++) {
+		  for(j=0;(size_t)j<vvi_VertexAdjacency[i].size();j++) {
 		    m_vi_Edges[m_vi_Vertices[i]+j] = vvi_VertexAdjacency[i][j];
 		    if(VALCRD !=0) m_vd_Values[m_vi_Vertices[i]+j] = vvd_Values[i][j];
 		  }
@@ -793,7 +794,7 @@ namespace ColPack
 
 		int i_VertexCount, i_VertexDegree;
 
-		int i_EdgeCount;
+		//int i_EdgeCount; //unused variable
 
 		int i_VertexWeights, i_EdgeWeights;
 
@@ -857,7 +858,7 @@ namespace ColPack
 				}
 
 				i_VertexCount = atoi(vs_InputTokens[0].c_str());
-				i_EdgeCount = atoi(vs_InputTokens[1].c_str());
+				//i_EdgeCount = atoi(vs_InputTokens[1].c_str()); //unused variable
 
 				i_VertexWeights = _FALSE;
 				i_EdgeWeights = _FALSE;
@@ -1146,7 +1147,8 @@ namespace ColPack
 	{
 		int i;
 
-		int i_VertexCount, i_EdgeCount;
+		int i_VertexCount;
+                //int i_EdgeCount; //unused variable
 
 		i_VertexCount = (signed) m_vi_Vertices.size();
 

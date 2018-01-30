@@ -290,11 +290,14 @@ namespace ColPack
 			return(_TRUE);
 		}
 
-		int i_LeftVertexCount, i_RightVertexCount, i_CurrentVertex;
+		int i_LeftVertexCount;
+                //int i_CurrentVertex;    //unused variable
+                //int i_RightVertexCount  //unused variable
+
 		bool cont=false;
 		vector<int> vi_forbiddenColors, vi_VerticesToBeColored, vi_verticesNeedNewColor;
 		i_LeftVertexCount = (int) m_vi_LeftVertices.size() - 1;
-		i_RightVertexCount = (int)m_vi_RightVertices.size () - 1;
+		//i_RightVertexCount = (int)m_vi_RightVertices.size () - 1;
 		m_i_LeftVertexColorCount = m_i_RightVertexColorCount = m_i_VertexColorCount = 0;
 
 		// !!! do sections for this part ? forbiddenColors may need to be private for each thread
@@ -403,7 +406,7 @@ namespace ColPack
 			i_NumOfVerticesToBeColored = vi_verticesNeedNewColor.size();
 
 			vi_VerticesToBeColored.reserve(vi_verticesNeedNewColor.size());
-			for(int i=0; i<vi_verticesNeedNewColor.size(); i++) {
+			for(size_t i=0; i<vi_verticesNeedNewColor.size(); i++) {
 			  vi_VerticesToBeColored.push_back(vi_verticesNeedNewColor[i]);
 			}
 
@@ -496,7 +499,8 @@ namespace ColPack
 		  return(_TRUE);
 		}
 
-		int i_LeftVertexCount, i_RightVertexCount, i_CurrentVertex;
+		int i_LeftVertexCount, i_RightVertexCount;
+                //int i_CurrentVertex;  //unused variable
 		bool cont=false;
 		vector<int> vi_forbiddenColors, vi_VerticesToBeColored, vi_verticesNeedNewColor;
 		i_LeftVertexCount = (int) m_vi_LeftVertices.size() - 1;
@@ -591,7 +595,7 @@ namespace ColPack
 			i_NumOfVerticesToBeColored = vi_verticesNeedNewColor.size();
 
 			vi_VerticesToBeColored.reserve(vi_verticesNeedNewColor.size());
-			for(int i=0; i<vi_verticesNeedNewColor.size(); i++) {
+			for(size_t i=0; i<vi_verticesNeedNewColor.size(); i++) {
 			  vi_VerticesToBeColored.push_back(vi_verticesNeedNewColor[i]);
 			}
 
@@ -738,7 +742,7 @@ namespace ColPack
 	int BipartiteGraphPartialColoring::GetLeftVertexColorCount()
 	{
 	  if(m_i_LeftVertexColorCount<0 && GetVertexColoringVariant() == "Row Partial Distance Two" ) {
-	    for(int i=0; i<m_vi_LeftVertexColors.size();i++) {
+	    for(size_t i=0; i<m_vi_LeftVertexColors.size();i++) {
 	      if(m_i_LeftVertexColorCount<m_vi_LeftVertexColors[i]) m_i_LeftVertexColorCount = m_vi_LeftVertexColors[i];
 	    }
 	  }
@@ -749,7 +753,7 @@ namespace ColPack
 	int BipartiteGraphPartialColoring::GetRightVertexColorCount()
 	{
 	  if(m_i_RightVertexColorCount<0 && GetVertexColoringVariant() == "Column Partial Distance Two" ) {
-	    for(int i=0; i<m_vi_RightVertexColors.size();i++) {
+	    for(size_t i=0; i<m_vi_RightVertexColors.size();i++) {
 	      if(m_i_RightVertexColorCount<m_vi_RightVertexColors[i]) m_i_RightVertexColorCount = m_vi_RightVertexColors[i];
 	    }
 	  }

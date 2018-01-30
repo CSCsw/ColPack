@@ -182,8 +182,6 @@ namespace ColPack
 
 		m_s_VertexOrderingVariant = "RANDOM";
 
-		int i;
-
 		int i_VertexCount;
 
 		i_VertexCount = STEP_DOWN((signed) m_vi_Vertices.size());
@@ -193,7 +191,7 @@ namespace ColPack
 		m_vi_OrderedVertices.resize((unsigned) i_VertexCount);
 
 		//initialize m_vi_OrderedVertices
-		for(unsigned int i = 0; i<i_VertexCount; i++) {
+		for(int i = 0; i<i_VertexCount; i++) {
 			m_vi_OrderedVertices[i] = i;
 		}
 
@@ -247,7 +245,7 @@ namespace ColPack
 		int i_HighestColor = _FALSE;
 
 		//Populate ColorGroups
-		for(int i=0; i < vi_VertexColors.size(); i++)
+		for(int i=0; i <(int)vi_VertexColors.size(); i++)
 		{
 			vvi_ColorGroups[vi_VertexColors[i]].push_back(i);
 
@@ -341,14 +339,14 @@ namespace ColPack
 		string tempS;
 		cout<<"vvpii_VertexEdgeMap.size() = "<<vvpii_VertexEdgeMap.size()<<endl;
 
-		for(int i=0; i<vvpii_VertexEdgeMap.size(); i++) {
+		for(int i=0; i<(int)vvpii_VertexEdgeMap.size(); i++) {
 			cout<<'['<<setw(4)<<i<<']';
-			for(int j=0; j< vvpii_VertexEdgeMap[i].size(); j++) {
+			for(int j=0; j<(int)vvpii_VertexEdgeMap[i].size(); j++) {
 				oout.str("");
 				oout << '(' << vvpii_VertexEdgeMap[i][j].first << ", " << vvpii_VertexEdgeMap[i][j].second << ')';
 				tempS = oout.str();
 				cout<<setw(10)<<tempS;
-				if(j%5 == 4 && j != vvpii_VertexEdgeMap[i].size() - 1) cout<<endl<<setw(6)<<' ';
+				if(j%5 == 4 && j !=((int)vvpii_VertexEdgeMap[i].size()) - 1) cout<<endl<<setw(6)<<' ';
 			}
 			cout<<endl;
 		}
@@ -1630,7 +1628,7 @@ namespace ColPack
 			currentOrderingID = vectorID2orderingID[i];
 			i_CurrentVertexBackDegre = 0;
 			//for through all the D1 neighbor of that vertex
-			for( unsigned int j = m_vi_Vertices[i]; j < m_vi_Vertices[i + 1]; j++) {
+			for( unsigned int j = m_vi_Vertices[i]; j <(unsigned int) m_vi_Vertices[i + 1]; j++) {
 				if(vectorID2orderingID[m_vi_Edges[j]] < currentOrderingID) i_CurrentVertexBackDegre++;
 			}
 			if( i_MaxBackDegree < i_CurrentVertexBackDegre) i_MaxBackDegree = i_CurrentVertexBackDegre;

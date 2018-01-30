@@ -248,7 +248,7 @@ void toFileC(string baseDir, string stat_output_suffix, vector<string> Orderings
 	// Create titles
 	if(stat_flags["NumberOfColors"]) {
 	  out_NumberOfColors<<"Style, Name";
-	  for(int i=0; i< Orderings.size(); i++) {
+	  for(size_t i=0; i< Orderings.size(); i++) {
 	    out_NumberOfColors<<", "<<Orderings[i];
 	  }
 	  out_NumberOfColors<<endl;
@@ -257,14 +257,14 @@ void toFileC(string baseDir, string stat_output_suffix, vector<string> Orderings
 	if(stat_flags["Time"]) {
 	  // line 1
 	  out_Time<<"Style,Name";
-	  for(int i=0; i< Orderings.size(); i++) {
+	  for(size_t i=0; i< Orderings.size(); i++) {
 	    out_Time<<", "<<Orderings[i]<<", , ";
 	  }
 	  out_Time<<endl;
 
 	  // line 2
 	  out_Time<<",";
-	  for(int i=0; i< Orderings.size(); i++) {
+	  for(size_t i=0; i< Orderings.size(); i++) {
 	    out_Time<<", OT, CT, TT";
 	  }
 	  out_Time<<endl;
@@ -272,7 +272,7 @@ void toFileC(string baseDir, string stat_output_suffix, vector<string> Orderings
 
 	if(stat_flags["MaxBackDegree"]) {
 	  out_MaxBackDegree<<"Name";
-	  for(int i=0; i< Orderings.size(); i++) {
+	  for(size_t i=0; i< Orderings.size(); i++) {
 	    out_MaxBackDegree<<", "<<Orderings[i];
 	  }
 	  out_MaxBackDegree<<endl;
@@ -285,7 +285,7 @@ void toFileC(string baseDir, string stat_output_suffix, vector<string> Orderings
 	for(unsigned int i=0;i < listOfGraphs.size(); i++){
 		printListOfGraphs(listOfGraphs,i);
 
-		for(int j=0;j < Colorings.size();j++) {
+		for(size_t j=0;j < Colorings.size();j++) {
 			cout<<Colorings[j]<<" Coloring"<<endl<<flush;
 			if(stat_flags["NumberOfColors"]) out_NumberOfColors<<Colorings[j]<<", ";
 			if(stat_flags["Time"]) out_Time<<Colorings[j]<<", ";
@@ -296,7 +296,7 @@ void toFileC(string baseDir, string stat_output_suffix, vector<string> Orderings
 			if(stat_flags["Time"]) out_Time<<stat_file_parsor.GetName();
 			if(stat_flags["MaxBackDegree"] && j == 0) out_MaxBackDegree<<stat_file_parsor.GetName();
 
-			for(int k=0;k < Orderings.size();k++) {
+			for(size_t k=0;k < Orderings.size();k++) {
 				current_time();
 
 				cout<<Orderings[k]<<" Ordering"<<endl<<flush;
@@ -477,7 +477,7 @@ void toFileStatisticForBipartiteGraph(string baseDir, string stat_output_suffix,
 }
 
 void printListOfGraphs(vector <string>& listOfGraphs, int selected) {
-	for(int i=0; i<listOfGraphs.size();i++) {
+	for(int i=0; i<(int)listOfGraphs.size();i++) {
 		if(i!=selected) cout<<"  Graph: "<<listOfGraphs[i]<<endl;
 		else cout<<"=>Graph: "<<listOfGraphs[i]<<endl;
 	}
@@ -519,14 +519,14 @@ void toFileBiC(string baseDir, string stat_output_suffix , vector<string> Orderi
 	// Create titles
 	if(stat_flags["NumberOfColors"]) {
 	  out_NumberOfColors<<"Style, Name";
-	  for(int i=0; i< Orderings.size(); i++) {
+	  for(size_t i=0; i< Orderings.size(); i++) {
 	    out_NumberOfColors<<", "<<Orderings[i]<<", , ";
 	  }
 	  out_NumberOfColors<<endl;
 
 	  // line 2
 	  out_NumberOfColors<<",";
-	  for(int i=0; i< Orderings.size(); i++) {
+	  for(size_t i=0; i< Orderings.size(); i++) {
 	    out_NumberOfColors<<", LEFT, RIGHT, TOTAL";
 	  }
 	  out_NumberOfColors<<endl;
@@ -535,14 +535,14 @@ void toFileBiC(string baseDir, string stat_output_suffix , vector<string> Orderi
 	if(stat_flags["Time"]) {
 	  // line 1
 	  out_Time<<"Style,Name";
-	  for(int i=0; i< Orderings.size(); i++) {
+	  for(size_t i=0; i< Orderings.size(); i++) {
 	    out_Time<<", "<<Orderings[i]<<", , ";
 	  }
 	  out_Time<<endl;
 
 	  // line 2
 	  out_Time<<",";
-	  for(int i=0; i< Orderings.size(); i++) {
+	  for(size_t i=0; i< Orderings.size(); i++) {
 	    out_Time<<", OT, CT, TT";
 	  }
 	  out_Time<<endl;
@@ -551,7 +551,7 @@ void toFileBiC(string baseDir, string stat_output_suffix , vector<string> Orderi
     for(unsigned int i=0;i < listOfGraphs.size(); i++){
 		printListOfGraphs(listOfGraphs,i);
 
-		for(int j=0;j<Colorings.size();j++)
+		for(size_t j=0;j<Colorings.size();j++)
 		{
 			cout<<Colorings[j]<<" Coloring"<<endl<<flush;
 			if(stat_flags["NumberOfColors"]) out_NumberOfColors<<Colorings[j]<<", ";
@@ -562,7 +562,7 @@ void toFileBiC(string baseDir, string stat_output_suffix , vector<string> Orderi
 			if(stat_flags["NumberOfColors"]) out_NumberOfColors<<stat_file_parsor.GetName();
 			if(stat_flags["Time"]) out_Time<<stat_file_parsor.GetName();
 
-			for (int k=0; k<Orderings.size(); k++)
+			for (size_t k=0; k<Orderings.size(); k++)
 			{
 				current_time();
 
@@ -633,7 +633,7 @@ void toFileBiPC(string baseDir, string stat_output_suffix, vector<string> Orderi
 	// Create titles
 	if(stat_flags["NumberOfColors"]) {
 	  out_NumberOfColors<<"Style, Name";
-	  for(int i=0; i< Orderings.size(); i++) {
+	  for(unsigned int i=0; i< Orderings.size(); i++) {
 	    out_NumberOfColors<<", "<<Orderings[i];
 	  }
 	  out_NumberOfColors<<endl;
@@ -642,14 +642,14 @@ void toFileBiPC(string baseDir, string stat_output_suffix, vector<string> Orderi
 	if(stat_flags["Time"]) {
 	  // line 1
 	  out_Time<<"Style,Name";
-	  for(int i=0; i< Orderings.size(); i++) {
+	  for(unsigned int i=0; i< Orderings.size(); i++) {
 	    out_Time<<", "<<Orderings[i]<<", , ";
 	  }
 	  out_Time<<endl;
 
 	  // line 2
 	  out_Time<<",";
-	  for(int i=0; i< Orderings.size(); i++) {
+	  for(unsigned int i=0; i< Orderings.size(); i++) {
 	    out_Time<<", OT, CT, TT";
 	  }
 	  out_Time<<endl;
@@ -658,7 +658,7 @@ void toFileBiPC(string baseDir, string stat_output_suffix, vector<string> Orderi
     for(unsigned int i=0;i < listOfGraphs.size(); i++){
 		printListOfGraphs(listOfGraphs,i);
 
-		for(int j=0;j<Colorings.size();j++)
+		for(unsigned int j=0;j<Colorings.size();j++)
 		{
 			cout<<Colorings[j]<<" Coloring"<<endl<<flush;
 			if(stat_flags["NumberOfColors"]) out_NumberOfColors<<Colorings[j]<<", ";
@@ -669,7 +669,7 @@ void toFileBiPC(string baseDir, string stat_output_suffix, vector<string> Orderi
 			if(stat_flags["NumberOfColors"]) out_NumberOfColors<<stat_file_parsor.GetName();
 			if(stat_flags["Time"]) out_Time<<stat_file_parsor.GetName();
 
-			for (int k=0; k<Orderings.size(); k++)	{
+			for (unsigned int k=0; k<Orderings.size(); k++)	{
 				current_time();
 
 				cout<<Orderings[k]<<" Ordering"<<endl<<flush;
