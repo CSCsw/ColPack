@@ -1284,7 +1284,7 @@ namespace ColPack
 
 		int i_EdgeID, i_NeighboringEdgeID;
 
-		int i_EdgeCount;
+		//int i_EdgeCount; //unused variable
 
 		int i_LeftVertexCount, i_RightVertexCount;
 
@@ -1301,7 +1301,7 @@ namespace ColPack
 		i_LeftVertexCount  = STEP_DOWN((signed) m_vi_LeftVertices.size());
 		i_RightVertexCount = STEP_DOWN((signed) m_vi_RightVertices.size());
 
-		i_EdgeCount = (signed) m_vi_Edges.size()/2;
+		//i_EdgeCount = (signed) m_vi_Edges.size()/2; //unused variable
 
 		m_mimi2_VertexEdgeMap.clear();
 
@@ -5322,7 +5322,7 @@ namespace ColPack
 
 		output = m_vi_RightVertexColors;
 
-		for (int i=0; i < output.size(); i++) {
+		for (size_t i=0; i < output.size(); i++) {
 			output[i] -= rowCount;
 			if (output[i] == columnCount + 1) output[i] = 0; //color 0, the rows with this color should be ignored.
 		}

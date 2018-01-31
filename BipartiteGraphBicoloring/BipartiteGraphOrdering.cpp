@@ -123,7 +123,7 @@ namespace ColPack
 
 		m_s_VertexOrderingVariant = "RANDOM";
 
-		int i;
+		//int i;  //unused variable
 
 		int i_LeftVertexCount, i_RightVertexCount;
 
@@ -135,7 +135,7 @@ namespace ColPack
 		//Order left vertices
 		m_vi_OrderedVertices.resize((unsigned) i_LeftVertexCount);
 
-		for(unsigned int i = 0; i<i_LeftVertexCount; i++) {
+		for(unsigned int i = 0; i<(unsigned)i_LeftVertexCount; i++) {
 			m_vi_OrderedVertices[i] = i;
 		}
 
@@ -146,7 +146,7 @@ namespace ColPack
 
 		tempOrdering.resize((unsigned) i_RightVertexCount);
 
-		for(unsigned int i = 0; i<i_RightVertexCount; i++) {
+		for(unsigned int i = 0; i<(unsigned)i_RightVertexCount; i++) {
 			tempOrdering[i] = i + i_LeftVertexCount;
 		}
 
@@ -155,7 +155,7 @@ namespace ColPack
 		m_vi_OrderedVertices.reserve(i_LeftVertexCount + i_RightVertexCount);
 
 		//Now, populate vector m_vi_OrderedVertices with the right vertices
-		for(unsigned int i = 0; i<i_RightVertexCount; i++) {
+		for(unsigned int i = 0; i<(unsigned)i_RightVertexCount; i++) {
 			m_vi_OrderedVertices.push_back(tempOrdering[i]);
 		}
 
@@ -257,7 +257,8 @@ namespace ColPack
 			return(_TRUE);
 		}
 
-		int i, u, l, v;
+		int i, u, l;
+                //int v; //unused variable
 
 		int _FOUND;
 
@@ -386,7 +387,7 @@ namespace ColPack
 					}
 					*/
 					if(vi_LeftSidedVertexinBucket[i] > 0)
-					for(int j  = 0; j < vvi_GroupedInducedVertexDegree[i].size(); j++)
+					for(unsigned int j  = 0; j < vvi_GroupedInducedVertexDegree[i].size(); j++)
 					{
 						u = vvi_GroupedInducedVertexDegree[i][j];
 						if(u < i_LeftVertexCount)
@@ -416,7 +417,7 @@ namespace ColPack
 					_FOUND = _FALSE;
 
 					if((i_InducedVertexDegreeCount - vi_LeftSidedVertexinBucket[i]) > 0)
-					for(int j = 0; j < vvi_GroupedInducedVertexDegree[i].size(); j++)
+					for(unsigned int j = 0; j < vvi_GroupedInducedVertexDegree[i].size(); j++)
 					{
 						u = vvi_GroupedInducedVertexDegree[i][j];
 
@@ -580,7 +581,8 @@ namespace ColPack
 
 		int i_VertexDegree;
 
-		int i_IncidenceVertexDegree, i_IncidenceVertexDegreeCount;
+		int i_IncidenceVertexDegree;
+                //int i_IncidenceVertexDegreeCount; //unused variable
 
 		int i_SelectedVertex, i_SelectedVertexCount;
 

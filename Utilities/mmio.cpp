@@ -461,13 +461,13 @@ char  *mm_typecode_to_str(MM_typecode matcode)
     char buffer[MM_MAX_LINE_LENGTH];
     const char *types[4];
 	char *mm_strdup(const char *);
-    int error =0;
+    //int error =0; //unused variable
 
     /* check for MTX type */
     if (mm_is_matrix(matcode))
         types[0] = MM_MTX_STR;
-    else
-        error=1;
+    //else             //unused variable
+    //    error=1;     //unused variable
 
     /* check for CRD or ARR matrix */
     if (mm_is_sparse(matcode))

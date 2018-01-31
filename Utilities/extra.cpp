@@ -65,7 +65,7 @@ int WriteMatrixMarket_ADOLCInput(string s_postfix, int i_mode, ...) {
 
     out_Matrix<<setprecision(10)<<scientific<<showpoint;
     for(int i = 0; i<i_Matrix_Row;i++) {
-      for(int j = 1; j<=uip2_SparsityPattern[i][0];j++) {
+      for(unsigned int j = 1; j<=uip2_SparsityPattern[i][0];j++) {
 	out_Matrix<<i+1<<" "<<uip2_SparsityPattern[i][j]+1;
 	out_Matrix<<endl;
       }
@@ -100,7 +100,7 @@ int WriteMatrixMarket_ADOLCInput(string s_postfix, int i_mode, ...) {
 
     out_Matrix<<setprecision(10)<<scientific<<showpoint;
     for(int i = 0; i<i_Matrix_Row;i++) {
-      for(int j = 1; j<=uip2_SparsityPattern[i][0];j++) {
+      for(unsigned int j = 1; j<=uip2_SparsityPattern[i][0];j++) {
 	out_Matrix<<i+1<<" "<<uip2_SparsityPattern[i][j]+1;
 	out_Matrix<<endl;
       }
@@ -156,7 +156,7 @@ int WriteMatrixMarket_ADOLCInput(string s_postfix, int i_mode, ...) {
 
     out_Matrix<<setprecision(10)<<scientific<<showpoint;
     for(int i = 0; i<i_Matrix_Row;i++) {
-      for(int j = 1; j<=uip2_SparsityPattern[i][0];j++) {
+      for(unsigned int j = 1; j<=uip2_SparsityPattern[i][0];j++) {
 	out_Matrix<<i+1<<" "<<uip2_SparsityPattern[i][j]+1<<" "<<dp2_Values[i][j];
 	out_Matrix<<endl;
       }
@@ -651,8 +651,8 @@ int buildDotWithColor(ColPack::GraphColoringInterface &g, vector<string> &ListOf
   vector<bool> m_vi_ConflictEdges;
   m_vi_ConflictEdges.resize(m_vi_Edges.size(),false);
   if(ListOfConflicts.size()>0) {
-    for(int i=0; i<ListOfConflicts.size();i++) {
-      for(int j=0; j<ListOfConflicts[i].size()-1;j++) {
+    for(size_t i=0; i<ListOfConflicts.size();i++) {
+      for(int j=0; j< ((int)ListOfConflicts[i].size())-1;j++) {
 	int Vertex1 = ListOfConflicts[i][j];
 	int Vertex2 = ListOfConflicts[i][j+1];
 	if(Vertex1 > Vertex2) { //swap order
@@ -717,9 +717,9 @@ bool isValidOrdering(vector<int> & ordering, int offset) {
   int orderingNum = 0;
   isExist.resize(ordering.size(), false);
   index.resize(ordering.size(), false);
-  for(int i=0; i<ordering.size(); i++) {
+  for(int i=0; i<(int)ordering.size(); i++) {
     orderingNum = ordering[i] - offset;
-    if(orderingNum<0 || orderingNum>= ordering.size()) {
+    if(orderingNum<0 || (unsigned int)orderingNum>= ordering.size()) {
       cerr<<" This vertex # is not in the valid range [0, ordering.size()]. ordering[i]: "<<ordering[i]<<endl;
       return false;
     }
@@ -858,7 +858,7 @@ int ConvertCoordinateFormat2RowCompressedFormat(unsigned int* uip1_RowIndex, uns
   //Populate values of (*dp3_Pattern) and (*dp3_Values)
   count=0;
   for(int i=0; i<i_RowCount; i++) {
-    for(int j=1; j<= (*dp3_Pattern)[i][0]; j++) {
+    for(unsigned int j=1; j<= (*dp3_Pattern)[i][0]; j++) {
       (*dp3_Pattern)[i][j] = uip1_ColumnIndex[count];
       (*dp3_Values)[i][j] = dp1_HessianValue[count];
       count++;
@@ -1001,7 +1001,7 @@ int ConvertRowCompressedFormat2ADIC(unsigned int ** uip2_SparsityPattern_RowComp
     std::set<int> valset;
     std::vector<double> valuevector;
     valuevector.reserve(uip2_SparsityPattern_RowCompressedFormat[i][0]);
-    for(int j= 1; j <= uip2_SparsityPattern_RowCompressedFormat[i][0]; j++) {
+    for(unsigned int j= 1; j <= uip2_SparsityPattern_RowCompressedFormat[i][0]; j++) {
       valset.insert(uip2_SparsityPattern_RowCompressedFormat[i][j]);
       valuevector.push_back(dp2_Value[i][j]);
     }
@@ -1028,7 +1028,7 @@ int ConvertRowCompressedFormat2CSR(unsigned int ** uip2_SparsityPattern_RowCompr
   (*ip_ColumnIndex) = new int[nnz];
   int nz_count=0;
   for(int i=0; i < i_rowCount; i++) {
-    for(int j=1; j<= uip2_SparsityPattern_RowCompressedFormat[i][0];j++) {
+    for(unsigned int j=1; j<= uip2_SparsityPattern_RowCompressedFormat[i][0];j++) {
       (*ip_ColumnIndex)[nz_count] = uip2_SparsityPattern_RowCompressedFormat[i][j];
       nz_count++;
     }
@@ -1047,7 +1047,9 @@ int ConvertMatrixMarketFormat2RowCompressedFormat(string s_InputFile, unsigned i
 	string m_s_InputFile=s_InputFile;
 
 	//initialize local data
-	int rowCounter=0, nonzeros=0, rowIndex=0, colIndex=0, nz_counter=0, entries=0;
+	int rowCounter=0, rowIndex=0, colIndex=0, nz_counter=0, entries=0;
+        //int nonzeros=0; //unused variable
+
 	//int num=0, numCount=0;
 	float value;
 	bool b_getValue, b_symmetric;
@@ -1429,7 +1431,7 @@ bool CompressedRowMatricesAreEqual(double** dp3_Value, double** dp3_NewValue, in
 }
 
 int DisplayADICFormat_Sparsity(std::list<std::set<int> > &lsi_valsetlist) {
-	int size = (lsi_valsetlist).size();
+	//int size = (lsi_valsetlist).size(); //unused variable
 	int rowIndex=-1, colIndex=-1;
 	std::list<std::set<int> >::iterator valsetlistiter = (lsi_valsetlist).begin();
 
@@ -1455,7 +1457,7 @@ int DisplayADICFormat_Sparsity(std::list<std::set<int> > &lsi_valsetlist) {
 }
 
 int DisplayADICFormat_Value(std::list<std::vector<double> > &lvd_Value) {
-	int size = (lvd_Value).size();
+	//int size = (lvd_Value).size(); //unused variable
 	int rowIndex=-1;
 	double value=0.;
 	std::list<std::vector<double> >::iterator valsetlistiter = (lvd_Value).begin();

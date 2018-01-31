@@ -136,7 +136,7 @@ namespace ColPack
 
 		istringstream in2;
 		int entry_counter = 0, num_of_entries = 0, nz_counter=0;
-		bool value_not_specified = false;
+		//bool value_not_specified = false;
 		int i_LineCount = _TRUE;
 
 		int i, j;
@@ -259,12 +259,12 @@ namespace ColPack
 				in2.clear();
 				in2.str(s_InputLine);
 				d_Value =-999999999.;
-				value_not_specified=false;
+				//value_not_specified=false;
 				in2>>i_LeftVertex>>i_RightVertex>>d_Value;
 				entry_counter++;
 				if(d_Value == -999999999. && in2.eof()) {
 				  // "d_Value" entry is not specified
-				  value_not_specified = true;
+				  //value_not_specified = true;
 				}
 				else if (d_Value == 0) {
 				  continue;
@@ -501,7 +501,8 @@ namespace ColPack
 			cout<<"Found File "<<m_s_InputFile<<endl;
 		}
 
-		int i_Dummy, i, j;
+		//int i_Dummy; //unused variable
+                int i, j;
 		int num;
 		int nnz;
 		string line, num_string;
@@ -595,7 +596,7 @@ namespace ColPack
 		//populate the m_vi_LeftVertices and their edges at the same time
 		m_vi_LeftVertices[0]=0;
 		for(i=0; i<NROW; i++) {
-		  for(j=0; j<vvi_LeftVertexAdjacency[i].size();j++) {
+		  for(j=0; j<(int)vvi_LeftVertexAdjacency[i].size();j++) {
 		    m_vi_Edges[m_vi_LeftVertices[i]+j] = vvi_LeftVertexAdjacency[i][j];
 		  }
 
@@ -605,7 +606,7 @@ namespace ColPack
 		//populate the m_vi_RightVertices and their edges at the same time
 		m_vi_RightVertices[0]=m_vi_LeftVertices[NROW];
 		for(i=0; i<NCOL; i++) {
-		  for(j=0; j<vvi_RightVertexAdjacency[i].size();j++) {
+		  for(j=0; j<(int)vvi_RightVertexAdjacency[i].size();j++) {
 		    m_vi_Edges[m_vi_RightVertices[i]+j] = vvi_RightVertexAdjacency[i][j];
 		  }
 
@@ -937,7 +938,7 @@ namespace ColPack
 	  //PrintBipartiteGraph ();
 	  //Pause();
 	  for(i=0; i < i_RowCount; i++) {
-	    for(j=ip_RowIndex[i]; j<ip_RowIndex[i+1]; j++) {
+	    for(j=ip_RowIndex[i]; j<(size_t)ip_RowIndex[i+1]; j++) {
 	      m_vi_Edges.push_back(ip_ColumnIndex[j]);
 	      colList[ ip_ColumnIndex[j] ].push_back(i);
 	    }
@@ -971,8 +972,8 @@ namespace ColPack
 	}
 
 	int BipartiteGraphInputOutput::BuildBPGraphFromADICFormat(std::list<std::set<int> > *  lsi_SparsityPattern, int i_ColumnCount) {
-	  int i;
-	  unsigned int j;
+	  //int i;  //unused variable
+	  //unsigned int j; //unused variable
 	  map< int,vector<int> > colList;
 	  int i_RowCount = (*lsi_SparsityPattern).size();
 
