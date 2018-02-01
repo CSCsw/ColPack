@@ -10,9 +10,10 @@ AM_CPPFLAGS =  $(COLPACK_COMMON_FLAGS) \
 		-I$(top_srcdir)/Recovery
 AM_LDFLAGS = $(COLPACK_COMMON_FLAGS)
 
-if ENABLE_OPENMP
-AM_CXXFLAGS = -fopenmp
-endif
+AM_CXXFLAGS = -std=c++11
+#if ENABLE_OPENMP
+AM_CXXFLAGS += -fopenmp 
+#endif
 
 LDADD = libColPack.la
 AM_DEFAULT_SOURCE_EXT = .cpp
