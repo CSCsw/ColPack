@@ -70,7 +70,7 @@ Ubuntu Build Instructions
 To build ColPack using autotools, run the following in the `ColPack`:
 
     autoreconf -vif
-    ./configure #--prefix=/path/to/install/
+    ./configure --enable-openmp --prefix=/path/to/install/
     make -j 4   #Where "4" is the number of cores on your machine
     make install
 
