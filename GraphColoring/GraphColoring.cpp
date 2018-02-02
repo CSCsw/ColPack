@@ -945,7 +945,9 @@ namespace ColPack
 			#pragma omp parallel default(none) firstprivate(i) shared(pii_ConflictColorCombination, i_ConflictVertex, cout, i_VertexCount, Colors2Edge_Private, PotentialHub_Private, i_MaxNumThreads, b_Stop, i_Mode)
 #endif
 			for(map< pair<int, int>, Colors2Edge_Value, lt_pii >::iterator iter = Colors2Edge_Private[i].begin(); iter != Colors2Edge_Private[i].end() ; iter++) {
-				#pragma omp single nowait
+#ifdef _OPENMP	
+                                #pragma omp single nowait
+#endif
 				{
 					if(iter->second.visited == false && !b_Stop) {
 						iter->second.visited=true;
@@ -970,7 +972,9 @@ namespace ColPack
 						i_ConflictVertex[i_thread_num] = BuildStarFromColorCombination_forChecking(i_Mode, i_MaxNumThreads, i_thread_num, iter->first, Colors2Edge_Private, PotentialHub_Private);
 
 						if(i_ConflictVertex[i_thread_num]  != -1) {
-							#pragma omp critical
+#ifdef _OPENMP
+#pragma omp critical
+#endif
 							{
 								if(pii_ConflictColorCombination!=NULL) {
 									(*pii_ConflictColorCombination).first = iter->first.first;
@@ -990,7 +994,7 @@ namespace ColPack
 							cout<<"\n\n\n\n\n\n\n"<<flush;
 						}
 #endif
-//*/
+// */
 					}
 				}
 			}
@@ -6056,14 +6060,17 @@ namespace ColPack
 		m_i_VertexColorCount = i_VertexColorCount;
 	}
 
+#ifndef _OPENMP
+//Public Function 
+int GraphColoring::D1_Coloring_OMP(){ printf("OpenMP is disabled. Recompile the code with correct flag\n"); return _TRUE;}
+#endif
 
-
+#ifdef _OPENMP
 //Public Function 
 int GraphColoring::D1_Coloring_OMP(){
-    int nT;
+    int nT=1;
 #pragma omp parallel
     { nT = omp_get_num_threads(); }
-
     double time1=0, time2=0, totalTime=0;
     long NVer     = m_vi_Vertices.size()-1;  //number of nodes
     //long NEdge    = m_vi_Edges.size()/2;     //number of edges 
@@ -6146,6 +6153,7 @@ int GraphColoring::D1_Coloring_OMP(){
             free(Mark);
         } //End of outer for loop: for each vertex
         time1  += omp_get_wtime();
+
         //totalTime += time1;
 #ifdef PRINT_DETAILED_STATS_
         printf("Time taken for Coloring:  %lf sec.\n", time1);
@@ -6254,8 +6262,7 @@ int GraphColoring::D1_Coloring_OMP(){
     //return nColors; //Return the number of colors used
     return(_TRUE);
 }//end of function DistanceOneColoring_omp_cx
-
-
+#endif
 
 
 

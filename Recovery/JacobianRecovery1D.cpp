@@ -40,7 +40,7 @@ namespace ColPack
 			numOfNonZeros = uip2_JacobianSparsityPattern[i][0];
 			(*dp3_JacobianValue)[i] = (double*) malloc( (numOfNonZeros+1) * sizeof(double) );
 			(*dp3_JacobianValue)[i][0] = numOfNonZeros; //initialize value of the 1st entry
-			for(int j=1; j <= numOfNonZeros; j++) (*dp3_JacobianValue)[i][j] = 0.; //initialize value of other entries
+			for(size_t j=1; j <=  numOfNonZeros; j++) (*dp3_JacobianValue)[i][j] = 0.; //initialize value of other entries
 		}
 
 		return RecoverD2Row_RowCompressedFormat_usermem(g, dp2_CompressedMatrix, uip2_JacobianSparsityPattern, dp3_JacobianValue);
@@ -69,7 +69,7 @@ namespace ColPack
 		//Recover value of the Jacobian
 		for(unsigned int i=0; i < (unsigned int)rowCount; i++) {
 			numOfNonZeros = uip2_JacobianSparsityPattern[i][0];
-			for(int j=1; j <= numOfNonZeros; j++) {
+			for(size_t j=1; j <= numOfNonZeros; j++) {
 				(*dp3_JacobianValue)[i][j] = dp2_CompressedMatrix[vi_LeftVertexColors[i]][uip2_JacobianSparsityPattern[i][j]];
 			}
 
@@ -117,7 +117,7 @@ namespace ColPack
 		unsigned int numOfNonZerosInEachRow = 0;
 		for(unsigned int i=0; i < (unsigned int)rowCount; i++) {
 			numOfNonZerosInEachRow = uip2_JacobianSparsityPattern[i][0];
-			for(int j=1; j <= numOfNonZerosInEachRow; j++) {
+			for(size_t j=1; j <= numOfNonZerosInEachRow; j++) {
 				(*dp2_JacobianValue)[(*ip2_RowIndex)[i]+j-1] = dp2_CompressedMatrix[vi_LeftVertexColors[i]][uip2_JacobianSparsityPattern[i][j]];
 			}
 
@@ -186,7 +186,7 @@ namespace ColPack
 		g->GetLeftVertexColors(vi_LeftVertexColors);
 
 		int numOfNonZeros;
-		vector<int>* LeftVerticesPtr = g->GetLeftVerticesPtr();
+		//vector<int>* LeftVerticesPtr = g->GetLeftVerticesPtr();
 
 		//Recover value of the Jacobian
 
@@ -229,7 +229,7 @@ namespace ColPack
 		}
 		else cout<<"**Good!!!"<<endl;
 		Pause();
-		//*/
+		// */
 		return numOfNonZeros_count;
 
 	}
@@ -542,7 +542,7 @@ namespace ColPack
 		return (*LeftVerticesPtr)[rowCount];
 */
 		unsigned int numOfNonZeros_count = 0;
-		unsigned int ll=0;
+		//unsigned int ll=0;
 		for(unsigned int i=0; i < (unsigned int)rowCount; i++) {
 			numOfNonZeros = uip2_JacobianSparsityPattern[i][0];
 			for(unsigned int j=1; j <= numOfNonZeros; j++) {
@@ -688,12 +688,12 @@ namespace ColPack
 	int JacobianRecovery1D::CompareMatrix_CoordinateFormat_vs_RowCompressedFormat(int i_rowCount, unsigned int** ip2_RowIndex, unsigned int** ip2_ColumnIndex, double** dp2_JacobianValue,  int rowCount2, unsigned int *** uip3_SparsityPattern, double*** dp3_Value) {
 		bool fail_flag=false;
 		for(int i=0;i<i_rowCount;i++) {
-		  if((*ip2_RowIndex)[i] >= rowCount2) {
+		  if((*ip2_RowIndex)[i] >= (unsigned)rowCount2) {
 		    fail_flag = true;
 		    break;
 		  }
 
-		  int j =0;
+		  size_t j =0;
 		  for(;j<= (*uip3_SparsityPattern)[ (*ip2_RowIndex)[i] ][0];j++) {
 		    if((*uip3_SparsityPattern)[ (*ip2_RowIndex)[i] ][j] == (*ip2_ColumnIndex)[i]) break;
 		  }
