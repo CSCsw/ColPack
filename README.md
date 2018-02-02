@@ -218,3 +218,8 @@ to avoid a name conflict with the shared library's ColPack.lib.
 
 Finally, some of the examples do not compile, seemingly because their
 filenames are too long.
+
+
+MAC OS Build Instructions
+==========================
+refer to the Ubuntu Instruction
