@@ -64,20 +64,28 @@ ColPack is written in an object-oriented fashion in C++ heavily using the Standa
 
 ![ColPack Organization](http://cscapes.cs.purdue.edu/coloringpage/software_files/ColPack_structure_2.png)  
 
+Try ColPack by Compile and Run without installation
+===================================================
+The simplest way to try ColPack is to compile the source code and run some test cases.
+	
+	git clone https://github.com/ProbShin/ColPack.git   #Download ColPack
+	cd ColPack                                          #ColPack Root Directory
+	cd Example_Try                                      #Contains Code for non-install user
+	make                                                #compile
+	./ColPack                                           #run
+
 
 Ubuntu Build Instructions
 =========================
-To build ColPack using autotools, run the following in the `ColPack`:
+Install ColPack makes ColPack easy to use and shrink your application's size. To install ColPack using **autotools**(make sure you have installed **automake** on your machine.), follows the instructions below.:
 
-    git clone https://github.com/ProbShin/ColPack.git
-    cd ColPack
-    autoreconf -vif
-    fullpath=$(pwd)
-    ./configure --prefix=${fullpath}
-    make -j 4   #Where "4" is the number of cores on your machine
-    make install
+    git clone https://github.com/ProbShin/ColPack.git  #Download ColPack
+    cd ColPack                                         #ColPack Root Directory
+    autoreconf -vif                                    #auto configure                        
+    ./configure --prefix=$(pwd)                        #chage $(pwd) to your destination of library files to install
+    make -j 4                                          #Where "4" is the number of cores on your machine
+    make install                                       #install lib and include/ColPack into destination directory 
 
-Change `${fullpath}` to the directory you want ColPack to install its library. Unless you want to install into ColPack root directory.  
 Append `--disable-openmp` to `./configure`if you do not want enable OpenMp
 
 ColPack also has experimental support for building with CMake, which you can do
