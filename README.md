@@ -69,10 +69,15 @@ Ubuntu Build Instructions
 =========================
 To build ColPack using autotools, run the following in the `ColPack`:
 
+    git clone https://github.com/ProbShin/ColPack.git
+    cd ColPack
     autoreconf -vif
-    ./configure --enable-openmp --prefix=/path/to/install/
+    ./configure --prefix=/fullpath/to/install/ColPack
     make -j 4   #Where "4" is the number of cores on your machine
     make install
+
+Change `/path/to/install/ColPack` to the directory you want ColPack to install its library. Unless you want to installed into root directory.
+Add --disable-openmp if you do not want enable OpenMp
 
 ColPack also has experimental support for building with CMake, which you can do
 via the following:
