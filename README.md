@@ -72,11 +72,12 @@ To build ColPack using autotools, run the following in the `ColPack`:
     git clone https://github.com/ProbShin/ColPack.git
     cd ColPack
     autoreconf -vif
-    ./configure --prefix=/fullpath/to/install/ColPack
+    fullpath=$(pwd)
+    ./configure --prefix=${fullpath}
     make -j 4   #Where "4" is the number of cores on your machine
     make install
 
-Change `/path/to/install/ColPack` to the directory you want ColPack to install its library. Unless you want to installed into root directory.  
+Change `${fullpath}` to the directory you want ColPack to install its library. Unless you want to installed into ColPack root directory.  
 Append `--disable-openmp` to `./configure`if you do not want enable OpenMp
 
 ColPack also has experimental support for building with CMake, which you can do
@@ -122,7 +123,7 @@ using autotools, or from the build directory if using CMake):
 	               DISTANCE_TWO
 	               --------------------
 	               DISTANCE_ONE_OMP    (automatic display: nThreads,num_colors,timall,conflicts,loops)
-	                --------------------
+	               --------------------
 	               IMPLICIT_COVERING__STAR_BICOLORING
 	               EXPLICIT_COVERING__STAR_BICOLORING
 	               EXPLICIT_COVERING__MODIFIED_STAR_BICOLORING
