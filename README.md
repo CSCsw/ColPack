@@ -139,9 +139,7 @@ using autotools, or from the build directory if using CMake):
 	./ColPack -f Graphs/bcsstk01.mtx -o LARGEST_FIRST -m DISTANCE_ONE -v
 	./ColPack -f Graphs/bcsstk01.mtx -o SMALLEST_LAST -m ACYCLIC -v
 	./ColPack -f Graphs/bcsstk01.mtx -o DYNAMIC_LARGEST_FIRST -m DISTANCE_ONE_OMP -v
-	./ColPack -f Graphs/someBiPartFile  -o NATURAL -m IMPLICIT_COVERING__STAR_BICOLORING -v
-	./ColPack -f Graphs/someBiPartFile  -o RANDOM  -m COLUMN_PARTIAL_DISTANCE_TWO -v
-
+	
 ### EXAMPLE OUTPUT
 
 	ReadMatrixMarketAdjacencyGraph
