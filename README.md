@@ -100,7 +100,7 @@ running the following from the build directory:
 After building, you can run the following commands (from this directory  if
 using autotools, or from the build directory if using CMake):
 
-	usage: ./ColPack -f <gname> -o <ordering> -m <methods> [-v]
+	$./ColPack -f <gname> -o <ordering> -m <methods> [-v]
 
 ### HELP 
 	$./ColPack
