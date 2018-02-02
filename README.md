@@ -76,8 +76,8 @@ To build ColPack using autotools, run the following in the `ColPack`:
     make -j 4   #Where "4" is the number of cores on your machine
     make install
 
-Change `/path/to/install/ColPack` to the directory you want ColPack to install its library. Unless you want to installed into root directory.
-Add --disable-openmp if you do not want enable OpenMp
+Change `/path/to/install/ColPack` to the directory you want ColPack to install its library. Unless you want to installed into root directory.  
+Append `--disable-openmp` to `./configure`if you do not want enable OpenMp
 
 ColPack also has experimental support for building with CMake, which you can do
 via the following:
@@ -100,25 +100,46 @@ running the following from the build directory:
 After building, you can run the following commands (from this directory  if
 using autotools, or from the build directory if using CMake):
 
-	$./ColPack <GraphName> [order_option] [coloring_option]
-	$./ColPack --graph <GraphName> [--order <order_option>] [--color <coloring_option>]
-	$./ColPack -g <GraphName> [-o <order_option>] [-c <coloring_option>]
-
--g or --graph can be changed to -f --file in case needed.
+	usage: ./ColPack -f <gname> -o <ordering> -m <methods> [-v]
 
 ### HELP 
-	$./ColPack -h
-	$./ColPack --help
+	$./ColPack
 
 ### OPTIONs 
-* order: `NATURAL, LARGEST_FIRST, DYNAMIC_LARGEST_FIRST, SMALLEST_LAST, INCIDENCE_DEGREE, RANDOM`  
-* color: `DISTANCE_ONE, ACYCLIC, ACYCLIC_FOR_INDIRECT_RECOVERY, STAR, RESTRICTED_STAR, DISTANCE_TWO`
+		
+	-f <gname>  :  Input file name
+	-o <order>  :  LARGEST_FIRST
+	               SMALLEST_LAST,
+	               DYNAMIC_LARGEST_FIRST,
+	               INCIDENCE_DEGREE,
+	               NATURAL,
+	               RANDOM
+	-m <methods>:  DISTANCE_ONE
+	               ACYCLIC
+	               ACYCLIC_FOR_INDIRECT_RECOVERY
+	               STAR
+	               RESTRICTED_STAR
+	               DISTANCE_TWO
+	               --------------------
+	               DISTANCE_ONE_OMP    (automatic display: nThreads,num_colors,timall,conflicts,loops)
+	                --------------------
+	               IMPLICIT_COVERING__STAR_BICOLORING
+	               EXPLICIT_COVERING__STAR_BICOLORING
+	               EXPLICIT_COVERING__MODIFIED_STAR_BICOLORING
+	               IMPLICIT_COVERING__GREEDY_STAR_BICOLORING
+	               --------------------
+	               COLUMN_PARTIAL_DISTANCE_TWO
+	               ROW_PARTIAL_DISTANCE_TWO
+	
+	-v          :  verbose for debug infomation
 
-### EXAMPLE 
-	$./ColPack Graphs/bcsstk01.mtx
-	$./ColPack Graphs/bcsstk01.mtx LARGEST_FIRST DISTANCE_ONE
-	$./ColPack --graph Graphs/bcsstk01.mtx --order SMALLEST_LAST -d DISTANCE_TWO
-	$./ColPack -f Graphs/bcsstk01.mtx -o RANDOM -distance DISTANCE_ONE
+### EXAMPLES:
+	
+	./ColPack -f Graphs/bcsstk01.mtx -o LARGEST_FIRST -m DISTANCE_ONE -v
+	./ColPack -f Graphs/bcsstk01.mtx -o SMALLEST_LAST -m ACYCLIC -v
+	./ColPack -f Graphs/bcsstk01.mtx -o DYNAMIC_LARGEST_FIRST -m DISTANCE_ONE_OMP -v
+	./ColPack -f Graphs/someBiPartFile  -o NATURAL -m IMPLICIT_COVERING__STAR_BICOLORING -v
+	./ColPack -f Graphs/someBiPartFile  -o RANDOM  -m COLUMN_PARTIAL_DISTANCE_TWO -v
 
 ### EXAMPLE OUTPUT
 
