@@ -77,7 +77,7 @@ To build ColPack using autotools, run the following in the `ColPack`:
     make -j 4   #Where "4" is the number of cores on your machine
     make install
 
-Change `${fullpath}` to the directory you want ColPack to install its library. Unless you want to installed into ColPack root directory.  
+Change `${fullpath}` to the directory you want ColPack to install its library. Unless you want to install into ColPack root directory.  
 Append `--disable-openmp` to `./configure`if you do not want enable OpenMp
 
 ColPack also has experimental support for building with CMake, which you can do
