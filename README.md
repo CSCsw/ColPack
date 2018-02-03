@@ -76,7 +76,7 @@ Try ColPack by Compile and Run without Installation
 You can just try ColPack by download, compile and run it. This is the fastest and simplest way to use ColPack. Do the following instructions in terminals.
 
     cd              
-    git clone https://github.com/ProbShin/ColPack.git   #Download ColPack
+    git clone https://github.com/CSCsw/ColPack.git   #Download ColPack
     cd ColPack      # go to ColPack Root Directory
     cd Example_Try  # go to Try ColPack folder
     make            # compile the code
@@ -89,7 +89,7 @@ Ubuntu Build Instructions
 Install ColPack makes ColPack easy to use and it can also decreases the size of the execuable file. To install ColPack using **autotools** (requires that have installed **automake** on your machine.), follows the instructions below.:
 
     cd   
-    git clone https://github.com/ProbShin/ColPack.git  #Download ColPack
+    git clone https://github.com/CSCsw/ColPack.git  #Download ColPack
     cd ColPack             # ColPack Root Directory
     autoreconf -vif                                
     fullpath=$(pwd)        # modify fullpath to your destination folder if need
