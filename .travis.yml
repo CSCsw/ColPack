@@ -4,7 +4,6 @@ matrix:
   -compiler: gcc
   before_script:  autoreconf -fi
   script: ./configure --prefix=~/ColPack && make && make check
-
     - # Now try building with CMake.
     - mkdir build
     - cd build
