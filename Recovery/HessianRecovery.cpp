@@ -427,7 +427,7 @@ namespace ColPack
 		unsigned int numOfNonZeros = RowIndex.size();
 
 //		#pragma omp parallel for default(none) schedule(static) shared(numOfNonZeros, ip2_RowIndex, ip2_ColumnIndex, dp2_HessianValue, RowIndex, ColumnIndex, HessianValue)
-		for(int i=0; i < numOfNonZeros; i++) {
+		for(size_t i=0; i < numOfNonZeros; i++) {
 			(*ip2_RowIndex)[i] = RowIndex[i];
 			(*ip2_ColumnIndex)[i] = ColumnIndex[i];
 			(*dp2_HessianValue)[i] = HessianValue[i];
@@ -516,7 +516,7 @@ namespace ColPack
 		(*ip2_ColumnIndex) = (unsigned int*) malloc(numOfNonZeros * sizeof(unsigned int));
 		(*dp2_HessianValue) = (double*) malloc(numOfNonZeros * sizeof(double)); //allocate memory for *dp2_HessianValue.
 
-		for(int i=0; i < numOfNonZeros; i++) {
+		for(size_t i=0; i < numOfNonZeros; i++) {
 			(*ip2_RowIndex)[i] = RowIndex[i];
 			(*ip2_ColumnIndex)[i] = ColumnIndex[i];
 			(*dp2_HessianValue)[i] = HessianValue[i];
@@ -1254,7 +1254,7 @@ namespace ColPack
 			int offset = 0;
 			i_VertexDegree = (signed) v2i_VertexAdjacency[i].size();
 			for(j=1; j<=NumOfNonzeros; j++) {
-				if( i > uip2_HessianSparsityPattern[i][j] ) {
+				if( (unsigned)i > uip2_HessianSparsityPattern[i][j] ) {
 				  offset++;
 				  continue;
 				}
@@ -1356,7 +1356,7 @@ cout<<"*WriteMatrixMarket_ADOLCInput("<<s_postfix<<", 1, uip2_HessianSparsityPat
 		(*uip2_ColumnIndex) = (unsigned int*) malloc(numOfNonZeros * sizeof(unsigned int));
 		(*dp2_HessianValue) = (double*) malloc(numOfNonZeros * sizeof(double)); //allocate memory for *dp2_HessianValue.
 
-		for(int i=0; i < numOfNonZeros; i++) {
+		for(size_t i=0; i < numOfNonZeros; i++) {
 			(*uip2_RowIndex)[i] = RowIndex[i];
 			(*uip2_ColumnIndex)[i] = ColumnIndex[i];
 			(*dp2_HessianValue)[i] = HessianValue[i];
@@ -1713,7 +1713,7 @@ cout<<"*WriteMatrixMarket_ADOLCInput("<<s_postfix<<", 2, uip2_HessianSparsityPat
 
 		unsigned int numOfNonZeros = returnValue;
 
-		for(int i=0; i < numOfNonZeros; i++) {
+		for(size_t i=0; i < numOfNonZeros; i++) {
 			(*ip2_RowIndex)[i] = RowIndex[i];
 			(*ip2_ColumnIndex)[i] = ColumnIndex[i];
 			(*dp2_HessianValue)[i] = HessianValue[i];

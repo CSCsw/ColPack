@@ -386,6 +386,8 @@ namespace ColPack
 
 		//Public Function 1478
 		void PrintVertexColorClasses();
+
+                int D1_Coloring_OMP();
 	};
 }
 #endif
