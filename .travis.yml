@@ -9,7 +9,7 @@ before_script:
   - autoreconf -fi
 
 script:
-  - ./configure && make && make check
+  - ./configure --disable-openmp && make && make check
 
   - # Now try building with CMake.
   - mkdir build
