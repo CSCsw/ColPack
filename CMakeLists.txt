@@ -29,7 +29,7 @@ set(COLPACK_VERSION 1.0.11)
 option(ENABLE_EXAMPLES
     "Build the examples in SampleDrivers/Matrix_Compression_and_Recovery." OFF)
 option(ENABLE_OPENMP "Enable OpenMP." OFF)
-
+set (CMAKE_CXX_STANDARD 11)
 # Configuring variables, etc.
 # ---------------------------
 if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
