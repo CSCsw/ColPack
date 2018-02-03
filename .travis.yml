@@ -1,19 +1,17 @@
 language: cpp
-matrix:
-  include:
-  - compiler: gcc
-    env: flag=
-  - compiler: clang
-    env: flag=--disable-openmp
+
+compiler: 
+  - gcc
+  - clang
 
 before_script:  autoreconf -fi
 
-script: ./configure --prefix=~/ColPack ${flag} && make && make check
-    - # Now try building with CMake.
-    - mkdir build
-    - cd build
-    - cmake .. -DCMAKE_INSTALL_PREFIX=~/ColPack
-    - make
-    - ctest
-    - make install
+script: ./configure --prefix=~/ColPack --disable-openmp && make && make check
+  - # Now try building with CMake.
+  - mkdir build
+  - cd build
+  - cmake .. -DCMAKE_INSTALL_PREFIX=~/ColPack
+  - make
+  - ctest
+  - make install
   
