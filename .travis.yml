@@ -2,8 +2,12 @@ language: cpp
 matrix:
   include:
   -compiler: gcc
-  before_script:  autoreconf -fi
-  script: ./configure --prefix=~/ColPack && make && make check
+   env: flag=
+  -compiler: clang
+   env: flag=--disable-openmp
+
+before_script:  autoreconf -fi
+  script: ./configure --prefix=~/ColPack ${flag} && make && make check
     - # Now try building with CMake.
     - mkdir build
     - cd build
@@ -12,15 +16,3 @@ matrix:
     - ctest
     - make install
   
-  -compiler: clang
-  before_script: autoreconf -fi
-  script: ./configure --prefix=~/ColPack --disable-openmp && make && make check
-
-    - # Now try building with CMake.
-    - mkdir build
-    - cd build
-    - cmake .. -DCMAKE_INSTALL_PREFIX=~/ColPack
-    - make
-    - ctest
-    - make install
-
