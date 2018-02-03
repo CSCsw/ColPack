@@ -4,9 +4,12 @@ compiler:
   - gcc
   - clang
 
-before_script:  autoreconf -fi
+before_script:  
+  - autoreconf -fi
 
-script: ./configure --prefix=~/ColPack --disable-openmp && make && make check
+script: 
+  -./configure --prefix=~/ColPack --disable-openmp && make && make check
+  
   - # Now try building with CMake.
   - mkdir build
   - cd build
