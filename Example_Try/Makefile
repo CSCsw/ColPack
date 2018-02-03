@@ -1,6 +1,7 @@
 # makefile for non-installed user
 # author: xin cheng
-# usage: change the following variable COLPACK_ROOT accordingly and make
+# usage: change the following variable COLPACK_ROOT accordingly
+#        delete OMP_FLAG=-fopenmp in MAC OS system
 COLPACK_ROOT = ..
 COLPACK_SRC = $(wildcard ${COLPACK_ROOT}/GraphColoring/*.cpp)
 COLPACK_SRC+= $(wildcard ${COLPACK_ROOT}/Utilities/*.cpp)

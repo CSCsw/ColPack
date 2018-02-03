@@ -1,7 +1,7 @@
 # make file for using installed library
 # author xin cheng
 # usage: chage the following two variable accordingly
-COLPACK_INSTALL_PATH = ../.libs/libColPack.so
+COLPACK_INSTALL_PATH = ../libs/libColPack.so
 COLPACK_ROOT = ..
 
 SRC = $(wildcard *.cpp)
