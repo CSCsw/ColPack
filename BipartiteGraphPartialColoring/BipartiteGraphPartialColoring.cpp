@@ -324,8 +324,10 @@ namespace ColPack
 // 		  cout<<"i_NumOfVerticesToBeColored = "<<i_NumOfVerticesToBeColored<<endl;
 			//Phase 1: tentative coloring
 			//Algo 4 - Line 4: for each right vertex v in U (in parallel) do
+#ifdef _OPENMP
 #pragma omp parallel for default(none) schedule(dynamic) shared(cout, i_NumOfVerticesToBeColored, vi_VerticesToBeColored) firstprivate(vi_forbiddenColors)
-			for(int i=0; i<i_NumOfVerticesToBeColored; i++) {
+#endif
+                    for(int i=0; i<i_NumOfVerticesToBeColored; i++) {
 				int v = vi_VerticesToBeColored[i];
 // 				CoutLock::set(); cout<<"t"<< omp_get_thread_num() <<": i="<<i<<", left vertex v="<<v<<endl;CoutLock::unset();
 				//Algo 4 - Line 5: for each left vertex w in adj (v) do
@@ -372,8 +374,10 @@ namespace ColPack
 
 			//Phase 2: conflict detection. For each vertex v in U, check and see if v need to be recolored
 			//Algo 4 - Line 11: for each vertex v in U (in parallel) do
+#ifdef _OPENMP
 #pragma omp parallel for default(none) schedule(dynamic) shared(i_NumOfVerticesToBeColored, vi_VerticesToBeColored,vi_verticesNeedNewColor, cout) private(cont)
-			for(int i=0; i<i_NumOfVerticesToBeColored; i++) {
+#endif
+                        for(int i=0; i<i_NumOfVerticesToBeColored; i++) {
 				//Algo 4 - Line 12: cont  <- true ; cont is used to break from the outer loop below
 				cont = true;
 				int v = vi_VerticesToBeColored[i];
@@ -390,8 +394,10 @@ namespace ColPack
 						//Algo 4 - Line 17: if color [v] = color [x] and f (v) > f (x) then
 					  if ( m_vi_LeftVertexColors [m_vi_Edges [x]] == m_vi_LeftVertexColors[v] && f(v) > f(m_vi_Edges [x]) ) {
 							//Algo 4 - Line 18: add [v] to R ; cont <- false; break
+#ifdef _OPENMP
 #pragma omp critical
-							{
+#endif
+                                              {
 								vi_verticesNeedNewColor.push_back(v);
 							}
 							cont = false;
@@ -528,8 +534,10 @@ namespace ColPack
 		  //cout<<"i_NumOfVerticesToBeColored = "<<i_NumOfVerticesToBeColored<<endl;
 			//Phase 1: tentative coloring
 			//Algo 4 - Line 4: for each right vertex v in U (in parallel) do
+#ifdef _OPENMP
 #pragma omp parallel for default(none) schedule(dynamic) shared(i_NumOfVerticesToBeColored, vi_VerticesToBeColored) firstprivate(vi_forbiddenColors)
-			for(int i=0; i<i_NumOfVerticesToBeColored; i++) {
+#endif
+                    for(int i=0; i<i_NumOfVerticesToBeColored; i++) {
 				int v = vi_VerticesToBeColored[i];
 				//Algo 4 - Line 5: for each left vertex w in adj (v) do
 				for (int w=m_vi_RightVertices [v]; w<m_vi_RightVertices [v+1]; w++ ) {
@@ -561,8 +569,10 @@ namespace ColPack
 
 			//Phase 2: conflict detection. For each vertex v in U, check and see if v need to be recolored
 			//Algo 4 - Line 11: for each vertex v in U (in parallel) do
+#ifdef _OPENMP
 #pragma omp parallel for default(none) schedule(dynamic) shared(i_NumOfVerticesToBeColored, vi_VerticesToBeColored,vi_verticesNeedNewColor, cout) private(cont)
-			for(int i=0; i<i_NumOfVerticesToBeColored; i++) {
+#endif
+                        for(int i=0; i<i_NumOfVerticesToBeColored; i++) {
 				//Algo 4 - Line 12: cont  <- true ; cont is used to break from the outer loop below
 				cont = true;
 				int v = vi_VerticesToBeColored[i];
@@ -579,8 +589,10 @@ namespace ColPack
 						//Algo 4 - Line 17: if color [v] = color [x] and f (v) > f (x) then
 					  if ( m_vi_RightVertexColors [m_vi_Edges [x]] == m_vi_RightVertexColors[v] && f(v) > f(m_vi_Edges [x]) ) {
 							//Algo 4 - Line 18: add [v] to R ; cont <- false; break
+#ifdef _OPENMP
 #pragma omp critical
-							{
+#endif
+                                              {
 								vi_verticesNeedNewColor.push_back(v);
 							}
 							cont = false;
@@ -605,7 +617,7 @@ namespace ColPack
 			for(int i=0; i<i_NumOfVerticesToBeColored; i++) {
 				vi_VerticesToBeColored[i]=vi_verticesNeedNewColor[i];
 			}
-			//*/
+			// */
 
 		}
 

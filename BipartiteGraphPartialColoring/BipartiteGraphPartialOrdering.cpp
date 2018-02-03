@@ -482,7 +482,7 @@ namespace ColPack
 // 				cout<<"delta[i_thread_num] 2="<< delta[i_thread_num] <<endl;
 
 				//Line 9: Let v be a vertex drawn from B_k [delta]
-				int v;
+				int v=0;
 
 				for(int i=delta[i_thread_num] ; i<i_MaxDegree_Private[i_thread_num]; i++) {
 					if(B[ i_thread_num ][ i ].size()!=0) {

@@ -6,6 +6,8 @@ http://cscapes.cs.purdue.edu/coloringpage/software.htm
 ColPack's project home page:
 http://cscapes.cs.purdue.edu/coloringpage/
 
+
+ 
 # ColPack 
 
 ColPack is a package comprising of implementations of algorithms for the specialized vertex coloring problems discussed in the previous section as well as algorithms for a variety of related supporting tasks in derivative computation.
@@ -65,14 +67,37 @@ ColPack is written in an object-oriented fashion in C++ heavily using the Standa
 ![ColPack Organization](http://cscapes.cs.purdue.edu/coloringpage/software_files/ColPack_structure_2.png)  
 
 
-Ubuntu Build Instructions
-=========================
-To build ColPack using autotools, run the following in the `ColPack`:
+Build and Compile ColPack Instructions
+======================================
+There are two ways to use ColPack, _Try without Installiation_ and _Build and Install_. The former is fast and easy to use, but is vulnerable for various OS enviroments settings, thus it requires the user know how to modify the makefile if meet some compiling issue.  The later one is more robust and it will also collect the ColPack into a shared library which makes ColPack easy to cooperate with other applications. But it requires to pre-install automake(or CMake) software. 
 
-    autoreconf -vif
-    ./configure --prefix=/path/to/install/
-    make -j 4   #Where "4" is the number of cores on your machine
-    make install
+Try ColPack by Compile and Run without Installation
+---------------------------------------------------
+You can just try ColPack by download, compile and run it. This is the fastest and simplest way to use ColPack. Do the following instructions in terminals.
+
+    cd              
+    git clone https://github.com/CSCsw/ColPack.git   #Download ColPack
+    cd ColPack      # go to ColPack Root Directory
+    cd Example_Try  # go to Try ColPack folder
+    make            # compile the code
+
+After all source codes been compiled, we will generate a executable file `ColPack` under current folder.  
+You may need to modify the Makefile to fit the different OS environments. 
+
+Ubuntu Build Instructions
+-------------------------
+Install ColPack makes ColPack easy to use and it can also decreases the size of the execuable file. To install ColPack using **autotools** (requires that have installed **automake** on your machine.), follows the instructions below.:
+
+    cd   
+    git clone https://github.com/CSCsw/ColPack.git  #Download ColPack
+    cd ColPack             # ColPack Root Directory
+    autoreconf -vif                                
+    fullpath=$(pwd)        # modify fullpath to your destination folder if need
+    ./configure --prefix=${fullpath}  
+    make -j 4              # Where "4" is the number of cores on your machine
+    make install           # install lib and include/ColPack to destination  
+
+Append `--disable-openmp` to `./configure` above if you need to disable OpenMP.(MAC user and some Windows user)  
 
 ColPack also has experimental support for building with CMake, which you can do
 via the following:
@@ -89,32 +114,95 @@ options, such as `ENABLE_EXAMPLES` and `ENABLE_OPENMP`, which you can set by
 running the following from the build directory:
 
     cmake .. -DENABLE_OPENMP=ON
+    
+Windows Build Instructions
+--------------------------
+You can build ColPack's static library on Windows using Visual Studio 
+(tested with Visual Studio 2015) and CMake. Note, however, that you are not
+able to use OpenMP (Visual Studio supports only OpenMP 2.0), and cannot
+compile the ColPack executable (it depends on the POSIX getopt.h).
 
-### USAGE 
+If you are using CMake 3.4 or greater, you can build and use ColPack's
+shared library. If you have an older CMake, we still build the shared
+library, but you will not be able to use it because none of the symbols will
+be exported (Visual Studio will not generate a .lib file).
 
-After building, you can run the following commands (from this directory  if
+On Windows, the examples link to the static library instead of the shared
+library.
+
+Unlike on UNIX, the static library is named ColPack_static (ColPack_static.lib)
+to avoid a name conflict with the shared library's ColPack.lib.
+
+Finally, some of the examples do not compile, seemingly because their
+filenames are too long.
+
+
+MAC OS Build Instructions
+-------------------------
+To install ColPack on Mac, you first need to install _Apple Xcode_ and _automake_.
+Then either install OpenMP and gcc compiler (real GNU Compiler Collection gcc, not just the link to clang.) or just disable OpenMP realated functions.(It's a well known problem, MAC's default compiler clang doesn't support OpenMP well.) 
+After that do the build instructions same as 'Ubuntu Build Instructions' part above. 
+
+Another recommend altinative way is to install an Ubuntu system on your MAC with *VirtualBox* (or any other virtual machine software). And then install ColPack on your virtual machines.
+
+After the Build, Use ColPack as Installed Library
+-------------------------------------------------
+After the build, we have already generate an executable file 'ColPack' under the colpack root directory. 
+However if you need to write your own code and use ColPack as an shared library. Then follow the following ways:
+* export library's path to `LD_LIBRARY_PATH`
+* create your own code. 
+* include the relative ColPack header files within your code.
+* added `-ldl path/to/installed/library` and `-I /path/to/installed/include` to the compiler
+* compile the code
+
+We provide a template codes in `Example_Use_Library`
+
+
+USAGE
+=====
+
+After building (or try), you can run the following commands (from ColPack root directory  if
 using autotools, or from the build directory if using CMake):
 
-	$./ColPack <GraphName> [order_option] [coloring_option]
-	$./ColPack --graph <GraphName> [--order <order_option>] [--color <coloring_option>]
-	$./ColPack -g <GraphName> [-o <order_option>] [-c <coloring_option>]
+	$./ColPack -f <graph_file_name> -o <ordering> -m <methods> [-v]
 
--g or --graph can be changed to -f --file in case needed.
-
-### HELP 
-	$./ColPack -h
-	$./ColPack --help
+### DISPLAY HELP 
+	$./ColPack
 
 ### OPTIONs 
-* order: `NATURAL, LARGEST_FIRST, DYNAMIC_LARGEST_FIRST, SMALLEST_LAST, INCIDENCE_DEGREE, RANDOM`  
-* color: `DISTANCE_ONE, ACYCLIC, ACYCLIC_FOR_INDIRECT_RECOVERY, STAR, RESTRICTED_STAR, DISTANCE_TWO`
+		
+	<gfile_name>:  Input file name
+	<ordering>  :  LARGEST_FIRST
+	               SMALLEST_LAST,
+	               DYNAMIC_LARGEST_FIRST,
+	               INCIDENCE_DEGREE,
+	               NATURAL,
+	               RANDOM
+	<methods>   :  DISTANCE_ONE
+	               ACYCLIC
+	               ACYCLIC_FOR_INDIRECT_RECOVERY
+	               STAR
+	               RESTRICTED_STAR
+	               DISTANCE_TWO
+	               --------------------
+	               DISTANCE_ONE_OMP    (automatic display: nThreads,num_colors,timall,conflicts,loops)
+	               --------------------
+	               IMPLICIT_COVERING__STAR_BICOLORING
+	               EXPLICIT_COVERING__STAR_BICOLORING
+	               EXPLICIT_COVERING__MODIFIED_STAR_BICOLORING
+	               IMPLICIT_COVERING__GREEDY_STAR_BICOLORING
+	               --------------------
+	               COLUMN_PARTIAL_DISTANCE_TWO
+	               ROW_PARTIAL_DISTANCE_TWO
+	
+	-v          :  verbose for debug infomation
 
-### EXAMPLE 
-	$./ColPack Graphs/bcsstk01.mtx
-	$./ColPack Graphs/bcsstk01.mtx LARGEST_FIRST DISTANCE_ONE
-	$./ColPack --graph Graphs/bcsstk01.mtx --order SMALLEST_LAST -d DISTANCE_TWO
-	$./ColPack -f Graphs/bcsstk01.mtx -o RANDOM -distance DISTANCE_ONE
-
+### EXAMPLES:
+	
+	./ColPack -f Graphs/bcsstk01.mtx -o LARGEST_FIRST -m DISTANCE_ONE -v
+	./ColPack -f Graphs/bcsstk01.mtx -o SMALLEST_LAST -m ACYCLIC -v
+	./ColPack -f Graphs/bcsstk01.mtx -o DYNAMIC_LARGEST_FIRST -m DISTANCE_ONE_OMP -v
+	
 ### EXAMPLE OUTPUT
 
 	ReadMatrixMarketAdjacencyGraph
@@ -170,24 +258,11 @@ using autotools, or from the build directory if using CMake):
 	15  : (INCIDENCE_DEGREE)
 	15  : (RANDOM)
 
-    
-Windows Build Instructions
-==========================
-You can build ColPack's static library on Windows using Visual Studio 
-(tested with Visual Studio 2015) and CMake. Note, however, that you are not
-able to use OpenMP (Visual Studio supports only OpenMP 2.0), and cannot
-compile the ColPack executable (it depends on the POSIX getopt.h).
 
-If you are using CMake 3.4 or greater, you can build and use ColPack's
-shared library. If you have an older CMake, we still build the shared
-library, but you will not be able to use it because none of the symbols will
-be exported (Visual Studio will not generate a .lib file).
 
-On Windows, the examples link to the static library instead of the shared
-library.
 
-Unlike on UNIX, the static library is named ColPack_static (ColPack_static.lib)
-to avoid a name conflict with the shared library's ColPack.lib.
 
-Finally, some of the examples do not compile, seemingly because their
-filenames are too long.
+The best source for citing this work
+====================================
+Assefaw H. Gebremedhin, Duc Nguyen, Mostofa Ali Patwary, and Alex Pothen, _[ColPack: Graph coloring software for derivative computation and beyond](http://dl.acm.org/citation.cfm?id=2513110&CFID=492318621&CFTOKEN=12698034)_, ACM Transactions on Mathematical Software, 40 (1), 30 pp., 2013.
+

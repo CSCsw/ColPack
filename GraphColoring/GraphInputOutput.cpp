@@ -198,7 +198,7 @@ namespace ColPack
 		  cout<<m_s_InputFile<<" not Found!"<<endl;
 		  exit(1);
 		}
-		else cout<<"Found file "<<m_s_InputFile<<endl;
+		//else cout<<"Found file "<<m_s_InputFile<<endl;
 
 		if (mm_read_banner(f, &matcode) != 0)
 		{
@@ -216,10 +216,10 @@ namespace ColPack
 		else b_symmetric = false;
 		//Check and make sure that the input file is supported
 		char * result = mm_typecode_to_str(matcode);
-		printf("Graph of Market Market type: [%s]\n", result);
+		//printf("Graph of Market Market type: [%s]\n", result);
 		free(result);
-		if (b_getValue) printf("\t Graph structure and VALUES will be read\n");
-		else printf("\t Read graph struture only. Values will NOT be read\n");
+		//if (b_getValue) printf("\t Graph structure and VALUES will be read\n");
+		//else printf("\t Read graph struture only. Values will NOT be read\n");
 		if( !( mm_is_coordinate(matcode) && (mm_is_symmetric(matcode) || mm_is_general(matcode) ) && ( mm_is_real(matcode) || mm_is_pattern(matcode) || mm_is_integer(matcode) ) ) ) {
 		  printf("Sorry, this application does not support this type.");
 		  exit(-1);
@@ -1368,15 +1368,15 @@ namespace ColPack
 			File file(s_InputFile);
 			string fileExtension = file.GetFileExtension();
 			if (isHarwellBoeingFormat(fileExtension)) {
-				cout<<"ReadHarwellBoeingAdjacencyGraph"<<endl;
+				//cout<<"ReadHarwellBoeingAdjacencyGraph"<<endl;
 				return ReadHarwellBoeingAdjacencyGraph(s_InputFile);
 			}
 			else if (isMeTiSFormat(fileExtension)) {
-				cout<<"ReadMeTiSAdjacencyGraph"<<endl;
+				//cout<<"ReadMeTiSAdjacencyGraph"<<endl;
 				return ReadMeTiSAdjacencyGraph(s_InputFile);
 			}
 			else if (isMatrixMarketFormat(fileExtension)) {
-				cout<<"ReadMatrixMarketAdjacencyGraph"<<endl;
+				//cout<<"ReadMatrixMarketAdjacencyGraph"<<endl;
 				return ReadMatrixMarketAdjacencyGraph(s_InputFile);
 			}
 			else { //other extensions
@@ -1385,15 +1385,15 @@ namespace ColPack
 			}
 		}
 		else if (s_fileFormat == "MM") {
-			cout<<"ReadMatrixMarketAdjacencyGraph"<<endl;
+			//cout<<"ReadMatrixMarketAdjacencyGraph"<<endl;
 			return ReadMatrixMarketAdjacencyGraph(s_InputFile);
 		}
 		else if (s_fileFormat == "HB") {
-			cout<<"ReadHarwellBoeingAdjacencyGraph"<<endl;
+			//cout<<"ReadHarwellBoeingAdjacencyGraph"<<endl;
 			return ReadHarwellBoeingAdjacencyGraph(s_InputFile);
 		}
 		else if (s_fileFormat == "MeTiS") {
-			cout<<"ReadMeTiSAdjacencyGraph"<<endl;
+			//cout<<"ReadMeTiSAdjacencyGraph"<<endl;
 			return ReadMeTiSAdjacencyGraph(s_InputFile);
 		}
 		else {

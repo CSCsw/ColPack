@@ -147,6 +147,7 @@ namespace ColPack
 
 		//Public Function 1604
 		int DistanceOneColoring(string s_OrderingVariant);
+		int DistanceOneColoring_OMP(string s_OrderingVariant);
 
 		//Public Function 1605
 		int DistanceTwoColoring(string s_OrderingVariant);

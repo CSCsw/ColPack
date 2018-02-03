@@ -1099,23 +1099,23 @@ namespace ColPack
 			File file(s_InputFile);
 			string fileExtension = file.GetFileExtension();
 			if (isHarwellBoeingFormat(fileExtension)) {
-				cout<<"ReadHarwellBoeingBipartiteGraph"<<endl;
+				//cout<<"ReadHarwellBoeingBipartiteGraph"<<endl;
 				ReadHarwellBoeingBipartiteGraph(s_InputFile);
 			}
 			else if (isMeTiSFormat(fileExtension)) {
-				cout<<"ReadMeTiSBipartiteGraph"<<endl;
+				//cout<<"ReadMeTiSBipartiteGraph"<<endl;
 				ReadMeTiSBipartiteGraph(s_InputFile);
 			}
 			else if (fileExtension == "gen") {
-				cout<<"ReadGenericMatrixBipartiteGraph"<<endl;
+				//cout<<"ReadGenericMatrixBipartiteGraph"<<endl;
 				ReadGenericMatrixBipartiteGraph(s_InputFile);
 			}
 			else if (fileExtension == "gens") {
-				cout<<"ReadGenericSquareMatrixBipartiteGraph"<<endl;
+				//cout<<"ReadGenericSquareMatrixBipartiteGraph"<<endl;
 				ReadGenericSquareMatrixBipartiteGraph(s_InputFile);
 			}
 			else if (isMatrixMarketFormat(fileExtension)) {
-				cout<<"ReadMatrixMarketBipartiteGraph"<<endl;
+				//cout<<"ReadMatrixMarketBipartiteGraph"<<endl;
 				ReadMatrixMarketBipartiteGraph(s_InputFile);
 			}
 			else { //other extensions
@@ -1124,23 +1124,23 @@ namespace ColPack
 			}
 		}
 		else if (s_fileFormat == "MM") {
-			cout<<"ReadMatrixMarketBipartiteGraph"<<endl;
+			//cout<<"ReadMatrixMarketBipartiteGraph"<<endl;
 			ReadMatrixMarketBipartiteGraph(s_InputFile);
 		}
 		else if (s_fileFormat == "HB") {
-			cout<<"ReadHarwellBoeingBipartiteGraph"<<endl;
+			//cout<<"ReadHarwellBoeingBipartiteGraph"<<endl;
 			ReadHarwellBoeingBipartiteGraph(s_InputFile);
 		}
 		else if (s_fileFormat == "MeTiS") {
-			cout<<"ReadMeTiSBipartiteGraph"<<endl;
+			//cout<<"ReadMeTiSBipartiteGraph"<<endl;
 			ReadMeTiSBipartiteGraph(s_InputFile);
 		}
 		else if (s_fileFormat == "GEN") {
-			cout<<"ReadGenericMatrixBipartiteGraph"<<endl;
+			//cout<<"ReadGenericMatrixBipartiteGraph"<<endl;
 			ReadGenericMatrixBipartiteGraph(s_InputFile);
 		}
 		else if (s_fileFormat == "GENS") {
-			cout<<"ReadGenericSquareMatrixBipartiteGraph"<<endl;
+			//cout<<"ReadGenericSquareMatrixBipartiteGraph"<<endl;
 			ReadGenericSquareMatrixBipartiteGraph(s_InputFile);
 		}
 		else {

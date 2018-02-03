@@ -63,7 +63,7 @@ int main(int argc, char* argv[]) {
         fprintf(stdout,"%d\n",g->GetVertexColorCount());
         delete g; g=nullptr;
     }
-    fprintf(stdout,"\n"); 
+    if(bVerbose) fprintf(stdout,"\n"); 
     return 0;
 }
 
