@@ -1,38 +1,27 @@
 language: cpp
+matrix:
+  include:
+  -compiler: gcc
+  before_script:  autoreconf -fi
+  script: ./configure --prefix=~/ColPack && make && make check
 
-compiler:
-  - gcc
-
-before_script:
-  - autoreconf -fi
-
-script:
-  - ./configure --prefix=~/ColPack && make && make check
-
-  - # Now try building with CMake.
-  - mkdir build
-  - cd build
-  - cmake .. -DCMAKE_INSTALL_PREFIX=~/ColPack
-  - make
-  - ctest
-  - make install
+    - # Now try building with CMake.
+    - mkdir build
+    - cd build
+    - cmake .. -DCMAKE_INSTALL_PREFIX=~/ColPack
+    - make
+    - ctest
+    - make install
   
-language: cpp
+  -compiler: clang
+  before_script: autoreconf -fi
+  script: ./configure --prefix=~/ColPack --disable-openmp && make && make check
 
-compiler:
-  - clang
+    - # Now try building with CMake.
+    - mkdir build
+    - cd build
+    - cmake .. -DCMAKE_INSTALL_PREFIX=~/ColPack
+    - make
+    - ctest
+    - make install
 
-before_script:
-  - autoreconf -fi
-
-script:
-  - ./configure --prefix=~/ColPack --disable-openmp && make && make check
-
-  - # Now try building with CMake.
-  - mkdir build
-  - cd build
-  - cmake .. -DCMAKE_INSTALL_PREFIX=~/ColPack
-  - make
-  - ctest
-  - make install
-  
