@@ -6,7 +6,18 @@ http://cscapes.cs.purdue.edu/coloringpage/software.htm
 ColPack's project home page:
 http://cscapes.cs.purdue.edu/coloringpage/
 
-
+# Table of Contents
+1. [ColPack](#colpack)
+2. [Installation Guilds](#build-and-compile-colpack-instructions)  
+	2.1 [Compile ColPack Without Install](#try-colpack-by-compile-and-run-without-installation)  
+	2.2 [Ubuntu Install](#ubuntu-build-instructions)  
+	2.3 [Windows Install](#windows-build-instructions)  
+	2.4 [MacOS Install](#mac-os-build-instructions)  
+	2.5 [Utilize the Installed Library](#after-the-build-use-colpack-as-installed-library)
+3. [Usages](#usage) 
+4. [HowToCite](#the-best-source-for-citing-this-work)
+  
+  
  
 # ColPack 
 
@@ -69,7 +80,7 @@ ColPack is written in an object-oriented fashion in C++ heavily using the Standa
 
 Build and Compile ColPack Instructions
 ======================================
-There are two ways to use ColPack, _Try without Installiation_ and _Build and Install_. The former is fast and easy to use, but is vulnerable for various OS enviroments settings, thus it requires the user know how to modify the makefile if meet some compiling issue.  The later one is more robust and it will also collect the ColPack into a shared library which makes ColPack easy to cooperate with other applications. But it requires to pre-install automake(or CMake) software. 
+There are two ways to use ColPack, _Try without Installiation_ and _Build and Install_. The former is fast and easy to use, but is vulnerable for various OS enviroments settings, thus it requires the user know how to modify the makefile if met some compiling issue.  The later one is more robust and it will also collect the ColPack into a shared library which makes ColPack easy to cooperate with other applications. But it requires to pre-install automake(or CMake) software. 
 
 Try ColPack by Compile and Run without Installation
 ---------------------------------------------------
@@ -82,7 +93,7 @@ You can just try ColPack by download, compile and run it. This is the fastest an
     make            # compile the code
 
 After all source codes been compiled, we will generate a executable file `ColPack` under current folder.  
-You may need to modify the Makefile to fit the different OS environments. 
+The above instruction are tested under Ubuntu system. You may need to modify the Makefile to fit the different OS environments and compilers.(delete `-fopenmp` for mac os. Replace `-fopenmp` to `-Qopenmp` )for intel compiler.) 
 
 Ubuntu Build Instructions
 -------------------------
@@ -139,16 +150,25 @@ filenames are too long.
 
 MAC OS Build Instructions
 -------------------------
-To install ColPack on Mac, you first need to install _Apple Xcode_ and _automake_.
-Then either install OpenMP and gcc compiler (real GNU Compiler Collection gcc, not just the link to clang.) or just disable OpenMP realated functions.(It's a well known problem, MAC's default compiler clang doesn't support OpenMP well.) 
-After that do the build instructions same as 'Ubuntu Build Instructions' part above. 
+To install ColPack on Mac, you first need to install _Apple Xcode_ and _automake_. Since (it is well known that) Mac's default compiler clang doesn't support OpenMP well, you need either install _OpenMP_ and _gcc_ compiler or disable _OpenMP_ by `--disable-openmp` .(It's a well known problem, MAC's default compiler clang doesn't support OpenMP well.) 
 
-Another recommend altinative way is to install an Ubuntu system on your MAC with *VirtualBox* (or any other virtual machine software). And then install ColPack on your virtual machines.
+    cd   
+    git clone https://github.com/CSCsw/ColPack.git  #Download ColPack
+    cd ColPack             # ColPack Root Directory
+    autoreconf -vif                                
+    fullpath=$(pwd)        # modify fullpath to your destination folder if need
+    ./configure --prefix=${fullpath} --disable-openmp
+    make -j 4              # Where "4" is the number of cores on your machine
+    make install           # install lib and include/ColPack to destination  
 
+
+Another recommend altinative way is to install an Ubuntu system on your MAC with *VirtualBox* (or any other virtual machine software), then install ColPack on your virtual machines.
+    
+    
 After the Build, Use ColPack as Installed Library
 -------------------------------------------------
-After the build, we have already generate an executable file 'ColPack' under the colpack root directory. 
-However if you need to write your own code and use ColPack as an shared library. Then follow the following ways:
+After the build, we have already generate an executable file 'ColPack' under the colpack root directory. And you can use it.
+However if you want to write your own code and use ColPack as an shared library. Then follow the following ways:
 * export library's path to `LD_LIBRARY_PATH`
 * create your own code. 
 * include the relative ColPack header files within your code.
