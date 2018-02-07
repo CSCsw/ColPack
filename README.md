@@ -8,8 +8,8 @@ http://cscapes.cs.purdue.edu/coloringpage/
 
 # Table of Contents
 1. [ColPack](#colpack)
-2. [Install Instructions](#build-and-compile-colpack-instructions)  
-	2.1 [Try Without Install](#try-colpack-by-compile-and-run-without-installation)  
+2. [Install Guilds](#build-and-compile-colpack-instructions)  
+	2.1 [Compile ColPack Without Install](#try-colpack-by-compile-and-run-without-installation)  
 	2.2 [Ubuntu Install](#ubuntu-build-instructions)  
 	2.3 [Windows Install](#windows-build-instructions)  
 	2.4 [MacOS Install](#mac-os-build-instructions)  
@@ -150,8 +150,7 @@ filenames are too long.
 
 MAC OS Build Instructions
 -------------------------
-To install ColPack on Mac, you first need to install _Apple Xcode_ and _automake_.
-Then either install OpenMP and gcc compiler (real GNU Compiler Collection gcc, not just the link to clang.) or just disable OpenMP realated functions.(It's a well known problem, MAC's default compiler clang doesn't support OpenMP well.) 
+To install ColPack on Mac, you first need to install _Apple Xcode_ and _automake_. Since (it is well known that) Mac's default compiler clang doesn't support OpenMP well, you need either install _OpenMP_ and _gcc_ compiler or disable _OpenMP_ by `--disable-openmp` .(It's a well known problem, MAC's default compiler clang doesn't support OpenMP well.) 
 
     cd   
     git clone https://github.com/CSCsw/ColPack.git  #Download ColPack
@@ -163,12 +162,13 @@ Then either install OpenMP and gcc compiler (real GNU Compiler Collection gcc, n
     make install           # install lib and include/ColPack to destination  
 
 
-Another recommend altinative way is to install an Ubuntu system on your MAC with *VirtualBox* (or any other virtual machine software). And then install ColPack on your virtual machines.
-
+Another recommend altinative way is to install an Ubuntu system on your MAC with *VirtualBox* (or any other virtual machine software), then install ColPack on your virtual machines.
+    
+    
 After the Build, Use ColPack as Installed Library
 -------------------------------------------------
-After the build, we have already generate an executable file 'ColPack' under the colpack root directory. 
-However if you need to write your own code and use ColPack as an shared library. Then follow the following ways:
+After the build, we have already generate an executable file 'ColPack' under the colpack root directory. And you can use it.
+However if you want to write your own code and use ColPack as an shared library. Then follow the following ways:
 * export library's path to `LD_LIBRARY_PATH`
 * create your own code. 
 * include the relative ColPack header files within your code.
