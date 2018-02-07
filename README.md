@@ -8,7 +8,7 @@ http://cscapes.cs.purdue.edu/coloringpage/
 
 # Table of Contents
 1. [ColPack](#colpack)
-2. [Install Guilds](#build-and-compile-colpack-instructions)  
+2. [Installation Guilds](#build-and-compile-colpack-instructions)  
 	2.1 [Compile ColPack Without Install](#try-colpack-by-compile-and-run-without-installation)  
 	2.2 [Ubuntu Install](#ubuntu-build-instructions)  
 	2.3 [Windows Install](#windows-build-instructions)  
