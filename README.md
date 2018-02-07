@@ -7,11 +7,12 @@ ColPack's project home page:
 http://cscapes.cs.purdue.edu/coloringpage/
 
 # Table of Contents
-1. [ColPack](#ColPack)
-2. [Install Instructions](#Build and Compile ColPack Instructions)
-3. [Usages](#USAGE) 
-
-
+1. [ColPack](ColPack#colpack)
+2. [Install Instructions](ColPack#build-and-compile-colpack-instructions)
+3. [Usages](ColPack#USAGE) 
+4. [HowToCite](ColPack#the-best-source-for-citing-this-work)
+  
+  
  
 # ColPack 
 
