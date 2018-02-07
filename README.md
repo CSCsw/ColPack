@@ -6,6 +6,11 @@ http://cscapes.cs.purdue.edu/coloringpage/software.htm
 ColPack's project home page:
 http://cscapes.cs.purdue.edu/coloringpage/
 
+# Table of Contents
+1. [ColPack](#ColPack)
+2. [Install Instructions](#Build and Compile ColPack Instructions)
+3. [Usages](#USAGE) 
+
 
  
 # ColPack 
@@ -82,7 +87,7 @@ You can just try ColPack by download, compile and run it. This is the fastest an
     make            # compile the code
 
 After all source codes been compiled, we will generate a executable file `ColPack` under current folder.  
-You may need to modify the Makefile to fit the different OS environments. 
+The above instruction are tested under Ubuntu system. You may need to modify the Makefile to fit the different OS environments and compilers.(delete `-fopenmp` for mac os. Replace `-fopenmp` to `-Qopenmp` )for intel compiler.) 
 
 Ubuntu Build Instructions
 -------------------------
@@ -141,7 +146,16 @@ MAC OS Build Instructions
 -------------------------
 To install ColPack on Mac, you first need to install _Apple Xcode_ and _automake_.
 Then either install OpenMP and gcc compiler (real GNU Compiler Collection gcc, not just the link to clang.) or just disable OpenMP realated functions.(It's a well known problem, MAC's default compiler clang doesn't support OpenMP well.) 
-After that do the build instructions same as 'Ubuntu Build Instructions' part above. 
+
+    cd   
+    git clone https://github.com/CSCsw/ColPack.git  #Download ColPack
+    cd ColPack             # ColPack Root Directory
+    autoreconf -vif                                
+    fullpath=$(pwd)        # modify fullpath to your destination folder if need
+    ./configure --prefix=${fullpath} --disable-openmp
+    make -j 4              # Where "4" is the number of cores on your machine
+    make install           # install lib and include/ColPack to destination  
+
 
 Another recommend altinative way is to install an Ubuntu system on your MAC with *VirtualBox* (or any other virtual machine software). And then install ColPack on your virtual machines.
 
