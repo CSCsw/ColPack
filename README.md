@@ -8,11 +8,11 @@ http://cscapes.cs.purdue.edu/coloringpage/
 
 # Table of Contents
 1. [ColPack](#colpack)
-2. [Install Instructions](#build-and-compile-colpack-instructions)
-	2.1 [Try without Install](##try-colpack-by-compile-and-run-without-installation)
-	2.2 [Ubuntu Install](#ubuntu-build-instructions)
-	2.3 [Windows Install](#windows-build-instructions)
-	2.4 [MacOS Install](#mac-os-build-instructions)
+2. [Install Instructions](#build-and-compile-colpack-instructions)  
+	2.1 [Try Without Install](#try-colpack-by-compile-and-run-without-installation)  
+	2.2 [Ubuntu Install](#ubuntu-build-instructions)  
+	2.3 [Windows Install](#windows-build-instructions)  
+	2.4 [MacOS Install](#mac-os-build-instructions)  
 	2.5 [Utilize the Installed Library](#after-the-build-use-colpack-as-installed-library)
 3. [Usages](#usage) 
 4. [HowToCite](#the-best-source-for-citing-this-work)
