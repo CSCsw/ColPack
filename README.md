@@ -80,7 +80,7 @@ ColPack is written in an object-oriented fashion in C++ heavily using the Standa
 
 Build and Compile ColPack Instructions
 ======================================
-There are two ways to use ColPack, _Try without Installiation_ and _Build and Install_. The former is fast and easy to use, but is vulnerable for various OS enviroments settings, thus it requires the user know how to modify the makefile if meet some compiling issue.  The later one is more robust and it will also collect the ColPack into a shared library which makes ColPack easy to cooperate with other applications. But it requires to pre-install automake(or CMake) software. 
+There are two ways to use ColPack, _Try without Installiation_ and _Build and Install_. The former is fast and easy to use, but is vulnerable for various OS enviroments settings, thus it requires the user know how to modify the makefile if met some compiling issue.  The later one is more robust and it will also collect the ColPack into a shared library which makes ColPack easy to cooperate with other applications. But it requires to pre-install automake(or CMake) software. 
 
 Try ColPack by Compile and Run without Installation
 ---------------------------------------------------
