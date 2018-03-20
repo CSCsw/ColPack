@@ -2,11 +2,11 @@
 # author: xin cheng
 # usage: change the following variable COLPACK_ROOT accordingly
 #        delete OMP_FLAG=-fopenmp in MAC OS system
-COLPACK_ROOT = ..
-COLPACK_SRC = $(wildcard ${COLPACK_ROOT}/GraphColoring/*.cpp)
-COLPACK_SRC+= $(wildcard ${COLPACK_ROOT}/Utilities/*.cpp)
-COLPACK_SRC+= $(wildcard ${COLPACK_ROOT}/BipartiteGraphBicoloring/*.cpp)
-COLPACK_SRC+= $(wildcard ${COLPACK_ROOT}/BipartiteGraphPartialColoring/*.cpp)
+COLPACK_ROOT = ../..
+COLPACK_SRC = $(wildcard ${COLPACK_ROOT}/SRC/GeneralGraphColoring/*.cpp)
+COLPACK_SRC+= $(wildcard ${COLPACK_ROOT}/SRC/Utilities/*.cpp)
+COLPACK_SRC+= $(wildcard ${COLPACK_ROOT}/SRC/BipartiteGraphBicoloring/*.cpp)
+COLPACK_SRC+= $(wildcard ${COLPACK_ROOT}/SRC/BipartiteGraphPartialColoring/*.cpp)
 
 COLPACK_OBJ = $(COLPACK_SRC:%.cpp=%.o)
 SRC = $(wildcard *.cpp)
@@ -28,12 +28,12 @@ LDFLAGS = -Wall -std=c++11 $(OMP_FLAG)  -Ofast #-O3
 
 
 INCLUDES = -I./
-INCLUDES = -I${COLPACK_ROOT}/Main
-INCLUDES+= -I${COLPACK_ROOT}/GraphColoring
-INCLUDES+= -I${COLPACK_ROOT}/BipartiteGraphBicoloring
-INCLUDES+= -I${COLPACK_ROOT}/BipartiteGraphPartialColoring
-INCLUDES+= -I${COLPACK_ROOT}/Utilities
-INCLUDES+= -I${COLPACK_ROOT}/Recovery
+INCLUDES = -I${COLPACK_ROOT}/INC
+INCLUDES+= -I${COLPACK_ROOT}/SRC/GeneralGraphColoring
+INCLUDES+= -I${COLPACK_ROOT}/SRC/BipartiteGraphBicoloring
+INCLUDES+= -I${COLPACK_ROOT}/SRC/BipartiteGraphPartialColoring
+INCLUDES+= -I${COLPACK_ROOT}/SRC/Utilities
+INCLUDES+= -I${COLPACK_ROOT}/SRC/Recovery
 
 
 all: $(EXE)
