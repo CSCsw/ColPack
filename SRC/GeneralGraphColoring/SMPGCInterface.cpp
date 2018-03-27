@@ -19,7 +19,7 @@ int SMPGCInterface::Coloring(int nT, int&colors, vector<int>&vtxColors, const st
     if     (method.compare("DISTANCE_ONE_OMP_GM")==0) return D1_OMP_GM(nT, colors, vtxColors, loc_ord);
     else if(method.compare("DISTANCE_ONE_OMP_IP")==0) return D1_OMP_IP(nT, colors, vtxColors, loc_ord);
     else if(method.compare("DISTANCE_ONE_OMP_JP")==0) return D1_OMP_JP(nT, colors, vtxColors, loc_ord);
-    else if(method.compare("DISTANCE_ONE_OMP_LB")==0) return D1_OMP_JP(nT, colors, vtxColors, loc_ord);
+    else if(method.compare("DISTANCE_ONE_OMP_LB")==0) return D1_OMP_LB(nT, colors, vtxColors, loc_ord);
     else if(method.compare("DISTANCE_ONE_OMP_JP_AW_LF")==0) return D1_OMP_JP(nT, colors, vtxColors, loc_ord);
     else if(method.compare("DISTANCE_ONE_OMP_JP_AW_SL")==0) return D1_OMP_JP(nT, colors, vtxColors, loc_ord);
     else { fprintf(stdout, "Unknow method %s\n",method.c_str()); exit(1); }   
@@ -201,24 +201,24 @@ bool SMPGCInterface::do_verify_colors(int colors, const vector<int>& vtxColors){
 // ============================================================================
 // based on Gebremedhin and Manne's GM algorithm [1]
 // ============================================================================
-int SMPGCInterface::D1_OMP_GM(int nT, int&colors, vector<int>&vtxColors, const string&loc_ord) {
+int SMPGCInterface::D1_OMP_GM(int nT, int&colors, vector<int64>&vtxColors, const string&loc_ord) {
     if(nT<=0) { printf("Warning, number of threads changed from %d to 1\n",nT); nT=1; }
     omp_set_num_threads(nT);
     
-    double tim_0  =0,tim_1=0,tim_2=0,tim_3=0;    //run time
-    double tim_Tot=0;               //run time
-    int    nConflicts = 0;                     //Number of conflicts 
+    double tim_color=0,tim_detect=0, tim_resolve;    //run time
+    double tim_Tot=0;                            //run time
+    int    nConflicts = 0;                       //Number of conflicts 
     
-    const int N = GraphCore::GetVertexCount(); //number of vertex
+    const int N = GraphCore::GetVertexCount();   //number of vertex
     
-    vector<int> &verPtr=m_vi_Vertices;      //ia of csr
-    vector<int> &verInd=m_vi_Edges;         //ja of csr
+    int* verPtr = &m_vi_Vertices[0];//vector<int> &verPtr=m_vi_Vertices;           //ia of csr
+    int* verInd = &m_vi_Edges[0];   //vector<int> &verInd=m_vi_Edges;              //ja of csr
     
     const int MaxDegreeP1 = m_i_MaximumVertexDegree+1; //maxDegree
     
-    colors=0;
+    colors=0;                       
+    vtxColors.clear();
     vtxColors.assign(N, -1);
-
 
     vector<int> Q;
     Q.assign(N,-1);
@@ -230,7 +230,6 @@ int SMPGCInterface::D1_OMP_GM(int nT, int&colors, vector<int>&vtxColors, const s
     const int qtnt = N/nT;
     const int rmnd = N%nT;
 
-    #pragma omp parallel for
     for(int tid=0; tid<nT; tid++){
         const int Nloc = qtnt + (tid<rmnd?1:0);
         QQ[tid].resize(Nloc);
@@ -243,8 +242,8 @@ int SMPGCInterface::D1_OMP_GM(int nT, int&colors, vector<int>&vtxColors, const s
     }
 
 
-tim_1 =- omp_get_wtime();
-#pragma omp parallel
+tim_color =- omp_get_wtime();
+#pragma omp parallel shared(qtnt, rmnd, Nloc, MaxDegreeP1, verPtr, verInd, vtxColors)
     {
         int tid=omp_get_thread_num();
         vector<bool> Mask;
@@ -253,21 +252,22 @@ tim_1 =- omp_get_wtime();
         const int Nloc =  qtnt + (tid<rmnd?1:0);
         const int low  =  tid*qtnt + (tid<rmnd?tid:rmnd);
         const int high =  low+Nloc;
+        
         // Phase 1: Pseudo-color
-        for(int qit=low; qit<high; qit++){
-            int v=Q[qit];
+        for(int it=low; it<high; it++){
+            int v=Q[it];
             Mask.assign(MaxDegreeP1, false);
-            for(int nbit=verPtr[v], nbitEnd=verPtr[v+1], nbColor; 
-                    nbit!=nbitEnd; nbit++ ) {
-                if( (nbColor=vtxColors[verInd[nbit]]) >= 0) 
-                    Mask[nbColor] = true; //assert(adjColor<Mark.size())
+            for(int jt=verPtr[v], jtEnd=verPtr[v+1]; jt!=jtEnd; jt++ ) {
+                int wColor;
+                if( (wColor=vtxColors[verInd[jt]]) >= 0) 
+                    Mask[wColor] = true; //assert(adjColor<Mark.size())
             } 
             int c;
             for (c=0; c!=MaxDegreeP1; c++)
                 if(Mask[c] == false)
                     break;
             vtxColors[v] = c;
-        } //End of outer for loop: for each vertex
+        } //End of for each vertex
     }//end of openmp parallel
     tim_1  += omp_get_wtime();    
 
@@ -304,15 +304,17 @@ tim_1 =- omp_get_wtime();
     tim_2 =- omp_get_wtime();
     #pragma omp parallel for
     for (int tid=0; tid<nT; tid++){
-        vector<int>& Q = QQ[tid];
         vector<int>& Qtmp = QQtmp[tid];
-        for(auto v : Q){
+        const int Nloc =  qtnt + (tid<rmnd?1:0);
+        const int low  =  tid*qtnt + (tid<rmnd?tid:rmnd);
+        const int high =  low+Nloc;
+        for(int qit=low; qit<high; qit++){
+            int v=Q[qit];
             for(int k=verPtr[v],kEnd=verPtr[v+1],nb; k!=kEnd; k++) {
                 nb = verInd[k];
                 if(v>nb && vtxColors[v] == vtxColors[nb]) {
                     Qtmp.push_back(v);
                     vtxColors[v] = -1;  //Will prevent v from being in conflict in another pairing
-                    if(Qtmp.size()==1) cout<<Qtmp.size()<<endl;
                     break;
                 } //End of if( vtxColor[v] == vtxColor[verInd[k]] )
             } //End of inner for loop: w in adj(v)
@@ -341,6 +343,7 @@ tim_1 =- omp_get_wtime();
     }
     tim_3 += omp_get_wtime();
 
+    nConflicts=0;
     for(auto q:QQtmp)
         nConflicts+=q.size();
 
@@ -353,11 +356,11 @@ tim_1 =- omp_get_wtime();
     colors++; //number of colors = largest color(0-based) + 1
 
 
-#ifndef PRINT_DETAILED_STATS_
+#ifdef PRINT_DETAILED_STATS_
     printf("***********************************************\n");
     printf("Total number of threads    : %d \n", nT);    
     printf("Total number of colors used: %d \n", colors);    
-    printf("Number of conflicts overall: %ld \n",nConflicts);  
+    printf("Number of conflicts overall: %d \n",nConflicts);  
     printf("Total Time                 : %lf sec\n", tim_Tot);
     printf("Phase 0 Time               : %lf sec\n", tim_0);
     printf("Phase 1 Time               : %lf sec\n", tim_1);
@@ -371,13 +374,15 @@ tim_1 =- omp_get_wtime();
 
 #endif  
 
+    printf("@GM_nT_c_T_T0_T1_T2_T3_nCnf\t");
+    printf("%d\t",  nT);    
     printf("%d\t",  colors);    
     printf("%lf\t", tim_Tot);
     printf("%lf\t", tim_0);
     printf("%lf\t", tim_1);
     printf("%lf\t", tim_2);
     printf("%lf\t", tim_3);
-    printf("%d\t", nConflicts);
+    printf("%d", nConflicts);
     printf("\n");
     return _TRUE;   
 }
@@ -401,6 +406,7 @@ int SMPGCInterface::D1_OMP_IP(int nT, int&colors, vector<int>&vtxColors, const s
     const int MaxDegreeP1 = m_i_MaximumVertexDegree+1; //maxDegree
     
     colors=0;
+    vtxColors.clear();
     vtxColors.assign(N, -1);
 
     vector<int> Q, Qtmp;
@@ -461,7 +467,7 @@ int SMPGCInterface::D1_OMP_IP(int nT, int&colors, vector<int>&vtxColors, const s
         printf("Loops (1-based)     : %d\n", nLoops);
         printf("Time Pseudo Coloring: %lg sec.\n", time1);
         printf("Time Detection      : %lg sec.\n", time2);
-        printf("Num  Conflicts      : %ld \n", QtmpTail);
+        //printf("Num  Conflicts      : %ld \n", QtmpTail);
 #endif
         Q.swap(Qtmp);
         QTail=QtmpTail;
@@ -478,7 +484,7 @@ int SMPGCInterface::D1_OMP_IP(int nT, int&colors, vector<int>&vtxColors, const s
     colors++; //number of colors = largest color(0-based) + 1
 
 
-#ifndef PRINT_DETAILED_STATS_
+#ifdef PRINT_DETAILED_STATS_
     printf("***********************************************\n");
     printf("Total number of threads    : %d \n", nT);    
     printf("Total number of colors used: %d \n", colors);    
@@ -495,21 +501,24 @@ int SMPGCInterface::D1_OMP_IP(int nT, int&colors, vector<int>&vtxColors, const s
 
 #endif  
 
-
+    printf("@AGM_nT_c_T_t1_t2_nCnf_nLoop\t");
+    printf("%d\t",  nT);    
     printf("%d\t",  colors);    
     printf("%lf\t", totalTime);
     printf("%lf\t", time1);
     printf("%lf\t", time2);
     printf("%ld\t", nConflicts);  
-    printf("%d\n",  nLoops);      
+    printf("%d",  nLoops);      
+    printf("\n");      
     return _TRUE;
 }
 
 
 // ============================================================================
-// based on LB's algorithm [3]
+// based on Luby's algorithm [3]
 // ============================================================================
 int SMPGCInterface::D1_OMP_LB(int nT, int&colors, vector<int>&vtxColors, const string&loc_ord) {
+    
     if(nT<=0) { printf("Warning, number of threads changed from %d to 1\n",nT); nT=1; }
     omp_set_num_threads(nT);
     
@@ -518,12 +527,14 @@ int SMPGCInterface::D1_OMP_LB(int nT, int&colors, vector<int>&vtxColors, const s
     double timeReG=0;    //run time
     double timeTot=0;               //run time
     
+
     const int N = GraphCore::GetVertexCount(); //number of vertex
     
     vector<int> &verPtr=m_vi_Vertices;      //ia of csr
     vector<int> &verInd=m_vi_Edges;         //ja of csr
     
     colors=0;
+    vtxColors.clear();
     vtxColors.resize(N, -1);
 
     const int qtnt = N/nT;
@@ -534,6 +545,7 @@ int SMPGCInterface::D1_OMP_LB(int nT, int&colors, vector<int>&vtxColors, const s
     int QTail=0;
     
     vector<vector<int>>  QQ;
+    QQ.resize(nT);
     #pragma omp parallel for
     for(int i=0;i<nT; i++){
         QQ[i].reserve(qtnt+1);
@@ -544,6 +556,7 @@ int SMPGCInterface::D1_OMP_LB(int nT, int&colors, vector<int>&vtxColors, const s
         Q[i]=m_vi_OrderedVertices[i];
     }
     QTail = N;
+
 
     // generate rando m numbers
 timeRnd =-omp_get_wtime();
@@ -555,14 +568,19 @@ timeRnd =-omp_get_wtime();
     for(int i=0; i<N; i++)
         WeightRnd[i] = distribution(generator);
 timeRnd +=omp_get_wtime();
-    
+
+
     colors=0;
     do{
+
+        
+//        printf("color %d\n",colors); 
         //phase 0: find maximal indenpenent set, and color it
 timeMIS -= omp_get_wtime();
 #pragma omp parallel
         {
             int tid = omp_get_thread_num();
+            vector<int> candi;
 #pragma omp for
         for(int vit=0; vit<QTail; vit++){
             int v = Q[vit];
@@ -570,18 +588,28 @@ timeMIS -= omp_get_wtime();
             bool bDomain=true;
             for(int k=verPtr[v],kEnd=verPtr[v+1]; k!=kEnd; k++){
                 int nb = verInd[k];
+                if(vtxColors[nb]!=-1) {
+                    continue;
+                }
                 double nbwt = WeightRnd[nb];
                 if(vwt<nbwt || (vwt==nbwt && v>nb)){
                     bDomain=false;
                     break;
                 }
             }
-            if(bDomain) 
-                vtxColors[v]=colors;
-            else
+            if(bDomain) {
+                candi.push_back(v);//vtxColors[v]=colors;
+            //    printf("v%d=c%d ",v,colors);
+            }
+            else{
                 QQ[tid].push_back(v);
+                //printf("v%dinQ.size(%d) ",v,QQ[tid].size());
+            }
         } //end of omp for
+        
+            for(auto v : candi) vtxColors[v]=colors;
         } //end of omp parallel
+
         colors++;
 timeMIS += omp_get_wtime();
 timeReG -= omp_get_wtime();
@@ -590,19 +618,20 @@ timeReG -= omp_get_wtime();
         for(int tid=0; tid<nT; tid++){
             for(auto v : QQ[tid])
                 Q[QTail++]=v;
-            QQ[tid].resize(0);
+            QQ[tid].clear(); //resize(0);
         }
+        //printf("color, Qtail = %d, %d\n",colors, QTail);
         
 timeReG += omp_get_wtime();
     }while(QTail!=0);
 
-timeTot = timeMIS+timeReG;
+timeTot = timeRnd+timeMIS+timeReG;
 #ifdef PRINT_DETAILED_STATS_
     printf("***********************************************\n");
     printf("Total number of threads    : %d \n", nT);    
     printf("Total number of colors used: %d \n", colors);    
-    printf("Number of conflicts overall: %ld \n",nConflicts);  
-    printf("Total Time(without RndTime): %lf sec\n", totalTime);
+    //printf("Number of conflicts overall: %ld \n",nConflicts);  
+    //printf("Total Time(without RndTime): %lf sec\n", totalTime);
     printf("Rnd Time               : %lf sec\n", timeRnd);
     printf("Mis Time               : %lf sec\n", timeMIS);
     printf("Reg Time               : %lf sec\n", timeReG);
@@ -613,12 +642,14 @@ timeTot = timeMIS+timeReG;
     printf("***********************************************\n");
 
 #endif  
-
+    printf("@LB_nT_c_T_Twt_TPse_TReG\t");
+    printf("%d\t",  nT);    
     printf("%d\t",  colors);    
     printf("%lf\t", timeTot);
     printf("%lf\t", timeRnd);
     printf("%lf\t", timeMIS);
-    printf("%lf\t", timeReG);
+    printf("%lf", timeReG);
+    printf("\n");
     return _TRUE;
 }
 
@@ -629,10 +660,11 @@ int SMPGCInterface::D1_OMP_JP(int nT, int&colors, vector<int>&vtxColors, const s
     if(nT<=0) { printf("Warning, number of threads changed from %d to 1\n",nT); nT=1; }
     omp_set_num_threads(nT);
     
-    double timeMIS=0;    //run time
-    double timeRnd=0;    //run time
-    double timeReG=0;    //run time
-    double timeTot=0;               //run time
+    double timeWt  =0;    //run time
+    double timeMIS =0;
+    //double timePse =0;    //run time
+    double timeReG =0;    //run time
+    double timeTot =0;               //run time
     int    nLoops = 0;                         //Number of rounds 
     
     const int N = GraphCore::GetVertexCount(); //number of vertex
@@ -643,6 +675,7 @@ int SMPGCInterface::D1_OMP_JP(int nT, int&colors, vector<int>&vtxColors, const s
     const int MaxDegreeP1 = m_i_MaximumVertexDegree+1; //maxDegree
     
     colors=0;
+    vtxColors.clear();
     vtxColors.resize(N, -1);
 
     const int qtnt = N/nT;
@@ -653,7 +686,8 @@ int SMPGCInterface::D1_OMP_JP(int nT, int&colors, vector<int>&vtxColors, const s
     int QTail=0;
     
     vector<vector<int>>  QQ;
-    #pragma omp parallel for
+    QQ.resize(nT);    
+#pragma omp parallel for
     for(int i=0;i<nT; i++){
         QQ[i].reserve(qtnt+1);
     }
@@ -670,20 +704,22 @@ int SMPGCInterface::D1_OMP_JP(int nT, int&colors, vector<int>&vtxColors, const s
     vector<double> WeightDeg;
     WeightDeg.resize(N,-1);
 
-timeRnd =-omp_get_wtime();
+timeWt =-omp_get_wtime();
     std::default_random_engine generator(std::chrono::system_clock::now().time_since_epoch().count());
     std::uniform_real_distribution<double> distribution(0.0,1.0);
     for(int i=0; i<N; i++)
         WeightRnd[i] = distribution(generator);
-timeRnd +=omp_get_wtime();
+timeWt +=omp_get_wtime();
     
     colors=0;
     do{
+        //printf("color%d_Qtail%d\n",colors,QTail);
         //phase 0: find maximal indenpenent set, and color it
 timeMIS -= omp_get_wtime();
 #pragma omp parallel
 {
     int tid = omp_get_thread_num();
+    vector<int> candi;
 #pragma omp for
         for(int vit=0; vit<QTail; vit++){
             int v = Q[vit];
@@ -691,6 +727,7 @@ timeMIS -= omp_get_wtime();
             bool bDomain=true;
             for(int k=verPtr[v],kEnd=verPtr[v+1]; k!=kEnd; k++){
                 int nb = verInd[k];
+                if(vtxColors[nb]!=-1) continue;
                 double nbwt = WeightRnd[nb];
                 if(vwt<nbwt || (vwt==nbwt && v>nb)){
                     bDomain=false;
@@ -698,22 +735,27 @@ timeMIS -= omp_get_wtime();
                 }
             }
             if(bDomain) {
-                vector<int> MASK(MaxDegreeP1,-1);
-                for(int k=verPtr[v],kEnd=verPtr[v+1]; k!=kEnd; k++){
-                    int nb = verInd[k];
-                    int nbcolor=vtxColors[nb];
-                    if( nbcolor>=0 ){
-                        MASK[nbcolor]=nb;
-                    }
-                }
-                int c;
-                for(c=0; c<MaxDegreeP1; c++)
-                    if(MASK[c]==-1) break;
-                vtxColors[v]=c;
+                candi.push_back(v);
             }
             else
                 QQ[tid].push_back(v);
         } //end of omp for
+
+        for(auto v : candi) {
+            vector<int> MASK(MaxDegreeP1,-1);
+            for(int k=verPtr[v],kEnd=verPtr[v+1]; k!=kEnd; k++){
+                int nb = verInd[k];
+                int nbcolor=vtxColors[nb];
+                if( nbcolor>=0 ){
+                    MASK[nbcolor]=nb;
+                }
+            }
+            int c;
+            for(c=0; c<MaxDegreeP1; c++)
+                if(MASK[c]==-1) break;
+            vtxColors[v]=c;
+
+        }
 }   //end of omp parallel
 timeMIS += omp_get_wtime();
 timeReG -= omp_get_wtime();
@@ -722,22 +764,31 @@ timeReG -= omp_get_wtime();
         for(int tid=0; tid<nT; tid++){
             for(auto v : QQ[tid])
                 Q[QTail++]=v;
-            QQ[tid].resize(0);
+            QQ[tid].clear();
         }
         
 timeReG += omp_get_wtime();
     nLoops++;
     }while(QTail!=0);
 
-timeTot = timeMIS+timeReG;
+timeTot =timeWt+ timeMIS+timeReG;
+//for(int i=0; i<N; i++) printf("%d-%d\n",i,vtxColors[i]);
+
+
+colors=0;
+#pragma omp parallel for reduction(max:colors)
+for(int i=0; i<N; i++){
+    auto c = vtxColors[i];
+    if(c>colors) colors=c;
+}
 #ifdef PRINT_DETAILED_STATS_
     printf("***********************************************\n");
     printf("Total number of threads    : %d \n", nT);    
     printf("Total number of colors used: %d \n", colors);    
-    printf("Number of conflicts overall: %ld \n",nConflicts);  
-    printf("Number of loops            : %ld \n",nLoops);  
+    //printf("Number of conflicts overall: %ld \n",nConflicts);  
+    //printf("Number of loops            : %ld \n",nLoops);  
     printf("Total Time                 : %lf sec\n", timeTot);
-    printf("Rnd Time                   : %lf sec\n", timeRnd);
+    printf("Rnd Time                   : %lf sec\n", timeWt);
     printf("MISCOLOR Time              : %lf sec\n", timeMIS);
     printf("Reg Time                   : %lf sec\n", timeReG);
     if( do_verify_colors(colors, vtxColors)) 
@@ -747,14 +798,15 @@ timeTot = timeMIS+timeReG;
     printf("***********************************************\n");
 
 #endif  
-
+    printf("@JP_nT_c_T_Twt_TMISC_TReG_nLoop\t");
+    printf("%d\t",  nT);    
     printf("%d\t",  colors);    
     printf("%lf\t", timeTot);
-    printf("%lf\t", timeRnd);
+    printf("%lf\t", timeWt);
     printf("%lf\t", timeMIS);
     printf("%lf\t", timeReG);
-    printf("%d\t", nLoops);
-    
+    printf("%d", nLoops);
+    printf("\n");
     return _TRUE;
 }
 
@@ -766,7 +818,7 @@ int SMPGCInterface::D1_OMP_JP_AW_LF(int nT, int&colors, vector<int>&vtxColors, c
     omp_set_num_threads(nT);
     
     double timeMIS=0;    //run time
-    double timeRnd=0;    //run time
+    double timeWt=0;    //run time
     double timeReG=0;    //run time
     double timeTot=0;               //run time
     int    nLoops = 0;                         //Number of rounds 
@@ -779,6 +831,7 @@ int SMPGCInterface::D1_OMP_JP_AW_LF(int nT, int&colors, vector<int>&vtxColors, c
     const int MaxDegreeP1 = m_i_MaximumVertexDegree+1; //maxDegree
     
     colors=0;
+    vtxColors.clear();
     vtxColors.resize(N, -1);
 
     const int qtnt = N/nT;
@@ -789,6 +842,7 @@ int SMPGCInterface::D1_OMP_JP_AW_LF(int nT, int&colors, vector<int>&vtxColors, c
     int QTail=0;
     
     vector<vector<int>>  QQ;
+    QQ.resize(nT);
     #pragma omp parallel for
     for(int i=0;i<nT; i++){
         QQ[i].reserve(qtnt+1);
@@ -806,36 +860,45 @@ int SMPGCInterface::D1_OMP_JP_AW_LF(int nT, int&colors, vector<int>&vtxColors, c
     vector<double> WeightDeg;
     WeightDeg.resize(N,-1);
 
-timeRnd =-omp_get_wtime();
+timeWt =-omp_get_wtime();
     std::default_random_engine generator(std::chrono::system_clock::now().time_since_epoch().count());
     std::uniform_real_distribution<double> distribution(0.0,1.0);
     for(int i=0; i<N; i++)
         WeightRnd[i] = distribution(generator);
     for(auto v: Q)
         WeightDeg[v] = verPtr[v+1]-verPtr[v];
-timeRnd +=omp_get_wtime();
+timeWt +=omp_get_wtime();
     
     colors=0;
     do{
         //phase 0: find maximal indenpenent set, and color it
-timeMIS -= omp_get_wtime();
+        timeMIS -= omp_get_wtime();
 #pragma omp parallel
-{
-    int tid = omp_get_thread_num();
+        {
+            int tid = omp_get_thread_num();
+            vector<int> candi;
 #pragma omp for
-        for(int vit=0; vit<QTail; vit++){
-            int v = Q[vit];
-            double vwt = WeightDeg[v];
-            bool bDomain=true;
-            for(int k=verPtr[v],kEnd=verPtr[v+1]; k!=kEnd; k++){
-                int nb = verInd[k];
-                double nbwt = WeightDeg[nb];
-                if(vwt<nbwt || (vwt==nbwt && WeightRnd[v]>WeightRnd[nb])){
-                    bDomain=false;
-                    break;
+            for(int vit=0; vit<QTail; vit++){
+                int v = Q[vit];
+                double vwt = WeightDeg[v];
+                bool bDomain=true;
+                for(int k=verPtr[v],kEnd=verPtr[v+1]; k!=kEnd; k++){
+                    int nb = verInd[k];
+                    if(vtxColors[nb]>=0) continue;
+                    double nbwt = WeightDeg[nb];
+                    if(vwt<nbwt || (vwt==nbwt && WeightRnd[v]>WeightRnd[nb])){
+                        bDomain=false;
+                        break;
+                    }
                 }
-            }
-            if(bDomain) {
+                if(bDomain) {
+                    candi.push_back(v);
+                }
+                else
+                    QQ[tid].push_back(v);
+            } //end of omp for
+
+            for(int v : candi){
                 vector<int> MASK(MaxDegreeP1,-1);
                 for(int k=verPtr[v],kEnd=verPtr[v+1]; k!=kEnd; k++){
                     int nb = verInd[k];
@@ -849,12 +912,10 @@ timeMIS -= omp_get_wtime();
                     if(MASK[c]==-1) break;
                 vtxColors[v]=c;
             }
-            else
-                QQ[tid].push_back(v);
-        } //end of omp for
-}
-timeMIS += omp_get_wtime();
-timeReG -= omp_get_wtime();
+        } //end of omp block
+        timeMIS += omp_get_wtime();
+        timeReG -= omp_get_wtime();
+
         //phase 2: rebuild the graph
         QTail=0;
         for(int tid=0; tid<nT; tid++){
@@ -862,20 +923,28 @@ timeReG -= omp_get_wtime();
                 Q[QTail++]=v;
             QQ[tid].resize(0);
         }
-        
-timeReG += omp_get_wtime();
-    nLoops++;
+
+        timeReG += omp_get_wtime();
+        nLoops++;
     }while(QTail!=0);
 
-timeTot = timeMIS+ timeReG;
+    timeTot = timeWt+timeMIS+ timeReG;
+
+    colors=0;
+    #pragma omp parallel for reduction(max:colors)
+    for(int i=0; i<N; i++){
+        auto c = vtxColors[i];
+        if(c>colors) colors=c;
+    }
+
 #ifdef PRINT_DETAILED_STATS_
     printf("***********************************************\n");
     printf("Total number of threads    : %d \n", nT);    
     printf("Total number of colors used: %d \n", colors);    
-    printf("Number of conflicts overall: %ld \n",nConflicts);  
-    printf("Number of loops            : %ld \n",nLoops);  
+    //printf("Number of conflicts overall: %ld \n",nConflicts);  
+    //printf("Number of loops            : %ld \n",nLoops);  
     printf("Total Time                 : %lf sec\n", timeTot);
-    printf("Rnd Time                   : %lf sec\n", timeRnd);
+    printf("gen Wegith Time                   : %lf sec\n", timeWt);
     printf("MISCOLOR Time              : %lf sec\n", timeMIS);
     printf("Reg Time                   : %lf sec\n", timeReG);
     if( do_verify_colors(colors, vtxColors)) 
@@ -885,13 +954,14 @@ timeTot = timeMIS+ timeReG;
     printf("***********************************************\n");
 
 #endif  
-
+    printf("@AJPLF_nT_c_T_TWt_TMISC_TReG\t");
+    printf("%d\t",  nT);
     printf("%d\t",  colors);    
     printf("%lf\t", timeTot);
-    printf("%lf\t", timeRnd);
+    printf("%lf\t", timeWt);
     printf("%lf\t", timeMIS);
-    printf("%lf\t", timeReG);
-    
+    printf("%lf", timeReG);
+    printf("\n");
     return _TRUE;
 }
 
@@ -899,11 +969,13 @@ timeTot = timeMIS+ timeReG;
 // based on Allwright's SL JP algorithm [3]
 // ============================================================================
 int SMPGCInterface::D1_OMP_JP_AW_SL(int nT, int&colors, vector<int>&vtxColors, const string&loc_ord) {
+
+
     if(nT<=0) { printf("Warning, number of threads changed from %d to 1\n",nT); nT=1; }
     omp_set_num_threads(nT);
     
     double timeMIS=0;    //run time
-    double timeRnd=0;    //run time
+    double timeWt=0;    //run time
     double timeReG=0;    //run time
     double timeTot=0;               //run time
     int    nLoops = 0;                         //Number of rounds 
@@ -916,6 +988,7 @@ int SMPGCInterface::D1_OMP_JP_AW_SL(int nT, int&colors, vector<int>&vtxColors, c
     const int MaxDegreeP1 = m_i_MaximumVertexDegree+1; //maxDegree
     
     colors=0;
+    vtxColors.clear();
     vtxColors.resize(N, -1);
 
     const int qtnt = N/nT;
@@ -926,6 +999,7 @@ int SMPGCInterface::D1_OMP_JP_AW_SL(int nT, int&colors, vector<int>&vtxColors, c
     int QTail=0;
     
     vector<vector<int>>  QQ;
+    QQ.resize(nT);
     #pragma omp parallel for
     for(int i=0;i<nT; i++){
         QQ[i].reserve(qtnt+1);
@@ -940,39 +1014,91 @@ int SMPGCInterface::D1_OMP_JP_AW_SL(int nT, int&colors, vector<int>&vtxColors, c
     // weight 
     vector<double> WeightRnd;
     WeightRnd.resize(N,-1);
-    vector<double> WeightDeg;
-    WeightDeg.resize(N,-1);
+    vector<int> WeightDeg;
+    WeightDeg.resize(N,-1);  //? false shareing potential v.s. cache line benefit
 
-timeRnd =-omp_get_wtime();
+timeWt =-omp_get_wtime();
     std::default_random_engine generator(std::chrono::system_clock::now().time_since_epoch().count());
     std::uniform_real_distribution<double> distribution(0.0,1.0);
     for(int i=0; i<N; i++)
         WeightRnd[i] = distribution(generator);
-    for(auto v: Q)
-        WeightDeg[v] = verPtr[v+1]-verPtr[v];
-timeRnd +=omp_get_wtime();
+    //get SL by parallel
+#pragma omp parallel shared(QTail, Q, verPtr, WeightDeg)
+    {
+        int tid = omp_get_thread_num();
+        int myQTail = QTail;
+        vector<int> candi;
+        vector<int> QQ;
+        int k=0;
+        while(myQTail!=0){
+            candi.clear();
+            QQ.clear();
+#pragma omp for nowait
+            for(int it=0; it<myQTail; it++){
+                int v = Q[it];
+                int jt=verPtr[v], jtEnd = verPtr[v+1];
+                int deg = jtEnd-jt;
+
+                for(; jt<jtEnd && deg>k; jt++)
+                    if(WeightDeg[Q[jt]]!=-1) 
+                        deg--;
+                
+                if(deg <= k) 
+                    candi.push_back(v);
+                else
+                    QQ.push_back(v);
+            }//end of omp for 
+
+            for(auto v : candi)
+                WeightDeg[v] = k;  //?false sharing potential
+            
+            int whereInQ =__sync_fetch_and_add(&QTail, -candi.size());
+            
+            // Q += QQ
+            for(int i=0,iEnd=candi.size(); i<iEnd; i++) {
+                Q[whereInQ+i]=QQ[i];
+            }
+#pragma omp barrier
+            myQTail = QTail;
+#pragma omp barrier
+            if(tid)==0 QTail=0;
+#pragma omp barrier
+        } //end of while
+    }// end of omp parallel to get SL weight
+
+    
+timeWt +=omp_get_wtime();
     
     colors=0;
     do{
         //phase 0: find maximal indenpenent set, and color it
-timeMIS -= omp_get_wtime();
-#pragma omp parallel 
-    { 
-        int tid=omp_get_thread_num();
-#pragma omp for 
-        for(int vit=0; vit<QTail; vit++){
-            int v = Q[vit];
-            double vwt = WeightRnd[v];
-            bool bDomain=true;
-            for(int k=verPtr[v],kEnd=verPtr[v+1]; k!=kEnd; k++){
-                int nb = verInd[k];
-                double nbwt = WeightRnd[nb];
-                if(vwt<nbwt || (vwt==nbwt && v>nb)){
-                    bDomain=false;
-                    break;
+        timeMIS -= omp_get_wtime();
+#pragma omp parallel
+        {
+            int tid = omp_get_thread_num();
+            vector<int> candi;
+#pragma omp for
+            for(int vit=0; vit<QTail; vit++){
+                int v = Q[vit];
+                double vwt = WeightDeg[v];
+                bool bDomain=true;
+                for(int k=verPtr[v],kEnd=verPtr[v+1]; k!=kEnd; k++){
+                    int nb = verInd[k];
+                    if(vtxColors[nb]>=0) continue;
+                    double nbwt = WeightDeg[nb];
+                    if(vwt<nbwt || (vwt==nbwt && WeightRnd[v]>WeightRnd[nb])){
+                        bDomain=false;
+                        break;
+                    }
                 }
-            }
-            if(bDomain) {
+                if(bDomain) {
+                    candi.push_back(v);
+                }
+                else
+                    QQ[tid].push_back(v);
+            } //end of omp for
+
+            for(int v : candi){
                 vector<int> MASK(MaxDegreeP1,-1);
                 for(int k=verPtr[v],kEnd=verPtr[v+1]; k!=kEnd; k++){
                     int nb = verInd[k];
@@ -986,12 +1112,10 @@ timeMIS -= omp_get_wtime();
                     if(MASK[c]==-1) break;
                 vtxColors[v]=c;
             }
-            else
-                QQ[tid].push_back(v);
-        } //end of omp for
-    }//end of omp paralle
-timeMIS += omp_get_wtime();
-timeReG -= omp_get_wtime();
+        } //end of omp block
+        timeMIS += omp_get_wtime();
+        timeReG -= omp_get_wtime();
+
         //phase 2: rebuild the graph
         QTail=0;
         for(int tid=0; tid<nT; tid++){
@@ -999,21 +1123,35 @@ timeReG -= omp_get_wtime();
                 Q[QTail++]=v;
             QQ[tid].resize(0);
         }
-        
-timeReG += omp_get_wtime();
-    nLoops++;
+
+        timeReG += omp_get_wtime();
+        nLoops++;
     }while(QTail!=0);
 
-timeTot = timeMIS+timeReG;
+    timeTot = timeWt+timeMIS+ timeReG;
+
+    colors=0;
+    #pragma omp parallel for reduction(max:colors)
+    for(int i=0; i<N; i++){
+        auto c = vtxColors[i];
+        if(c>colors) colors=c;
+    }
+
+
+
+
+
+
+
 #ifdef PRINT_DETAILED_STATS_
     printf("***********************************************\n");
     printf("Total number of threads    : %d \n", nT);    
     printf("Total number of colors used: %d \n", colors);    
-    printf("Number of conflicts overall: %ld \n",nConflicts);  
-    printf("Total Time                 : %lf sec\n", totalTime);
-    printf("Rnd Time                   : %lf sec\n", timeRnd);
-    printf("MISCOLOR Time              : %lf sec\n", timeMIS);
-    printf("Reg Time                   : %lf sec\n", timeReG);
+    //printf("Number of conflicts overall: %ld \n",nConflicts);  
+    //printf("Total Time                 : %lf sec\n", totalTime);
+    printf("genWeightTime                   : %lf sec\n", timeWt);
+    printf("M.I.S. COLOR Time              : %lf sec\n", timeMIS);
+    printf("reGen Graph Time                   : %lf sec\n", timeReG);
     if( do_verify_colors(colors, vtxColors)) 
         printf("Verified, correct.\n");
     else 
@@ -1021,13 +1159,14 @@ timeTot = timeMIS+timeReG;
     printf("***********************************************\n");
 
 #endif  
-
+    printf("@AJPSL_np_c_T_TWt_TMIS_TReG_nLoop\t");
+    printf("%d\t",  nT);    
     printf("%d\t",  colors);    
     printf("%lf\t", timeTot);
-    printf("%lf\t", timeRnd);
+    printf("%lf\t", timeWt);
     printf("%lf\t", timeMIS);
     printf("%lf\t", timeReG);
-    
+    printf("%d\n",nLoops);
     return _TRUE;
 }
 
