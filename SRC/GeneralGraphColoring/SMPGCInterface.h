@@ -35,8 +35,8 @@ namespace ColPack {
 //=============================================================================
     class SMPGCInterface : public GraphOrdering {
     public:
-        SMPGCInterface(const string& graph_name);
-        SMPGCInterface(const string& graph_name, const string&glb_ord);
+        //SMPGCInterface(const string& graph_name);
+        SMPGCInterface(const string& graph_name, double*iotime, const string&glb_ord);
         virtual ~SMPGCInterface();
         
         SMPGCInterface(SMPGCInterface&&)=delete;
@@ -47,7 +47,7 @@ namespace ColPack {
     public: // interface functions and utilites
         int Coloring(int nT, int&color, vector<int>&vtxColors, const string&loc_ord, const string& method);
     protected:
-        void do_read_MM_struct(const string& fname, vector<int>&vi, vector<int>&vj, int *p_maxdeg, int*p_mindeg, double*p_avgdeg);
+        void do_read_MM_struct(const string& fname, vector<int>&vi, vector<int>&vj, int *p_maxdeg, int*p_mindeg, double*p_avgdeg, double*iotime);
         int  do_local_ordering(vector<int>&orderedmtx,const string& o);
         bool do_verify_colors(int colors,const vector<int>& vc);
         virtual void dump();
