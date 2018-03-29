@@ -5,46 +5,46 @@
     Created Time: Tue 06 Mar 2018 10:46:58 AM EST
 *********************************************************************/
 
-#include "SMPGCInterface.h"
-#include <chrono> //c++11 system time
-#include <random> //c++11 random
-#include <time.h>
+#include "SMPGC.h"
+#include <time.h>  //clock
 using namespace std;
 using namespace ColPack;
 
 
 // ============================================================================
-// Interface
+// Construction
 // ============================================================================
-int SMPGCInterface::Coloring(int nT, int&colors, vector<int>&vtxColors, const string&loc_ord, const string& method){
-    if     (method.compare("DISTANCE_ONE_OMP_GM")==0) return D1_OMP_GM(nT, colors, vtxColors, loc_ord);
-    else if(method.compare("DISTANCE_ONE_OMP_IP")==0) return D1_OMP_IP(nT, colors, vtxColors, loc_ord);
-    else if(method.compare("DISTANCE_ONE_OMP_JP")==0) return D1_OMP_JP(nT, colors, vtxColors, loc_ord);
-    else if(method.compare("DISTANCE_ONE_OMP_LB")==0) return D1_OMP_LB(nT, colors, vtxColors, loc_ord);
-    else if(method.compare("DISTANCE_ONE_OMP_JP_AW_LF")==0) return D1_OMP_JP(nT, colors, vtxColors, loc_ord);
-    else if(method.compare("DISTANCE_ONE_OMP_JP_AW_SL")==0) return D1_OMP_JP(nT, colors, vtxColors, loc_ord);
-    else { fprintf(stdout, "Unknow method %s\n",method.c_str()); exit(1); }   
-    return _TRUE;
+SMPGCOrdering::SMPGCOrdering(const string& graph_name, const string& fmt, const string& order="NATURAL", double* ordtime) 
+: SMPGCCore(graph_name, fmt, nullptr, nullptr, nullptr, nullptr) {
+    int N = SMPGCCore::nodes();
+    OrderedVtx.clear();
+    OrderedVtx.assign(N);
+    for(int i=0; i<N; i++) {
+        OrderedVtx[i]=i;
+    }
+
+    if(order=="RANDOM") RandomOrdering(OrderedVtx);
+    else if(order=="NATURAL") { };
+    return;
 }
 
-// ============================================================================
-// Construction
-// ============================================================================
-//SMPGCInterface::SMPGCInterface(const string& graph_name){
-//    GraphCore::m_s_InputFile = graph_name;
-//    double iotime;
-//    do_read_MM_struct(graph_name, m_vi_Vertices, m_vi_Edges, &m_i_MaximumVertexDegree, &m_i_MaximumVertexDegree, &m_d_AverageVertexDegree, &iotime);
-//    printf("iotime %g ",iotime);
-//    GraphOrdering::NaturalOrdering();
-//}
 
-// ============================================================================
-// Construction
-// ============================================================================
-SMPGCInterface::SMPGCInterface(const string& graph_name,double* iotime, const string& glb_order="NATURAL"){
-    GraphCore::m_s_InputFile = graph_name;
-    do_read_MM_struct(graph_name, m_vi_Vertices, m_vi_Edges, &m_i_MaximumVertexDegree, &m_i_MaximumVertexDegree, &m_d_AverageVertexDegree, iotime);
+SMPGCordering::NaturalOrdering(vector<INT>vertex){
+    int size   vertex.size();
+}
+
+
     GraphOrdering::OrderVertices(glb_order);
+
+    srand(time(NULL));
+	int size = ordering.size();
+	int ran_num = 0;
+	for(int i=0; i < size; i++) {
+		//Get a random number in range [i,  size]
+		ran_num = (int)(((float) rand() / RAND_MAX) * (size -1 - i)) + i;
+		swap(ordering[i],ordering[ran_num]);
+	}
+
 }
 
 // ============================================================================
