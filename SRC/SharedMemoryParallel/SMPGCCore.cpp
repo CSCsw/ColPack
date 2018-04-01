@@ -5,7 +5,7 @@
     Created Time: Tue 06 Mar 2018 10:46:58 AM EST
 *********************************************************************/
 
-#include "SMPGC.h"
+#include "SMPGCCore.h"
 #include <time.h>   //clock
 using namespace std;
 using namespace ColPack;
@@ -15,12 +15,18 @@ using namespace ColPack;
 // ============================================================================
 // Construction
 // ============================================================================
-SMPGCCore::SMPGCCore(const string& graph_name, const string& format="mm", INT* maxDeg, INT* minDeg, double* avgDeg, double* iotime) {
+SMPGCCore::SMPGCCore(const string& graph_name, const string& format, double* iotime) {
     if(format!="binary")
-        do_read_MM_struct(graph_name, ia_, ja_, maxDeg, minDeg, avgDeg, iotime);
+        do_read_MM_struct(graph_name, ia_, ja_, &maxDeg_, &minDeg_, &avgDeg_, iotime);
     else 
-        do_read_Binary_struct(graph_name, ia_, ja_, maxDeg, minDeg, avgDeg, iotime);
+        do_read_Binary_struct(graph_name, ia_, ja_, &maxDeg_, &minDeg_, &avgDeg_, iotime);
 }
+
+
+SMPGCCore::~SMPGCCore(){
+}
+
+
 
 // ============================================================================
 // Read MatrixMarket only structure into memory
@@ -47,7 +53,7 @@ void SMPGCCore::do_read_MM_struct(const string& graph_name, vector<INT>&ia, vect
         int tmpR, tmpC, tmpNNZ;
         double tmpV;
         mm_read_mtx_crd_size(fp, &tmpR, &tmpC, &tmpNNZ);
-        if(tmpR!=tmpC) { fclose(fp); error(graph_name, "number of Row does not equal number of Col"); }
+        if(tmpR!=tmpC) { fclose(fp); stringstream ss; ss<<"Graph \""<<graph_name<<"\" number of Row does not equal number of Col!"; error(ss.str()); }
         N=tmpR;
         //M=0;
         for(int i=0; i<tmpNNZ; i++){
@@ -65,8 +71,9 @@ void SMPGCCore::do_read_MM_struct(const string& graph_name, vector<INT>&ia, vect
                 //M++;
 
                 if(tmpR<tmpC) {
-                    printf("%d %d\n",tmpR,tmpC);
-                    error(graph_name, "Find a nonzero in upper triangular in symmetric graph");
+                    fclose(fp); stringstream ss; ss<<"Graph \""<<graph_name<<"\" Find a nonzero in upper triangular in symmetric graph";
+                    ss<<"row,col = "<<tmpR<<" , "<<tmpC;
+                    error(ss.str());
                 }
             }
         }
@@ -76,7 +83,7 @@ void SMPGCCore::do_read_MM_struct(const string& graph_name, vector<INT>&ia, vect
         int tmpR, tmpC;
         double tmpV;
         mm_read_mtx_array_size(fp, &tmpR, &tmpC);
-        if(tmpR!=tmpC) { fclose(fp); error(graph_name, "number of Row does not equal number of Col"); }
+        if(tmpR!=tmpC) { fclose(fp); stringstream ss; ss<<"Graph \""<<graph_name<<"\" number of Row does not equal number of Col!"; error(ss.str()); }
         N=tmpR;
         for(int c=0; c<tmpC; c++){
             for(int r=(bSymmetric?c:0); r<tmpR; c++){
@@ -119,6 +126,16 @@ void SMPGCCore::do_read_MM_struct(const string& graph_name, vector<INT>&ia, vect
 }
 
 
+// ============================================================================
+//
+// ============================================================================
+
+void SMPGCCore::do_read_Binary_struct(const string&graph_name, vector<INT>&ia_, vector<INT>&ja_, INT* maxDeg_,INT* minDeg_,double* avgDeg_,double* iotime){
+    return;
+}
+void SMPGCCore::do_write_Binary_struct(const string&graph_name, vector<INT>&ia_, vector<INT>&ja_,double* iotime){
+    return;
+}
 
 
 // ============================================================================
