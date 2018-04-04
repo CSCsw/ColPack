@@ -53,6 +53,11 @@ public: // deplete construction
 public: // API
     void NaturalOrdering(vector<INT>& vtxs, INT N);
     void RandomOrdering(vector<INT>& vtxs, INT N);
+    void LargestDegreeFirstOrdering(vector<INT>& vtxs, INT N);
+    void SmallestDegreeLastOrdering(vector<INT>& vtxs, INT N);
+    void DynamicLargestDegreeFirstOrdering(vector<INT>& vtxs, INT N);
+    void IncidenceDegreeOrdering(vector<INT>& vtxs, INT N);
+    void LogOrdering(vector<INT>& vtxs, INT N);
     virtual void dump();
     vector<INT>& ordered_vertex(){ return ordered_vertex_; }
 

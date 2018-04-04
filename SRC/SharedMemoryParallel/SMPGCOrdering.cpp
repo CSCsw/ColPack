@@ -59,7 +59,27 @@ void SMPGCOrdering::RandomOrdering (vector<INT>&ordering, INT N=-1) {
     }
 }
 
+// ============================================================================
+// Largest Degree First
+// ============================================================================
+void SMPGCOrdering::LargestDegreeFirstOrdering(vector<INT>& vtxs, INT N){
 
+}
+
+
+// ============================================================================
+// Smallest Degree Last
+// ============================================================================
+void SMPGCOrdering::SmallestDegreeLastOrdering(vector<INT>& vtxs, INT N){
+
+}
+
+// ==
+//
+// ==
+void SMPGCOrdering::DynamicLargestDegreeFirstOrdering(vector<INT>& vtxs, INT N){
+
+}
 
 
 
