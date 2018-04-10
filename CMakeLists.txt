@@ -187,14 +187,14 @@ enable_testing()
 # examples regardless of the setting for ENABLE_EXAMPLES.
 # First, gather up all the example files.
 file(GLOB SAMPLE_DRIVERS_BASIC RELATIVE "${CMAKE_SOURCE_DIR}/SRC/SampleDrivers"
-    SampleDrivers/Basic/*.cpp)
+    SRC/SampleDrivers/Basic/*.cpp)
 set(EXAMPLES ${SAMPLE_DRIVERS_BASIC})
 if(ENABLE_EXAMPLES)
     file(GLOB SAMPLE_DRIVERS_MATRIX_COMPRESSION_AND_RECOVERY
         RELATIVE "${CMAKE_SOURCE_DIR}/SRC/SampleDrivers"
-        SampleDrivers/Matrix_Compression_and_Recovery/ADIC/*.cpp
-        SampleDrivers/Matrix_Compression_and_Recovery/ADOL-C/*.cpp
-        SampleDrivers/Matrix_Compression_and_Recovery/CSR_input/*.cpp
+        SRC/SampleDrivers/Matrix_Compression_and_Recovery/ADIC/*.cpp
+        SRC/SampleDrivers/Matrix_Compression_and_Recovery/ADOL-C/*.cpp
+        SRC/SampleDrivers/Matrix_Compression_and_Recovery/CSR_input/*.cpp
         # Leaving out SMB because that depends on ADOL-C.
         )
     list(APPEND EXAMPLES ${SAMPLE_DRIVERS_MATRIX_COMPRESSION_AND_RECOVERY})
@@ -207,7 +207,7 @@ foreach(example_cpp ${EXAMPLES})
     # Get a directory relative to the SampleDrivers directory.
     get_filename_component(example_rel_dir ${example_cpp} DIRECTORY
         BASE_DIR SampleDrivers)
-    add_executable(${example} SampleDrivers/${example_cpp})
+    add_executable(${example} SRC/SampleDrivers/${example_cpp})
     target_link_libraries(${example} ${ColPack_lib_to_use})
     # Autools installs the examples in CSR_input into a dir. named CSR.
     string(REPLACE "CSR_input" "CSR" example_rel_dir ${example_rel_dir})
