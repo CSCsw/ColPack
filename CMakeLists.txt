@@ -28,7 +28,7 @@ set(COLPACK_VERSION 1.0.11)
 # -------------
 option(ENABLE_EXAMPLES
     "Build the examples in SampleDrivers/Matrix_Compression_and_Recovery." OFF)
-option(ENABLE_OPENMP "Enable OpenMP." OFF)
+option(ENABLE_OPENMP "Enable OpenMP." ON)
 set (CMAKE_CXX_STANDARD 11)
 # Configuring variables, etc.
 # ---------------------------
