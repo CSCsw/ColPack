@@ -1,8 +1,8 @@
 # make file for using installed library
 # author xin cheng
 # usage: chage the following two variable accordingly
-COLPACK_INSTALL_PATH = ../libs/libColPack.so
-COLPACK_ROOT = ..
+COLPACK_INSTALL_PATH = ../../libs/libColPack.so
+COLPACK_ROOT = ../..
 
 SRC = $(wildcard *.cpp)
 OBJ = $(SRC:%.cpp=%.o)
@@ -18,11 +18,11 @@ CCFLAGS = -Wall -fopenmp -O3 -std=c++11
 LDFLAGS = -Wall -fopenmp -O3 -std=c++11 -ldl ${COLPACK_INSTALL_PATH}
 
 INCLUDES = -I./
-INCLUDES+= -I${COLPACK_ROOT}/Include
-INCLUDES+= -I${COLPACK_ROOT}/Source/GeneralGraphColoring
-INCLUDES+= -I${COLPACK_ROOT}/Source/BipartiteGraphBicoloring
-INCLUDES+= -I${COLPACK_ROOT}/Source/BipartiteGraphPartialColoring
-INCLUDES+= -I${COLPACK_ROOT}/Source/Utilities
+INCLUDES+= -I${COLPACK_ROOT}/INC
+INCLUDES+= -I${COLPACK_ROOT}/SRC/GeneralGraphColoring
+INCLUDES+= -I${COLPACK_ROOT}/SRC/BipartiteGraphBicoloring
+INCLUDES+= -I${COLPACK_ROOT}/SRC/BipartiteGraphPartialColoring
+INCLUDES+= -I${COLPACK_ROOT}/SRC/Utilities
 
 
 all: $(EXE)
