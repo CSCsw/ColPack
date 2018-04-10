@@ -108,6 +108,7 @@ endif()
 set(COLPACK_SOURCE_INCLUDE_DIRS
     "${CMAKE_SOURCE_DIR}/APP/Main"
     "${CMAKE_SOURCE_DIR}/SRC/Utilities"
+    "${CMAKE_SOURCE_DIR}/INC"
     "${CMAKE_SOURCE_DIR}/SRC/BipartiteGraphPartialColoring"
     "${CMAKE_SOURCE_DIR}/SRC/BipartiteGraphBicoloring"
     "${CMAKE_SOURCE_DIR}/SRC/GraphColoring"
