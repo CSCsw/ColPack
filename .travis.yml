@@ -1,9 +1,16 @@
 language: cpp
 
-compiler:
-  - gcc
-  - clang
 
+matrix:
+  include:
+    # works on Precise and Trusty
+    - env:
+        - MATRIX_EVAL="CC=clang && CXX=clang++ && CXX_FLAG-fopenmp=libomp"
+
+ # works on Precise and Trusty
+    - env:
+        - MATRIX_EVAL="CC=gcc && CXX=g++"
+        
 
 before_script:
   - autoreconf -fi
