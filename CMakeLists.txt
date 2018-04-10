@@ -171,7 +171,7 @@ install(TARGETS ColPack_shared EXPORT ColPackTargets
 # and not readily available when using Visual Studio.
 find_path(HAS_GETOPT getopt.h)
 if(HAS_GETOPT)
-    add_executable(ColPack Main/Main.cpp)
+    add_executable(ColPack APP/Main/Main.cpp)
     target_link_libraries(ColPack ${ColPack_lib_to_use})
     # TODO install this executable?
 else()
