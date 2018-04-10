@@ -81,19 +81,19 @@ set(COLPACK_INSTALL_EXAMPLESBINDIR examples)
 # Lists of the source files.
 # -------------------------
 file(GLOB HEADERS
-    Utilities/*.h
-    BipartiteGraphBicoloring/*.h
-    BipartiteGraphPartialColoring/*.h
-    GraphColoring/*.h
-    Recovery/*.h
-    Main/ColPackHeaders.h
-    Main/Definitions.h)
+    SRC/Utilities/*.h
+    SRC/BipartiteGraphBicoloring/*.h
+    SRC/BipartiteGraphPartialColoring/*.h
+    SRC/GeneralGraphColoring/*.h
+    SRC/Recovery/*.h
+    INC/ColPackHeaders.h
+    INC/Definitions.h)
 file(GLOB SOURCES
-    Utilities/*.cpp
-    BipartiteGraphBicoloring/*.cpp
-    BipartiteGraphPartialColoring/*.cpp
-    GraphColoring/*.cpp
-    Recovery/*.cpp)
+    SRC/Utilities/*.cpp
+    SRC/BipartiteGraphBicoloring/*.cpp
+    SRC/BipartiteGraphPartialColoring/*.cpp
+    SRC/GeneralGraphColoring/*.cpp
+    SRC/Recovery/*.cpp)
 
 # Static library.
 # ---------------
@@ -106,12 +106,12 @@ endif()
 
 # Use these include directories when building the ColPack library.
 set(COLPACK_SOURCE_INCLUDE_DIRS
-    "${CMAKE_SOURCE_DIR}/Main"
-    "${CMAKE_SOURCE_DIR}/Utilities"
-    "${CMAKE_SOURCE_DIR}/BipartiteGraphPartialColoring"
-    "${CMAKE_SOURCE_DIR}/BipartiteGraphBicoloring"
-    "${CMAKE_SOURCE_DIR}/GraphColoring"
-    "${CMAKE_SOURCE_DIR}/Recovery")
+    "${CMAKE_SOURCE_DIR}/APP/Main"
+    "${CMAKE_SOURCE_DIR}/SRC/Utilities"
+    "${CMAKE_SOURCE_DIR}/SRC/BipartiteGraphPartialColoring"
+    "${CMAKE_SOURCE_DIR}/SRC/BipartiteGraphBicoloring"
+    "${CMAKE_SOURCE_DIR}/SRC/GraphColoring"
+    "${CMAKE_SOURCE_DIR}/SRC/Recovery")
 target_include_directories(ColPack_static PRIVATE
     ${COLPACK_SOURCE_INCLUDE_DIRS})
 # For clients of the ColPack target within this project (e.g. examples).
@@ -185,12 +185,12 @@ enable_testing()
 # To replicate the behavior of autotools, we build and install the Basic
 # examples regardless of the setting for ENABLE_EXAMPLES.
 # First, gather up all the example files.
-file(GLOB SAMPLE_DRIVERS_BASIC RELATIVE "${CMAKE_SOURCE_DIR}/SampleDrivers"
+file(GLOB SAMPLE_DRIVERS_BASIC RELATIVE "${CMAKE_SOURCE_DIR}/SRC/SampleDrivers"
     SampleDrivers/Basic/*.cpp)
 set(EXAMPLES ${SAMPLE_DRIVERS_BASIC})
 if(ENABLE_EXAMPLES)
     file(GLOB SAMPLE_DRIVERS_MATRIX_COMPRESSION_AND_RECOVERY
-        RELATIVE "${CMAKE_SOURCE_DIR}/SampleDrivers"
+        RELATIVE "${CMAKE_SOURCE_DIR}/SRC/SampleDrivers"
         SampleDrivers/Matrix_Compression_and_Recovery/ADIC/*.cpp
         SampleDrivers/Matrix_Compression_and_Recovery/ADOL-C/*.cpp
         SampleDrivers/Matrix_Compression_and_Recovery/CSR_input/*.cpp

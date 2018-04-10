@@ -35,17 +35,17 @@ pkginclude_HEADERS = \
 			SRC/BipartiteGraphBicoloring/BipartiteGraphInputOutput.h \
 			SRC/BipartiteGraphBicoloring/BipartiteGraphBicoloring.h \
 			SRC/BipartiteGraphBicoloring/BipartiteGraphCore.h \
-			SRC/GraphColoring/GraphColoringInterface.h \
-			SRC/GraphColoring/GraphInputOutput.h \
-			SRC/GraphColoring/GraphColoring.h \
-			SRC/GraphColoring/GraphOrdering.h \
-			SRC/GraphColoring/GraphCore.h \
+			SRC/GeneralGraphColoring/GraphColoringInterface.h \
+			SRC/GeneralGraphColoring/GraphInputOutput.h \
+			SRC/GeneralGraphColoring/GraphColoring.h \
+			SRC/GeneralGraphColoring/GraphOrdering.h \
+			SRC/GeneralGraphColoring/GraphCore.h \
 			SRC/Recovery/JacobianRecovery2D.h \
 			SRC/Recovery/JacobianRecovery1D.h \
 			SRC/Recovery/HessianRecovery.h \
 			SRC/Recovery/RecoveryCore.h \
-			SRC/Main/Definitions.h \
-			SRC/Main/ColPackHeaders.h
+			INC/Definitions.h \
+			INC/ColPackHeaders.h
 
 libColPack_la_SOURCES = \
 			SRC/Utilities/CoutLock.cpp SRC/Utilities/command_line_parameter_processor.cpp \
@@ -62,29 +62,29 @@ libColPack_la_SOURCES = \
 			SRC/BipartiteGraphBicoloring/BipartiteGraphCore.cpp \
 			SRC/BipartiteGraphBicoloring/BipartiteGraphBicoloringInterface.cpp \
 			SRC/BipartiteGraphBicoloring/BipartiteGraphOrdering.cpp \
-			SRC/GraphColoring/GraphCore.cpp \
-			SRC/GraphColoring/GraphColoringInterface.cpp \
-			SRC/GraphColoring/GraphInputOutput.cpp \
-			SRC/GraphColoring/GraphOrdering.cpp \
-			SRC/GraphColoring/GraphColoring.cpp \
+			SRC/GeneralGraphColoring/GraphCore.cpp \
+			SRC/GeneralGraphColoring/GraphColoringInterface.cpp \
+			SRC/GeneralGraphColoring/GraphInputOutput.cpp \
+			SRC/GeneralGraphColoring/GraphOrdering.cpp \
+			SRC/GeneralGraphColoring/GraphColoring.cpp \
 			SRC/Recovery/JacobianRecovery1D.cpp \
 			SRC/Recovery/RecoveryCore.cpp \
 			SRC/Recovery/JacobianRecovery2D.cpp \
 			SRC/Recovery/HessianRecovery.cpp
 
 ColPack_SOURCES = \
-			APP/Example_Use_Library/Main.cpp
+			APP/Main/Main.cpp
 
 
 
 examplesdir = ${prefix}/examples
 basic_examplesdir = ${examplesdir}/Basic
 basic_examples_PROGRAMS = \
-			SampleDrivers/Basic/color_bipartite_graph_using_BipartiteGraphBicoloringInterface \
-			SampleDrivers/Basic/color_bipartite_graph_using_BipartiteGraphPartialColoringInterface \
-			SampleDrivers/Basic/color_graph_using_GraphColoringInterface \
-			SampleDrivers/Basic/Generate_seed_matrix_for_Hessian \
-			SampleDrivers/Basic/Generate_seed_matrix_for_Jacobian
+			SRC/SampleDrivers/Basic/color_bipartite_graph_using_BipartiteGraphBicoloringInterface \
+			SRC/SampleDrivers/Basic/color_bipartite_graph_using_BipartiteGraphPartialColoringInterface \
+			SRC/SampleDrivers/Basic/color_graph_using_GraphColoringInterface \
+			SRC/SampleDrivers/Basic/Generate_seed_matrix_for_Hessian \
+			SRC/SampleDrivers/Basic/Generate_seed_matrix_for_Jacobian
 
 TESTS = ${basic_examples_PROGRAMS}
 
