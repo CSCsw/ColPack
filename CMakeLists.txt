@@ -111,7 +111,7 @@ set(COLPACK_SOURCE_INCLUDE_DIRS
     "${CMAKE_SOURCE_DIR}/INC"
     "${CMAKE_SOURCE_DIR}/SRC/BipartiteGraphPartialColoring"
     "${CMAKE_SOURCE_DIR}/SRC/BipartiteGraphBicoloring"
-    "${CMAKE_SOURCE_DIR}/SRC/GraphColoring"
+    "${CMAKE_SOURCE_DIR}/SRC/GeneralGraphColoring"
     "${CMAKE_SOURCE_DIR}/SRC/Recovery")
 target_include_directories(ColPack_static PRIVATE
     ${COLPACK_SOURCE_INCLUDE_DIRS})
