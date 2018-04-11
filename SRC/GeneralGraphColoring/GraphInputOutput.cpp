@@ -221,7 +221,7 @@ namespace ColPack
 		//if (b_getValue) printf("\t Graph structure and VALUES will be read\n");
 		//else printf("\t Read graph struture only. Values will NOT be read\n");
 		if( !( mm_is_coordinate(matcode) && (mm_is_symmetric(matcode) || mm_is_general(matcode) ) && ( mm_is_real(matcode) || mm_is_pattern(matcode) || mm_is_integer(matcode) ) ) ) {
-		  printf("Sorry, this application does not support this type.");
+		  printf("Sorry, this application does not support this type.\n");
 		  exit(-1);
 		}
 

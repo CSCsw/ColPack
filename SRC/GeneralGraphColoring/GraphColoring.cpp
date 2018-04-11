@@ -310,12 +310,12 @@ namespace ColPack
 	//Public Function 1454
 	int GraphColoring::DistanceOneColoring()
 	{
-		//*
-		if(CheckVertexColoring("DISTANCE ONE"))
+		/*
+                if(CheckVertexColoring("DISTANCE ONE"))
 		{
 			return(_TRUE);
 		}
-		//*/
+                */
 
 		int i, j;
 
@@ -380,10 +380,12 @@ namespace ColPack
 	//Public Function 1455
 	int GraphColoring::DistanceTwoColoring()
 	{
-		if(CheckVertexColoring("DISTANCE TWO"))
+		/*
+                 if(CheckVertexColoring("DISTANCE TWO"))
 		{
 			return(_TRUE);
 		}
+                */
 
 		int i, j, k;
 
@@ -464,10 +466,10 @@ namespace ColPack
 	//Public Function 1456
 	int GraphColoring::NaiveStarColoring()
 	{
-		if(CheckVertexColoring("NAIVE STAR"))
-		{
-			return(_TRUE);
-		}
+		//if(CheckVertexColoring("NAIVE STAR"))
+		//{
+		//	return(_TRUE);
+		//}
 
 		int i, j, k, l;
 
@@ -568,10 +570,10 @@ namespace ColPack
 	//Public Function 1457
 	int GraphColoring::RestrictedStarColoring()
 	{
-		if(CheckVertexColoring("RESTRICTED STAR"))
-		{
-			return(_TRUE);
-		}
+		//if(CheckVertexColoring("RESTRICTED STAR"))
+		//{
+		//	return(_TRUE);
+		//}
 
 		int i, j, k;
 
@@ -1951,10 +1953,10 @@ namespace ColPack
 	}
 
 	int GraphColoring::StarColoring_serial2() {
-		if(CheckVertexColoring("STAR"))
-		{
-			return(_TRUE);
-		}
+		//if(CheckVertexColoring("STAR"))
+		//{
+		//	return(_TRUE);
+		//}
 
 		int i_MaxNumThreads = 1;
 		int i_MaxColor;
@@ -2494,10 +2496,10 @@ namespace ColPack
 	int GraphColoring::StarColoring_serial()
 	{
 	  // Line 2: Initialize data structures
-		if(CheckVertexColoring("STAR"))
-		{
-			return(_TRUE);
-		}
+	//	if(CheckVertexColoring("STAR"))
+	//	{
+	//		return(_TRUE);
+	//	}
 
 		int i, j, k;
 
@@ -3443,10 +3445,10 @@ namespace ColPack
 	//Public Function 1461
 	int GraphColoring::AcyclicColoring()
 	{
-		if(CheckVertexColoring("ACYCLIC"))
-		{
-			return(_TRUE);
-		}
+		//if(CheckVertexColoring("ACYCLIC"))
+		//{
+	//		return(_TRUE);
+	//	}
 
 		int i, j, k;
 
@@ -3954,10 +3956,10 @@ namespace ColPack
 
 	int GraphColoring::AcyclicColoring_ForIndirectRecovery() {
 //#define DEBUG 1462
-		if(CheckVertexColoring("ACYCLIC"))
-		{
-			return(_TRUE);
-		}
+		//if(CheckVertexColoring("ACYCLIC"))
+		//{
+		//	return(_TRUE);
+		//}
 
 		int i, j, k;
 
@@ -4467,10 +4469,10 @@ namespace ColPack
 	int GraphColoring::AcyclicColoring(vector<int> & vi_Sets, map< int, vector<int> > & mivi_VertexSets)
 	{
 //#define DEBUG 1462
-		if(CheckVertexColoring("ACYCLIC"))
-		{
-			return(_TRUE);
-		}
+		//if(CheckVertexColoring("ACYCLIC"))
+		//{
+		//	return(_TRUE);
+		//}
 
 		int i, j, k;
 
@@ -5057,10 +5059,10 @@ namespace ColPack
 	//Public Function 1464
 	int GraphColoring::TriangularColoring()
 	{
-		if(CheckVertexColoring("TRIANGULAR"))
-		{
-			return(_TRUE);
-		}
+		//if(CheckVertexColoring("TRIANGULAR"))
+		//{
+		//	return(_TRUE);
+		//}
 
 		int i, j, k, l;
 
@@ -5199,10 +5201,10 @@ namespace ColPack
 	//Public Function 1465
 	int GraphColoring::ModifiedTriangularColoring()
 	{
-		if(CheckVertexColoring("MODIFIED TRIANGULAR"))
-		{
-			return(_TRUE);
-		}
+		//if(CheckVertexColoring("MODIFIED TRIANGULAR"))
+		//{
+		//	return(_TRUE);
+		//}
 
 		int i, j, k;
 

@@ -196,7 +196,6 @@ namespace ColPack
 		}
 
 		randomOrdering(m_vi_OrderedVertices);
-
 		/*
 		srand(time(NULL)); //set the seed of random number function
 
@@ -331,7 +330,8 @@ namespace ColPack
 
 		// clear the buffer
 		vvi_GroupedVertexDegree.clear();
-		return(_TRUE);
+		
+                return(_TRUE);
 	}
 
 	int GraphOrdering::printVertexEdgeMap(vector< vector< pair< int, int> > > &vvpii_VertexEdgeMap) {
