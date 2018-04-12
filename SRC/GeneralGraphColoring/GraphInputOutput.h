@@ -78,7 +78,7 @@ namespace ColPack
 		All the values for the non-zeros in the matrix will be ignored.
 		If the input file contains only the graph structure, the value of b_getStructureOnly will be ignored
 		*/
-		int ReadMatrixMarketAdjacencyGraph(string s_InputFile, bool b_getStructureOnly = false);
+		int ReadMatrixMarketAdjacencyGraph(string s_InputFile, bool b_getStructureOnly = true);
 
 		/// Write the structure of the graph into a file using Matrix Market format
 		/**
