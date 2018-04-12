@@ -288,6 +288,8 @@ namespace ColPack
                         sort(vec.begin(), vec.end());
                         vec.erase( unique(vec.begin(), vec.end()), vec.end());
                     }
+                    row=col=max(row,col);
+
                 }
 
 		if(entry_counter<num_of_entries) { //entry_counter should be == num_of_entries
@@ -306,7 +308,7 @@ namespace ColPack
 		}
 		
                 CalculateVertexDegrees();
-		return(_TRUE);
+                return(_TRUE);
 	}
 
 
