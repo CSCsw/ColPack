@@ -1094,7 +1094,8 @@ int SMPGCInterface::D1_OMP_JP_AW_LF(int nT, INT&colors, vector<INT>&vtxColors) {
     omp_set_num_threads(nT);
     
     double tim_MIS=0;    //run time
-    double tim_Wgt=0;    //run time
+    double tim_Wgt_Rnd=0;    //run time
+    double tim_Wgt_LF=0;    //run time
     double tim_ReG=0;    //run time
     double tim_MxC=0;    //run time
     double tim_Tot=0;               //run time
@@ -1131,14 +1132,24 @@ int SMPGCInterface::D1_OMP_JP_AW_LF(int nT, INT&colors, vector<INT>&vtxColors) {
     vector<double> WeightDeg;
     WeightDeg.resize(N,-1);
 
-tim_Wgt =-omp_get_wtime();
-    std::default_random_engine generator(std::chrono::system_clock::now().time_since_epoch().count());
     std::uniform_real_distribution<double> distribution(0.0,1.0);
+tim_Wgt_Rnd =-omp_get_wtime();
+#pragma omp parallel
+{
+    int pid = omp_get_thread_num();
+    std::default_random_engine generator(pid);
+#pragma omp for
     for(INT i=0; i<N; i++)
         WeightRnd[i] = distribution(generator);
-    for(auto v: Q)
+}
+tim_Wgt_Rnd += omp_get_wtime();
+
+
+tim_Wgt_LF =- omp_get_wtime();
+#pragma omp parallel for
+    for(INT v=0; v<N; v++)
         WeightDeg[v] = verPtr[v+1]-verPtr[v];
-tim_Wgt +=omp_get_wtime();
+tim_Wgt_LF +=omp_get_wtime();
     
     colors=0;
     do{
@@ -1208,13 +1219,14 @@ tim_Wgt +=omp_get_wtime();
     }
     tim_MxC += omp_get_wtime();
 
-    tim_Tot = tim_Wgt+tim_MIS+ tim_ReG+tim_MxC;
+    tim_Tot = tim_Wgt_Rnd+tim_Wgt_LF+tim_MIS+ tim_ReG+tim_MxC;
 
-    printf("@AJPLF_nT_c_T_TWgt_TMISC_TReG_TMxC_nLoops\t");
+    printf("@AJPLF_nT_c_T_TWgtRnd_TWgtLF_TMISC_TReG_TMxC_nLoops\t");
     printf("%d\t",  nT);
     printf("%lld\t",  colors);    
     printf("%lf\t", tim_Tot);
-    printf("%lf\t", tim_Wgt);
+    printf("%lf\t", tim_Wgt_Rnd);
+    printf("%lf\t", tim_Wgt_LF);
     printf("%lf\t", tim_MIS);
     printf("%lf\t", tim_ReG);
     printf("%lf\t", tim_MxC);
