@@ -43,11 +43,12 @@ public: // Constructions
     SMPGCInterface(const string& graph_name);
     SMPGCInterface(const string& graph_name, const string& fmt, double*iotime, const string&ord, double*ordtime);
     virtual ~SMPGCInterface(){}
+
         // Deplete constructions
-    SMPGCInterface(SMPGCInterface&&)=delete;
-    SMPGCInterface(const SMPGCInterface&)=delete;
-    SMPGCInterface& operator=(SMPGCInterface&&)=delete;
-    SMPGCInterface& operator=(const SMPGCInterface&)=delete;
+        SMPGCInterface(SMPGCInterface&&)=delete;
+        SMPGCInterface(const SMPGCInterface&)=delete;
+        SMPGCInterface& operator=(SMPGCInterface&&)=delete;
+        SMPGCInterface& operator=(const SMPGCInterface&)=delete;
 
 public: // API
     virtual void dump();
@@ -63,6 +64,10 @@ public: // API
     int D1_OMP_JP(int nT, INT&color, vector<INT>&vtxColors);
     int D1_OMP_JP_AW_LF(int nT, INT&color, vector<INT>&vtxColors);
     int D1_OMP_JP_AW_SL(int nT, INT&color, vector<INT>&vtxColors);
+
+    int D1_OMP_GM_LO(int nT, INT&color, vector<INT>&vtxColors, const string& local_ordering);
+    int D1_OMP_IP_LO(int nT, INT&color, vector<INT>&vtxColors, const string& local_ordering);
+
 
 protected: // Utilites
     INT cnt_conflict(INT colors,const vector<INT>& vc);

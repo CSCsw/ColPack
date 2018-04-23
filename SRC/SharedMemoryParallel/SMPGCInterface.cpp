@@ -26,6 +26,7 @@ int SMPGCInterface::Coloring(int nT, const string& method){
     else if(method.compare("DISTANCE_ONE_OMP_LB")==0) return D1_OMP_LB(nT, num_colors_, vertex_color_);
     else if(method.compare("DISTANCE_ONE_OMP_JP_AW_LF")==0) return D1_OMP_JP_AW_LF(nT, num_colors_, vertex_color_);
     else if(method.compare("DISTANCE_ONE_OMP_JP_AW_SL")==0) return D1_OMP_JP_AW_SL(nT, num_colors_, vertex_color_);
+    else if(method.compare("DISTANCE_ONE_OMP_GM_LF")==0) return D1_OMP_GM_LF(nT, num_colors_, vertex_color_);
     else { fprintf(stdout, "Unknow method %s\n",method.c_str()); exit(1); }   
     return _TRUE;
 }
@@ -92,9 +93,6 @@ SMPGCInterface::INT SMPGCInterface::cnt_conflict(INT colors, const vector<INT>& 
 int SMPGCInterface::D1_OMP_GM(int nT, INT&colors, vector<INT>&vtxColor) {
     if(nT<=0) { printf("Warning, number of threads changed from %d to 1\n",nT); nT=1; }
     omp_set_num_threads(nT);
-
-
-
 
     double tim_color=0,tim_detect=0, tim_recolor=0;    //run time
     double tim_Tot=0;                            //run time
@@ -1153,6 +1151,7 @@ tim_Wgt_LF +=omp_get_wtime();
     
     colors=0;
     do{
+
         //phase 0: find maximal indenpenent set, and color it
         tim_MIS -= omp_get_wtime();
 #pragma omp parallel
@@ -1294,8 +1293,8 @@ tim_Wgt =-omp_get_wtime();
             vv_deg2vs[deg].push_back(v);   
         }
         
-        INT mxDeg = MaxDegreeP1-1;
-        int iMin = 0;
+        //INT mxDeg = MaxDegreeP1-1;
+        //int iMin = 0;
         for(INT i=0; i<N; i++){
 
         }

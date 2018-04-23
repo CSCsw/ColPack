@@ -62,19 +62,19 @@ void SMPGCOrdering::RandomOrdering (vector<INT>&ordering, INT N=-1) {
 // ============================================================================
 // Largest Degree First
 // ============================================================================
-void SMPGCOrdering::LargestDegreeFirstOrdering(vector<INT>& vtxs, INT N){
-    vtxs.clear();
-    vtxs.reserve(N);
+void SMPGCOrdering::local_largest_degree_first_ordering(vector<INT>& vtxs){
     INT const * const verPtr  = CSRiaPtr();      //ia of csr
-    INT const * const verInd  = CSRjaPtr();      //ja of csr
+    //INT const * const verInd  = CSRjaPtr();      //ja of csr
     const INT MaxDegreeP1 = maxDeg()+1; //maxDegree
 
     vector<vector<INT>> GroupedVertexDegree(MaxDegreeP1);
-    for(INT v=0; v<N; v++){
+    
+    for(auto v: vtxs){ 
         INT deg = verPtr[v+1]-verPtr[v];
         GroupedVertexDegree[deg].push_back(v);
     }
-
+    
+    vtxs.clear();
     for(INT d=MaxDegreeP1-1,it=MaxDegreeP1; it!=0; it--,d--){
         vtxs.insert(vtxs.end(), GroupedVertexDegree[d].begin(), GroupedVertexDegree[d].end());
     }
