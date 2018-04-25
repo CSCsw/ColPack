@@ -11,8 +11,8 @@
 #include <omp.h>
 #include "ColPackHeaders.h" //#include "GraphOrdering.h"
 #include "SMPGCCore.h"
-
-
+#include <random>
+#include <algorithm>
 
 using namespace std;
 
@@ -45,27 +45,39 @@ class SMPGCOrdering : public SMPGCCore {
 public: // construction
     SMPGCOrdering(const string& file_name, const string& fmt, double*iotime, const string& order, double *ordtime);
     virtual ~SMPGCOrdering();
+
 public: // deplete construction
     SMPGCOrdering(SMPGCOrdering&&)=delete;
     SMPGCOrdering(const SMPGCOrdering&)=delete;
     SMPGCOrdering& operator=(SMPGCOrdering&&)=delete;
     SMPGCOrdering& operator=(const SMPGCOrdering&)=delete;
-public: // API
-    void NaturalOrdering(vector<INT>& vtxs, INT N);
-    void RandomOrdering(vector<INT>& vtxs, INT N);
-    void local_largest_degree_first_ordering(vector<INT>& vtxs); //LargestDegreeFirstOrdering(vector<INT>& vtxs, INT N);
-    void SmallestDegreeLastOrdering(vector<INT>& vtxs, INT N);
-    void DynamicLargestDegreeFirstOrdering(vector<INT>& vtxs, INT N);
-    void IncidenceDegreeOrdering(vector<INT>& vtxs, INT N);
-    void LogOrdering(vector<INT>& vtxs, INT N);
+
+public: // API: global ordering
+    void set_global_ordering(const string& order, double*t);
+    void global_natural_ordering();
+    void global_random_ordering();
+
+public: // API: local ordering
+    void set_local_ordering(vector<INT>&vtxs, const string& order, double *t);
+    void local_natural_ordering(vector<INT>& vtxs);
+    void local_random_ordering (vector<INT>& vtxs);
+    void local_largest_degree_first_ordering(vector<INT>& vtxs); 
+    void local_smallest_degree_last_ordering(vector<INT>& vtxs);
+    void local_smallest_degree_last_ordering_B1a(vector<INT>& vtxs);
+    
+    //void SmallestDegreeLastOrdering(vector<INT>& vtxs, INT N);
+    //void DynamicLargestDegreeFirstOrdering(vector<INT>& vtxs, INT N);
+    //void IncidenceDegreeOrdering(vector<INT>& vtxs, INT N);
+    //void LogOrdering(vector<INT>& vtxs, INT N);
+    
+    void set_rseed(const INT x){ mt_.seed(x); }
+    
     virtual void dump();
     vector<INT>& ordered_vertex(){ return ordered_vertex_; }
 
 protected: // members
     vector<INT> ordered_vertex_;   
-
-protected: // misc
-    virtual void error(const string& s){ fprintf(stderr,"Err in class SMPGCOrdering with msg \"%s\"\n",s.c_str()); exit(1);}
+    mt19937_64 mt_;
 };
 
 

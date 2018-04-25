@@ -26,7 +26,11 @@ int SMPGCInterface::Coloring(int nT, const string& method){
     else if(method.compare("DISTANCE_ONE_OMP_LB")==0) return D1_OMP_LB(nT, num_colors_, vertex_color_);
     else if(method.compare("DISTANCE_ONE_OMP_JP_AW_LF")==0) return D1_OMP_JP_AW_LF(nT, num_colors_, vertex_color_);
     else if(method.compare("DISTANCE_ONE_OMP_JP_AW_SL")==0) return D1_OMP_JP_AW_SL(nT, num_colors_, vertex_color_);
-    else if(method.compare("DISTANCE_ONE_OMP_GM_LF")==0) return D1_OMP_GM_LF(nT, num_colors_, vertex_color_);
+    else if(method.compare("DISTANCE_ONE_OMP_GM_LF")==0) return D1_OMP_GM_LO(nT, num_colors_, vertex_color_, "LARGEST_FIRST");
+    else if(method.compare("DISTANCE_ONE_OMP_GM_SL")==0) return D1_OMP_GM_LO(nT, num_colors_, vertex_color_, "SMALLEST_LAST");
+    else if(method.compare("DISTANCE_ONE_OMP_IP_LF")==0) return D1_OMP_IP_LO(nT, num_colors_, vertex_color_, "LARGEST_FIRST");
+    else if(method.compare("DISTANCE_ONE_OMP_IP_SL")==0) return D1_OMP_IP_LO(nT, num_colors_, vertex_color_, "SMALLEST_LAST");
+    else if(method.compare("DISTANCE_ONE_OMP_GM_SL1")==0) return D1_OMP_IP_LO(nT, num_colors_, vertex_color_, "SMALLEST_LAST_1");
     else { fprintf(stdout, "Unknow method %s\n",method.c_str()); exit(1); }   
     return _TRUE;
 }
@@ -57,7 +61,6 @@ SMPGCInterface::SMPGCInterface(const string& graph_name, const string& fmt, doub
 void SMPGCInterface::dump(){
     ;
 }
-
 
 
 // ============================================================================
