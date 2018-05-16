@@ -56,17 +56,14 @@ public: // API
         // Algorithms 
     int D1_OMP_GM(int nT, INT&color, vector<INT>&vtxColors);
     int D1_OMP_IP(int nT, INT&color, vector<INT>&vtxColors);
-    int D1_OMP_IP_1(int nT, INT&color, vector<INT>&vtxColors);
-    int D1_OMP_IP_2(int nT, INT&color, vector<INT>&vtxColors);
-    int D1_OMP_IP_3(int nT, INT&color, vector<INT>&vtxColors);
-    int D1_OMP_IP_4(int nT, INT&color, vector<INT>&vtxColors);
     int D1_OMP_LB(int nT, INT&color, vector<INT>&vtxColors);
     int D1_OMP_JP(int nT, INT&color, vector<INT>&vtxColors);
     int D1_OMP_JP_AW_LF(int nT, INT&color, vector<INT>&vtxColors);
     int D1_OMP_JP_AW_SL(int nT, INT&color, vector<INT>&vtxColors);
 
     int D1_OMP_GM_LO(int nT, INT&color, vector<INT>&vtxColors, const string& local_ordering);
-    int D1_OMP_IP_LO(int nT, INT&color, vector<INT>&vtxColors, const string& local_ordering);
+    int D1_OMP_IP_LO_perloop(int nT, INT&color, vector<INT>&vtxColors, const string& local_ordering);
+    int D1_OMP_IP_LO_once(int nT, INT&color, vector<INT>&vtxColors, const string& local_ordering);
 
 
 protected: // Utilites

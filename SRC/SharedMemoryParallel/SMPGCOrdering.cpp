@@ -120,6 +120,33 @@ void SMPGCOrdering::local_random_ordering (vector<INT>&vtxs) {
 // ============================================================================
 // Largest Degree First
 // ============================================================================
+void SMPGCOrdering::local_largest_degree_first_ordering_emplace(vector<INT>& vtxs, const INT beg, const INT end){
+    INT const * const verPtr  = CSRiaPtr();      //ia of csr
+    //INT const * const verInd  = CSRjaPtr();      //ja of csr
+    const INT MaxDegreeP1 = maxDeg()+1; //maxDegree
+
+    vector<vector<INT>> GroupedVertexDegree(MaxDegreeP1);
+    
+    for(auto i=beg; i<end; i++){
+        auto v  = vtxs[i];
+        INT deg = verPtr[v+1]-verPtr[v];
+        GroupedVertexDegree[deg].push_back(v);
+    }
+    
+    INT pos=beg;
+    for(INT d=MaxDegreeP1-1, it=MaxDegreeP1; it!=0; it--, d--){
+        for(auto v : GroupedVertexDegree[d]){
+            vtxs[pos++]=v;
+        }
+    }
+
+    GroupedVertexDegree.clear();
+}
+
+
+// ============================================================================
+// Largest Degree First
+// ============================================================================
 void SMPGCOrdering::local_largest_degree_first_ordering(vector<INT>& vtxs){
     INT const * const verPtr  = CSRiaPtr();      //ia of csr
     //INT const * const verInd  = CSRjaPtr();      //ja of csr
@@ -127,17 +154,21 @@ void SMPGCOrdering::local_largest_degree_first_ordering(vector<INT>& vtxs){
 
     vector<vector<INT>> GroupedVertexDegree(MaxDegreeP1);
     
-    for(auto v: vtxs){ 
+    for(const auto v : vtxs) {
         INT deg = verPtr[v+1]-verPtr[v];
         GroupedVertexDegree[deg].push_back(v);
     }
-    
+   
     vtxs.clear();
-    for(INT d=MaxDegreeP1-1,it=MaxDegreeP1; it!=0; it--,d--){
+    for(INT d=MaxDegreeP1-1, it=MaxDegreeP1; it!=0; it--, d--){
         vtxs.insert(vtxs.end(), GroupedVertexDegree[d].begin(), GroupedVertexDegree[d].end());
     }
+
     GroupedVertexDegree.clear();
 }
+
+
+
 
 
 // ============================================================================

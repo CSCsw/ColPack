@@ -23,12 +23,14 @@ int main(int argc, char* argv[]) {
    
 
     for(int i=1; i<argc; i++){
-        if(argv[i][0]!='-') continue;
-        if(     !strcmp(argv[i], "-f")) fname = argv[++i];
-        else if(!strcmp(argv[i], "-o")) order = argv[++i];
-        else if(!strcmp(argv[i], "-m")) methd = argv[++i];
-        else if(!strcmp(argv[i], "-v")) bVerbose = true;
-        else printf("Warning: unknown input argument\"%s\"",argv[i]);
+        string cmd = argv[i];
+        if(     cmd == "-f") fname = argv[++i];
+        else if(cmd == "-o") order = argv[++i];
+        else if(cmd == "-m") methd = argv[++i];
+        else if(cmd == "-v") bVerbose = true;
+        else{
+            printf("Warning: unknown input argument\"%s\".\n", argv[i]);
+        }
     }   
 
     if(fname.empty()) {usage(); exit(0); }
@@ -59,8 +61,17 @@ int main(int argc, char* argv[]) {
         if(bVerbose) fprintf(stdout,"\ngraph: %s\norder: %s\nmethd: %s\nGeneral Graph Coloring\n",fname.c_str(), order.c_str(), methd.c_str());
         GraphColoringInterface *g = new GraphColoringInterface(SRC_FILE, fname.c_str(), "AUTO_DETECTED");
         g->Coloring(order.c_str(), methd.c_str());
-        if(bVerbose) fprintf(stdout, "number of colors: ");
-        fprintf(stdout,"%d\n",g->GetVertexColorCount());
+        
+        if(bVerbose) {
+            double t1 = g->GetVertexOrderingTime();
+            double t2 = g->GetVertexColoringTime();
+            fprintf(stdout, "order+color time = %f = %f+%f\n",t1+t2, t1,t2);
+            fprintf(stdout, "number of colors: ");
+            fprintf(stdout,"%d\n",g->GetVertexColorCount());
+        }
+        else {
+            fprintf(stdout,"%d\n",g->GetVertexColorCount());
+        }
         delete g; g=nullptr;
     }
     if(bVerbose) fprintf(stdout,"\n"); 
@@ -82,8 +93,6 @@ void usage(){
             "               STAR\n"
             "               RESTRICTED_STAR\n"
             "               DISTANCE_TWO\n"
-            "               --------------------\n"
-            "               DISTANCE_ONE_OMP    (automatic display: nThreads,num_colors,timall,conflicts,loops)\n "
             "               --------------------\n"
             "               IMPLICIT_COVERING__STAR_BICOLORING\n"
             "               EXPLICIT_COVERING__STAR_BICOLORING\n"

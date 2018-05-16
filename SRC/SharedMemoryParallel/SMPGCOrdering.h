@@ -62,6 +62,7 @@ public: // API: local ordering
     void local_natural_ordering(vector<INT>& vtxs);
     void local_random_ordering (vector<INT>& vtxs);
     void local_largest_degree_first_ordering(vector<INT>& vtxs); 
+    void local_largest_degree_first_ordering_emplace(vector<INT>& vtxs, const INT beg, const INT end); 
     void local_smallest_degree_last_ordering(vector<INT>& vtxs);
     void local_smallest_degree_last_ordering_B1a(vector<INT>& vtxs);
     
