@@ -20,6 +20,8 @@ int SMPGCInterface::Coloring(int nT, const string& method){
     if     (method.compare("DISTANCE_ONE_OMP_GM")==0) { return D1_OMP_GM(nT, num_colors_, vertex_color_);}
     else if(method.compare("DISTANCE_ONE_OMP_IP")==0) return D1_OMP_IP(nT, num_colors_, vertex_color_);
     else if(method.compare("DISTANCE_ONE_OMP_JP")==0) return D1_OMP_JP(nT, num_colors_, vertex_color_);
+    else if(method.compare("DISTANCE_ONE_OMP_JP1")==0) return D1_OMP_JP_adv(nT, num_colors_, vertex_color_);
+    else if(method.compare("DISTANCE_ONE_OMP_JP_profile")==0) return D1_OMP_JP_profile(nT, num_colors_, vertex_color_);
     else if(method.compare("DISTANCE_ONE_OMP_LB")==0) return D1_OMP_LB(nT, num_colors_, vertex_color_);
     else if(method.compare("DISTANCE_ONE_OMP_JP_AW_LF")==0) return D1_OMP_JP_AW_LF(nT, num_colors_, vertex_color_);
     else if(method.compare("DISTANCE_ONE_OMP_JP_AW_SL")==0) return D1_OMP_JP_AW_SL(nT, num_colors_, vertex_color_);
@@ -32,6 +34,7 @@ int SMPGCInterface::Coloring(int nT, const string& method){
     else if(method.compare("DISTANCE_ONE_OMP_IP_PERLOOP_LF")==0)  return D1_OMP_IP_LO_perloop(nT, num_colors_, vertex_color_, "LARGEST_FIRST");
     else if(method.compare("DISTANCE_ONE_OMP_IP_PERLOOP_SL")==0)  return D1_OMP_IP_LO_perloop(nT, num_colors_, vertex_color_, "SMALLEST_LAST");
     else if(method.compare("DISTANCE_ONE_OMP_IP_PERLOOP_SL1")==0) return D1_OMP_IP_LO_perloop(nT, num_colors_, vertex_color_, "SMALLEST_LAST1");
+
     else { fprintf(stdout, "Unknow method %s\n",method.c_str()); exit(1); }   
     return _TRUE;
 }
@@ -266,14 +269,14 @@ int SMPGCInterface::D1_OMP_IP(int nT, INT&colors, vector<INT>&vtxColors) {
     colors=0;
     vtxColors.clear(); vtxColors.assign(N, -1);
 
-    vector<INT> Q; Q.resize(N);
-    vector<INT> Qtmp; Qtmp.resize(N,-1);
+    vector<INT> readyQ;    readyQ.resize(N);
+    vector<INT> conflictQ; conflictQ.resize(N,-1);
     INT Q_len=N;
     
     #pragma omp parallel for
     for (INT i=0; i<N; i++) {
-        Q[i]  = ordered_vertex()[i];
-        Qtmp[i]= -1; //Empty queue
+        readyQ[i]  = ordered_vertex()[i];
+        conflictQ[i]= -1; //Empty queue
     }
 
     vector<double> profile_tim_colors;
@@ -292,7 +295,7 @@ int SMPGCInterface::D1_OMP_IP(int nT, INT&colors, vector<INT>&vtxColors) {
             vector<INT> Mark; Mark.reserve(MaxDegreeP1);
             #pragma omp for
             for (INT i=0; i<num_nodes_remains; i++) {
-                const INT v = Q[i]; 
+                const INT v = readyQ[i]; 
                 Mark.assign(MaxDegreeP1, -1);
                 for(INT wit = verPtr[v], witEnd=verPtr[v+1]; wit !=witEnd; wit++ ) {
                     const INT w = verInd[wit];
@@ -316,12 +319,12 @@ int SMPGCInterface::D1_OMP_IP(int nT, INT&colors, vector<INT>&vtxColors) {
         //phase Detect Conflicts:
         #pragma omp parallel for
         for (INT i=0; i<num_nodes_remains; i++) {
-            const INT v = Q[i]; 
+            const auto v = readyQ[i]; 
             for(INT wit=verPtr[v],witEnd=verPtr[v+1]; wit!=witEnd; wit++) {
                 const INT w = verInd[wit];
                 if(v>w && vtxColors[v] == vtxColors[w]) {
                     INT whereInQ = __sync_fetch_and_add(&Q_len, 1);
-                    Qtmp[whereInQ] = v;//Add to the queue
+                    conflictQ[whereInQ] = v;//Add to the queue
                     vtxColors[v] = -1;  //Will prevent v from being in conflict in another pairing
                     break;
                 } //End of if( vtxColor[v] == vtxColor[verInd[k]] )
@@ -330,9 +333,9 @@ int SMPGCInterface::D1_OMP_IP(int nT, INT&colors, vector<INT>&vtxColors) {
         
         nConflicts += Q_len;
         nLoops++;
-        Qtmp.resize(Q_len);
-        Q.resize(Q_len);
-        Q.swap(Q);
+        conflictQ.resize(Q_len);
+        readyQ.resize(Q_len);
+        readyQ.swap(conflictQ);
         tim = omp_get_wtime();
         tim_detect += tim;
         profile_tim_detects.back()+=tim;
@@ -351,13 +354,6 @@ int SMPGCInterface::D1_OMP_IP(int nT, INT&colors, vector<INT>&vtxColors) {
 
     tim_total = tim_color+tim_detect+tim_max_c;
 
-#ifdef PRINT_DETAILED_STATS_
-    if( do_verify_colors(colors, vtxColors)) 
-        printf("Verified, correct.\n");
-    else 
-        printf("Verified, fail.\n");
-#endif  
-
     printf("@GMmp_nT_c_T_TColor_TDetect_TMaxC_nCnf_nLoop____profiles\t");
     printf("%d\t",  nT);    
     printf("%lld\t",  colors);    
@@ -367,7 +363,7 @@ int SMPGCInterface::D1_OMP_IP(int nT, INT&colors, vector<INT>&vtxColors) {
     printf("%lf\t", tim_max_c);
     printf("%lld\t", nConflicts);  
     printf("%d\t\t\t",  nLoops);      
-    for(size_t i=0; i<profile_tim_colors.size(); i++) printf("\t%g\t%g\t%lld",profile_tim_colors[i], profile_tim_detects[i], profile_conflicts[i]);
+    for(size_t i=0; i<profile_tim_colors.size(); i++) printf("\t%g\t%g\t%lld\t",profile_tim_colors[i], profile_tim_detects[i], profile_conflicts[i]);
     printf("\n");      
     return _TRUE;
 }
@@ -530,8 +526,6 @@ int SMPGCInterface::D1_OMP_JP(int nT, INT&colors, vector<INT>&vtxColors) {
     // weight 
     vector<double> WeightRnd;
     WeightRnd.resize(N,-1);
-    vector<double> WeightDeg;
-    WeightDeg.resize(N,-1);
 
 tim_Wgt =-omp_get_wtime();
     std::default_random_engine generator(std::chrono::system_clock::now().time_since_epoch().count());
@@ -596,7 +590,7 @@ tim_ReG -= omp_get_wtime();
         }
 tim_ReG += omp_get_wtime();
     nLoops++;
-    }while(QTail!=0);
+    }while(nLoops<=3  && QTail!=0);
 
 tim_MxC = -omp_get_wtime();
 //for(int i=0; i<N; i++) printf("%d-%d\n",i,vtxColors[i]);
@@ -610,7 +604,7 @@ colors++;
 tim_MxC += omp_get_wtime();
 
 tim_Tot =tim_Wgt+ tim_MIS+tim_ReG+tim_MxC;
-    printf("@JP_nT_c_T_TWgt_TMISC_TReG_TMxC_nLoop\t");
+    printf("@JPlp3_nT_c_T_TWgt_TMISC_TReG_TMxC_nLoop\t");
     printf("%d\t",  nT);    
     printf("%lld\t",  colors);    
     printf("%lf\t", tim_Tot);
