@@ -59,8 +59,10 @@ public: // API
 
     int D1_OMP_LB(int nT, INT&color, vector<INT>&vtxColors);
     int D1_OMP_JP(int nT, INT&color, vector<INT>&vtxColors);
-    int D1_OMP_JP_adv(int nT, INT&color, vector<INT>&vtxColors);
     int D1_OMP_JP_profile(int nT, INT&color, vector<INT>&vtxColors);
+    int D1_OMP_JP_LargeAndSmall(int nT, INT&color, vector<INT>&vtxColors);
+    int D1_OMP_JP_hyper_orig_greedy(int nT, INT&color, vector<INT>&vtxColors);
+    int D1_OMP_JP_hyper_LaS_greedy(int nT, INT&color, vector<INT>&vtxColors);
     
     int D1_OMP_JP_AW_LF(int nT, INT&color, vector<INT>&vtxColors);
     int D1_OMP_JP_AW_SL(int nT, INT&color, vector<INT>&vtxColors);

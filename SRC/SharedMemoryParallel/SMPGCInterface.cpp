@@ -20,8 +20,10 @@ int SMPGCInterface::Coloring(int nT, const string& method){
     if     (method.compare("DISTANCE_ONE_OMP_GM")==0) { return D1_OMP_GM(nT, num_colors_, vertex_color_);}
     else if(method.compare("DISTANCE_ONE_OMP_IP")==0) return D1_OMP_IP(nT, num_colors_, vertex_color_);
     else if(method.compare("DISTANCE_ONE_OMP_JP")==0) return D1_OMP_JP(nT, num_colors_, vertex_color_);
-    else if(method.compare("DISTANCE_ONE_OMP_JP1")==0) return D1_OMP_JP_adv(nT, num_colors_, vertex_color_);
     else if(method.compare("DISTANCE_ONE_OMP_JP_profile")==0) return D1_OMP_JP_profile(nT, num_colors_, vertex_color_);
+    else if(method.compare("DISTANCE_ONE_OMP_JP_LaS")==0) return D1_OMP_JP_LargeAndSmall(nT, num_colors_, vertex_color_);
+    else if(method.compare("DISTANCE_ONE_OMP_JP_hyper_LaS_greedy")==0) return D1_OMP_JP_hyper_LaS_greedy(nT, num_colors_, vertex_color_);
+    else if(method.compare("DISTANCE_ONE_OMP_JP_hyper_orig_greedy")==0) return D1_OMP_JP_hyper_orig_greedy(nT, num_colors_, vertex_color_);
     else if(method.compare("DISTANCE_ONE_OMP_LB")==0) return D1_OMP_LB(nT, num_colors_, vertex_color_);
     else if(method.compare("DISTANCE_ONE_OMP_JP_AW_LF")==0) return D1_OMP_JP_AW_LF(nT, num_colors_, vertex_color_);
     else if(method.compare("DISTANCE_ONE_OMP_JP_AW_SL")==0) return D1_OMP_JP_AW_SL(nT, num_colors_, vertex_color_);
@@ -528,7 +530,8 @@ int SMPGCInterface::D1_OMP_JP(int nT, INT&colors, vector<INT>&vtxColors) {
     WeightRnd.resize(N,-1);
 
 tim_Wgt =-omp_get_wtime();
-    std::default_random_engine generator(std::chrono::system_clock::now().time_since_epoch().count());
+    //std::default_random_engine generator(std::chrono::system_clock::now().time_since_epoch().count());
+    std::default_random_engine generator(12345);
     std::uniform_real_distribution<double> distribution(0.0,1.0);
     for(int i=0; i<N; i++)
         WeightRnd[i] = distribution(generator);
@@ -590,7 +593,7 @@ tim_ReG -= omp_get_wtime();
         }
 tim_ReG += omp_get_wtime();
     nLoops++;
-    }while(nLoops<=3  && QTail!=0);
+    }while( QTail!=0);
 
 tim_MxC = -omp_get_wtime();
 //for(int i=0; i<N; i++) printf("%d-%d\n",i,vtxColors[i]);
@@ -604,7 +607,7 @@ colors++;
 tim_MxC += omp_get_wtime();
 
 tim_Tot =tim_Wgt+ tim_MIS+tim_ReG+tim_MxC;
-    printf("@JPlp3_nT_c_T_TWgt_TMISC_TReG_TMxC_nLoop\t");
+    printf("@JP_nT_c_T_TWgt_TMISC_TReG_TMxC_nLoop\t");
     printf("%d\t",  nT);    
     printf("%lld\t",  colors);    
     printf("%lf\t", tim_Tot);
