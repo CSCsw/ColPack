@@ -53,6 +53,7 @@ public: // Constructions
 public: // API
     virtual void dump();
     int Coloring(int nT, const string& method);
+    int Coloring(int nT, const string& method, const string &optionStr, const INT switch_iter);
         // Algorithms 
     int D1_OMP_GM(int nT, INT&color, vector<INT>&vtxColors);
     int D1_OMP_IP(int nT, INT&color, vector<INT>&vtxColors);
@@ -61,9 +62,15 @@ public: // API
     int D1_OMP_JP(int nT, INT&color, vector<INT>&vtxColors);
     int D1_OMP_JP_profile(int nT, INT&color, vector<INT>&vtxColors);
     int D1_OMP_JP_LargeAndSmall(int nT, INT&color, vector<INT>&vtxColors);
-    int D1_OMP_JP_hyper_orig_greedy(int nT, INT&color, vector<INT>&vtxColors);
-    int D1_OMP_JP_hyper_LaS_greedy(int nT, INT&color, vector<INT>&vtxColors);
-    
+    int D1_OMP_JP_hyper_orig_greedy(int nT, INT&color, vector<INT>&vtxColors, const int option, const INT swtich_iter);
+    int D1_OMP_JP_hyper_LaS_greedy(int nT, INT&color, vector<INT>&vtxColors, const int option, const INT switch_iter);
+   
+    inline void hyperJP_greedy_GM3P(vector<INT>&Q, const INT &QTail, vector<vector<INT>>&QQ, const int&nT, INT const * const &verPtr, INT const * const &verIdx, INT& colors, vector<INT>&vtxColors); 
+    inline void hyperJP_greedy_GMMP(vector<INT>&Q, const INT &QTail, vector<INT>&conflictQ, const int&nT, INT const * const &verPtr, INT const * const &verIdx, INT& colors, vector<INT>&vtxColors); 
+    inline void hyperJP_greedy_serial(vector<INT>&Q, const INT &QTail, INT const * const &verPtr, INT const * const &verIdx, INT& colors, vector<INT>&vtxColors); 
+    inline void hyperJP_stream(vector<INT>&Q, const INT &QTail, vector<vector<INT>>&QQ, const int&nT, INT const * const &verPtr, INT const * const &verIdx, INT& colors, vector<INT>&vtxColors); 
+
+
     int D1_OMP_JP_AW_LF(int nT, INT&color, vector<INT>&vtxColors);
     int D1_OMP_JP_AW_SL(int nT, INT&color, vector<INT>&vtxColors);
 

@@ -6,6 +6,7 @@
 *********************************************************************/
 #ifndef SMPGCCORE_H
 #define SMPGCCORE_H
+#include "SMPGCDefine.h"
 #include <vector>
 #include <unordered_map>
 #include <iostream>

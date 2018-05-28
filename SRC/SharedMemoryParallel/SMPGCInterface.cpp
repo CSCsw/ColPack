@@ -22,8 +22,7 @@ int SMPGCInterface::Coloring(int nT, const string& method){
     else if(method.compare("DISTANCE_ONE_OMP_JP")==0) return D1_OMP_JP(nT, num_colors_, vertex_color_);
     else if(method.compare("DISTANCE_ONE_OMP_JP_profile")==0) return D1_OMP_JP_profile(nT, num_colors_, vertex_color_);
     else if(method.compare("DISTANCE_ONE_OMP_JP_LaS")==0) return D1_OMP_JP_LargeAndSmall(nT, num_colors_, vertex_color_);
-    else if(method.compare("DISTANCE_ONE_OMP_JP_hyper_LaS_greedy")==0) return D1_OMP_JP_hyper_LaS_greedy(nT, num_colors_, vertex_color_);
-    else if(method.compare("DISTANCE_ONE_OMP_JP_hyper_orig_greedy")==0) return D1_OMP_JP_hyper_orig_greedy(nT, num_colors_, vertex_color_);
+
     else if(method.compare("DISTANCE_ONE_OMP_LB")==0) return D1_OMP_LB(nT, num_colors_, vertex_color_);
     else if(method.compare("DISTANCE_ONE_OMP_JP_AW_LF")==0) return D1_OMP_JP_AW_LF(nT, num_colors_, vertex_color_);
     else if(method.compare("DISTANCE_ONE_OMP_JP_AW_SL")==0) return D1_OMP_JP_AW_SL(nT, num_colors_, vertex_color_);
@@ -38,6 +37,24 @@ int SMPGCInterface::Coloring(int nT, const string& method){
     else if(method.compare("DISTANCE_ONE_OMP_IP_PERLOOP_SL1")==0) return D1_OMP_IP_LO_perloop(nT, num_colors_, vertex_color_, "SMALLEST_LAST1");
 
     else { fprintf(stdout, "Unknow method %s\n",method.c_str()); exit(1); }   
+    return _TRUE;
+}
+
+int SMPGCInterface::Coloring(int nT, const string& method, const string &optionStr, const INT switch_iter=1){
+    int option=JP_HYPER_GREEDY_GM3P;
+    if     (optionStr.compare("GM3P")==0)     option=JP_HYPER_GREEDY_GM3P;
+    else if(optionStr.compare("GMMP")==0)     option=JP_HYPER_GREEDY_GMMP;
+    else if(optionStr.compare("SERL")==0)     option=JP_HYPER_GREEDY_SERL;
+    else if(optionStr.compare("STREAM")==0)   option=JP_HYPER_STREAM;
+    else{
+        printf("JP hyper method,\"%s\" is not an option. Should be one of {GM3P,GMMP,SERL,STREAM}\n",optionStr.c_str());
+        exit(1);
+    }
+    if     (method.compare("DISTANCE_ONE_OMP_JP_hyper_LaS_greedy")==0) 
+        return  D1_OMP_JP_hyper_LaS_greedy(nT, num_colors_, vertex_color_, option, switch_iter);
+    else if(method.compare("DISTANCE_ONE_OMP_JP_hyper_orig_greedy")==0) 
+        return D1_OMP_JP_hyper_orig_greedy(nT, num_colors_, vertex_color_, option, switch_iter);
+    else {fprintf(stdout, "Unknown method %s\n",method.c_str()); exit(1); }
     return _TRUE;
 }
 
@@ -103,19 +120,20 @@ int SMPGCInterface::D1_OMP_GM(int nT, INT&colors, vector<INT>&vtxColor) {
     if(nT<=0) { printf("Warning, number of threads changed from %d to 1\n",nT); nT=1; }
     omp_set_num_threads(nT);
 
-    double tim_color=0,tim_detect=0, tim_recolor=0;    //run time
-    double tim_Tot=0;                            //run time
-    INT    nConflicts = 0;                       //Number of conflicts 
+    double tim_color  = 0;                     // run time
+    double tim_detect = 0;                     // run time
+    double tim_recolor= 0;                     // run time
+    double tim_Tot=0;                          // run time
+    INT    nConflicts = 0;                     // Number of conflicts 
     
     const INT N = nodes();   //number of vertex
+    const INT MaxDegreeP1 = maxDeg()+1; //maxDegree
     const vector<INT>& verPtr = CSRia();
     const vector<INT>& verInd = CSRja();
-    const INT MaxDegreeP1 = maxDeg()+1; //maxDegree
     const vector<INT>& Q = ordered_vertex(); 
     
     colors=0;                       
     vtxColor.assign(N, -1);
-    
 
     vector<vector<INT>> QQ(nT);
     const INT qtnt = N/nT;
@@ -138,11 +156,11 @@ int SMPGCInterface::D1_OMP_GM(int nT, INT&colors, vector<INT>&vtxColor) {
         vector<bool> Mask;
 #pragma omp for
         for(INT it=0; it<N; it++) {
-            INT v=Q[it];
+            const auto v=Q[it];
             Mask.assign(MaxDegreeP1, false);
             for(INT jt=verPtr[v], jtEnd=verPtr[v+1]; jt!=jtEnd; jt++ ) {
-                INT wColor;
-                if( (wColor=vtxColor[verInd[jt]]) >= 0) 
+                const auto wColor=vtxColor[verInd[jt]];
+                if( wColor >= 0) 
                     Mask[wColor] = true; //assert(adjColor<Mark.size())
             } 
             int c;
@@ -167,10 +185,10 @@ int SMPGCInterface::D1_OMP_GM(int nT, INT&colors, vector<INT>&vtxColor) {
         //for(int qit=low; qit<high; qit++){
 #pragma omp for
         for(INT it=0; it<N; it++){
-            INT v  = Q[it];
-            INT vc = vtxColor[v];
+            const auto v  = Q[it];
+            const auto vc = vtxColor[v];
             for(INT jt=verPtr[v],jtEnd=verPtr[v+1]; jt!=jtEnd; jt++) {
-                int w = verInd[jt];
+                const auto w = verInd[jt];
                 if(v<w && vc == vtxColor[w]) {
                     Qtmp.push_back(v);
                     vtxColor[v] = -1;  //Will prevent v from being in conflict in another pairing
@@ -190,8 +208,8 @@ int SMPGCInterface::D1_OMP_GM(int nT, INT&colors, vector<INT>&vtxColor) {
         for(auto v: QQ[tid]){
             Mark.assign(MaxDegreeP1, false);
             for(auto wit=verPtr[v], witEnd=verPtr[v+1]; wit!=witEnd; wit++ ) {
-                INT wc;
-                if( (wc=vtxColor[verInd[wit]]) >= 0) 
+                const auto wc=vtxColor[verInd[wit]];
+                if(wc >= 0) 
                     Mark[wc] = true; //assert(adjColor<Mark.size())
             } 
             INT c;
@@ -254,19 +272,19 @@ int SMPGCInterface::D1_OMP_IP(int nT, INT&colors, vector<INT>&vtxColors) {
     if(nT<=0) { printf("Warning, number of threads changed from %d to 1\n",nT); nT=1; }
     omp_set_num_threads(nT); 
 
-    double tim_total=.0;
-    double tim_color=.0;
-    double tim_detect=.0;
-    double tim_max_c=.0;   //run time
-    INT   nConflicts = 0;                  //Number of conflicts 
-    int    nLoops = 0;                      //Number of rounds 
+    double tim_total   =.0;
+    double tim_color   =.0;
+    double tim_detect  =.0;
+    double tim_max_c   =.0;                     // run time
+    int    nLoops      = 0;                     // number of iteration 
     
-    const INT N   = nodes(); //number of vertex
+    const INT N   = nodes();                    // number of vertex
+    const INT MaxDegreeP1 = maxDeg()+1;         // maxDegree
     
-    INT const * const verPtr  = CSRiaPtr();      //ia of csr
-    INT const * const verInd  = CSRjaPtr();      //ja of csr
+    INT const * const verPtr  = CSRiaPtr();     // ia of csr
+    INT const * const verInd  = CSRjaPtr();     // ja of csr
     
-    const INT MaxDegreeP1 = maxDeg()+1; //maxDegree
+    INT    nConflicts = 0;                      // number of conflicts 
     
     colors=0;
     vtxColors.clear(); vtxColors.assign(N, -1);
@@ -280,7 +298,6 @@ int SMPGCInterface::D1_OMP_IP(int nT, INT&colors, vector<INT>&vtxColors) {
         readyQ[i]  = ordered_vertex()[i];
         conflictQ[i]= -1; //Empty queue
     }
-
     vector<double> profile_tim_colors;
     vector<double> profile_tim_detects;
     vector<INT> profile_conflicts;
@@ -297,12 +314,12 @@ int SMPGCInterface::D1_OMP_IP(int nT, INT&colors, vector<INT>&vtxColors) {
             vector<INT> Mark; Mark.reserve(MaxDegreeP1);
             #pragma omp for
             for (INT i=0; i<num_nodes_remains; i++) {
-                const INT v = readyQ[i]; 
+                const auto v = readyQ[i]; 
                 Mark.assign(MaxDegreeP1, -1);
                 for(INT wit = verPtr[v], witEnd=verPtr[v+1]; wit !=witEnd; wit++ ) {
-                    const INT w = verInd[wit];
-                    INT nbColor;
-                    if( (nbColor=vtxColors[w]) >= 0) 
+                    const auto w = verInd[wit];
+                    const auto nbColor=vtxColors[w];
+                    if(nbColor>= 0) 
                         Mark[nbColor] = w; //assert(adjColor<Mark.size())
                 } 
                 INT c;
