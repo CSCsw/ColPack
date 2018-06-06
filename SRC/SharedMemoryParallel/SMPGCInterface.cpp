@@ -17,43 +17,43 @@ using namespace ColPack;
 // ============================================================================
 int SMPGCInterface::Coloring(int nT, const string& method){
     
-    if     (method.compare("DISTANCE_ONE_OMP_GM")==0) { return D1_OMP_GM(nT, num_colors_, vertex_color_);}
-    else if(method.compare("DISTANCE_ONE_OMP_IP")==0) return D1_OMP_IP(nT, num_colors_, vertex_color_);
-    else if(method.compare("DISTANCE_ONE_OMP_JP")==0) return D1_OMP_JP(nT, num_colors_, vertex_color_);
-    else if(method.compare("DISTANCE_ONE_OMP_JP_profile")==0) return D1_OMP_JP_profile(nT, num_colors_, vertex_color_);
-    else if(method.compare("DISTANCE_ONE_OMP_JP_LaS")==0) return D1_OMP_JP_LargeAndSmall(nT, num_colors_, vertex_color_);
+    if     (method.compare("D1Greedy")==0) return D1Greedy(nT, num_colors_, vertex_color_);
+
+    if     (method.compare("DISTANCE_ONE_OMP_GM3P")==0) return D1_OMP_GM3P(nT, num_colors_, vertex_color_);
+    else if(method.compare("DISTANCE_ONE_OMP_GMMP")==0) return D1_OMP_GMMP(nT, num_colors_, vertex_color_);
+    else if(method.compare("DISTANCE_ONE_OMP_JP")==0)   return D1_OMP_JP  (nT, num_colors_, vertex_color_);
+    else if(method.compare("DISTANCE_ONE_OMP_JP2S")==0) return D1_OMP_JP2S(nT, num_colors_, vertex_color_);
+
+    else if(method.compare("DISTANCE_ONE_OMP_JP_LF")==0) return D1_OMP_JP_LF(nT, num_colors_, vertex_color_);
+    else if(method.compare("DISTANCE_ONE_OMP_JP_SL")==0) return D1_OMP_JP_SL(nT, num_colors_, vertex_color_);
+    else if(method.compare("DISTANCE_ONE_OMP_GM3P_SL")==0) return  D1_OMP_GM3P_LO(nT, num_colors_, vertex_color_, "SMALLEST_LAST");
+    else if(method.compare("DISTANCE_ONE_OMP_GM3P_SL1")==0) return D1_OMP_GM3P_LO(nT, num_colors_, vertex_color_, "SMALLEST_LAST1");
+    else if(method.compare("DISTANCE_ONE_OMP_GMMP_LF")==0)  return D1_OMP_GMMP_LO_perloop(nT, num_colors_, vertex_color_, "LARGEST_FIRST");
+    else if(method.compare("DISTANCE_ONE_OMP_GMMP_SL")==0)  return D1_OMP_GMMP_LO_perloop(nT, num_colors_, vertex_color_, "SMALLEST_LAST");
+    else if(method.compare("DISTANCE_ONE_OMP_GMMP_SL1")==0) return D1_OMP_GMMP_LO_perloop(nT, num_colors_, vertex_color_, "SMALLEST_LAST1");
+    else if(method.compare("DISTANCE_ONE_OMP_GMMP_LF_ONCE")==0)  return D1_OMP_GMMP_LO_once(nT, num_colors_, vertex_color_, "LARGEST_FIRST");
+    else if(method.compare("DISTANCE_ONE_OMP_GMMP_SL_ONCE")==0)  return D1_OMP_GMMP_LO_once(nT, num_colors_, vertex_color_, "SMALLEST_LAST");
+    else if(method.compare("DISTANCE_ONE_OMP_GMMP_SL1_ONCE")==0) return D1_OMP_GMMP_LO_once(nT, num_colors_, vertex_color_, "SMALLEST_LAST1");
 
     else if(method.compare("DISTANCE_ONE_OMP_LB")==0) return D1_OMP_LB(nT, num_colors_, vertex_color_);
-    else if(method.compare("DISTANCE_ONE_OMP_JP_AW_LF")==0) return D1_OMP_JP_AW_LF(nT, num_colors_, vertex_color_);
-    else if(method.compare("DISTANCE_ONE_OMP_JP_AW_SL")==0) return D1_OMP_JP_AW_SL(nT, num_colors_, vertex_color_);
-    else if(method.compare("DISTANCE_ONE_OMP_GM_LF")==0) return  D1_OMP_GM_LO(nT, num_colors_, vertex_color_, "LARGEST_FIRST");
-    else if(method.compare("DISTANCE_ONE_OMP_GM_SL")==0) return  D1_OMP_GM_LO(nT, num_colors_, vertex_color_, "SMALLEST_LAST");
-    else if(method.compare("DISTANCE_ONE_OMP_GM_SL1")==0) return D1_OMP_GM_LO(nT, num_colors_, vertex_color_, "SMALLEST_LAST1");
-    else if(method.compare("DISTANCE_ONE_OMP_IP_SINGLE_LF")==0)  return D1_OMP_IP_LO_once(nT, num_colors_, vertex_color_, "LARGEST_FIRST");
-    else if(method.compare("DISTANCE_ONE_OMP_IP_SINGLE_SL")==0)  return D1_OMP_IP_LO_once(nT, num_colors_, vertex_color_, "SMALLEST_LAST");
-    else if(method.compare("DISTANCE_ONE_OMP_IP_SINGLE_SL1")==0) return D1_OMP_IP_LO_once(nT, num_colors_, vertex_color_, "SMALLEST_LAST1");
-    else if(method.compare("DISTANCE_ONE_OMP_IP_PERLOOP_LF")==0)  return D1_OMP_IP_LO_perloop(nT, num_colors_, vertex_color_, "LARGEST_FIRST");
-    else if(method.compare("DISTANCE_ONE_OMP_IP_PERLOOP_SL")==0)  return D1_OMP_IP_LO_perloop(nT, num_colors_, vertex_color_, "SMALLEST_LAST");
-    else if(method.compare("DISTANCE_ONE_OMP_IP_PERLOOP_SL1")==0) return D1_OMP_IP_LO_perloop(nT, num_colors_, vertex_color_, "SMALLEST_LAST1");
-
     else { fprintf(stdout, "Unknow method %s\n",method.c_str()); exit(1); }   
     return _TRUE;
 }
 
 int SMPGCInterface::Coloring(int nT, const string& method, const string &optionStr, const INT switch_iter=1){
-    int option=JP_HYPER_GREEDY_GM3P;
-    if     (optionStr.compare("GM3P")==0)     option=JP_HYPER_GREEDY_GM3P;
-    else if(optionStr.compare("GMMP")==0)     option=JP_HYPER_GREEDY_GMMP;
-    else if(optionStr.compare("SERL")==0)     option=JP_HYPER_GREEDY_SERL;
-    else if(optionStr.compare("STREAM")==0)   option=JP_HYPER_STREAM;
+    int option=JP_HYBER_IMPLEMENT_GM3P;  //default
+    if     (optionStr.compare("GM3P")==0)     option=JP_HYBER_IMPLEMENT_GM3P;
+    else if(optionStr.compare("GMMP")==0)     option=JP_HYBER_IMPLEMENT_GMMP;
+    else if(optionStr.compare("GREEDY")==0)   option=JP_HYBER_IMPLEMENT_GREEDY;
+    else if(optionStr.compare("STREAM")==0)   option=JP_HYBER_IMPLEMENT_STREAM;
     else{
-        printf("JP hyper method,\"%s\" is not an option. Should be one of {GM3P,GMMP,SERL,STREAM}\n",optionStr.c_str());
+        printf("JP hyper method,\"%s\" is not an option. Should be one of {GM3P,GMMP,GREEDY,STREAM}\n",optionStr.c_str());
         exit(1);
     }
-    if     (method.compare("DISTANCE_ONE_OMP_JP_hyper_LaS_greedy")==0) 
-        return  D1_OMP_JP_hyper_LaS_greedy(nT, num_colors_, vertex_color_, option, switch_iter);
-    else if(method.compare("DISTANCE_ONE_OMP_JP_hyper_orig_greedy")==0) 
-        return D1_OMP_JP_hyper_orig_greedy(nT, num_colors_, vertex_color_, option, switch_iter);
+    if     (method.compare("DISTANCE_ONE_OMP_JP2S_HYBER")==0) 
+        return  D1_OMP_JP2S_hyber(nT, num_colors_, vertex_color_, option, switch_iter);
+    else if(method.compare("DISTANCE_ONE_OMP_JP_HYBER")==0) 
+        return D1_OMP_JP_hyber(nT, num_colors_, vertex_color_, option, switch_iter);
     else {fprintf(stdout, "Unknown method %s\n",method.c_str()); exit(1); }
     return _TRUE;
 }
@@ -116,7 +116,7 @@ SMPGCInterface::INT SMPGCInterface::cnt_conflict(INT colors, const vector<INT>& 
 // ============================================================================
 // based on Gebremedhin and Manne's GM algorithm [1]
 // ============================================================================
-int SMPGCInterface::D1_OMP_GM(int nT, INT&colors, vector<INT>&vtxColor) {
+int SMPGCInterface::D1_OMP_GM3P(int nT, INT&colors, vector<INT>&vtxColor) {
     if(nT<=0) { printf("Warning, number of threads changed from %d to 1\n",nT); nT=1; }
     omp_set_num_threads(nT);
 
@@ -268,7 +268,7 @@ int SMPGCInterface::D1_OMP_GM(int nT, INT&colors, vector<INT>&vtxColor) {
 // ============================================================================
 // based on Catalyurek et al 's IP algorithm [2]
 // ============================================================================
-int SMPGCInterface::D1_OMP_IP(int nT, INT&colors, vector<INT>&vtxColors) {
+int SMPGCInterface::D1_OMP_GMMP(int nT, INT&colors, vector<INT>&vtxColors) {
     if(nT<=0) { printf("Warning, number of threads changed from %d to 1\n",nT); nT=1; }
     omp_set_num_threads(nT); 
 
@@ -546,10 +546,10 @@ int SMPGCInterface::D1_OMP_JP(int nT, INT&colors, vector<INT>&vtxColors) {
     vector<double> WeightRnd;
     WeightRnd.resize(N,-1);
 
-tim_Wgt =-omp_get_wtime();
     //std::default_random_engine generator(std::chrono::system_clock::now().time_since_epoch().count());
     std::default_random_engine generator(12345);
     std::uniform_real_distribution<double> distribution(0.0,1.0);
+tim_Wgt =-omp_get_wtime();
     for(int i=0; i<N; i++)
         WeightRnd[i] = distribution(generator);
 tim_Wgt +=omp_get_wtime();
@@ -639,7 +639,7 @@ tim_Tot =tim_Wgt+ tim_MIS+tim_ReG+tim_MxC;
 // ============================================================================
 // based on Allwright's LF JP algorithm [3]
 // ============================================================================
-int SMPGCInterface::D1_OMP_JP_AW_LF(int nT, INT&colors, vector<INT>&vtxColors) {
+int SMPGCInterface::D1_OMP_JP_LF(int nT, INT&colors, vector<INT>&vtxColors) {
     if(nT<=0) { printf("Warning, number of threads changed from %d to 1\n",nT); nT=1; }
     omp_set_num_threads(nT);
     
@@ -791,7 +791,7 @@ tim_Wgt_LF +=omp_get_wtime();
 // ============================================================================
 // based on Allwright's SL JP algorithm [3]
 // ============================================================================
-int SMPGCInterface::D1_OMP_JP_AW_SL(int nT, INT&colors, vector<INT>&vtxColors) {
+int SMPGCInterface::D1_OMP_JP_SL(int nT, INT&colors, vector<INT>&vtxColors) {
     if(nT<=0) { printf("Warning, number of threads changed from %d to 1\n",nT); nT=1; }
     omp_set_num_threads(nT);
     

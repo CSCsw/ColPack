@@ -15,7 +15,7 @@ using namespace ColPack;
 // ============================================================================
 // Local Ordering version of GM alg 
 // ============================================================================
-int SMPGCInterface::D1_OMP_GM_LO(int nT, INT&colors, vector<INT>&vtxColor, const string& local_ordering) {
+int SMPGCInterface::D1_OMP_GM3P_LO(int nT, INT&colors, vector<INT>&vtxColor, const string& local_ordering) {
     if(nT<=0) { printf("Warning, number of threads changed from %d to 1\n",nT); nT=1; }
     omp_set_num_threads(nT);
 
@@ -189,7 +189,7 @@ int SMPGCInterface::D1_OMP_GM_LO(int nT, INT&colors, vector<INT>&vtxColor, const
 // ============================================================================
 // Local Ordering
 // ============================================================================
-int SMPGCInterface::D1_OMP_IP_LO_perloop(int nT, INT&colors, vector<INT>&vtxColors, const string& local_ordering) {
+int SMPGCInterface::D1_OMP_GMMP_LO_perloop(int nT, INT&colors, vector<INT>&vtxColors, const string& local_ordering) {
     if(nT<=0) { printf("Warning, number of threads changed from %d to 1\n",nT); nT=1; }
     omp_set_num_threads(nT);
     
@@ -353,7 +353,7 @@ int SMPGCInterface::D1_OMP_IP_LO_perloop(int nT, INT&colors, vector<INT>&vtxColo
 // ============================================================================
 // Local Ordering
 // ============================================================================
-int SMPGCInterface::D1_OMP_IP_LO_once(int nT, INT&colors, vector<INT>&vtxColors, const string& local_ordering) {
+int SMPGCInterface::D1_OMP_GMMP_LO_once(int nT, INT&colors, vector<INT>&vtxColors, const string& local_ordering) {
     if(nT<=0) { printf("Warning, number of threads changed from %d to 1\n",nT); nT=1; }
     omp_set_num_threads(nT);
     

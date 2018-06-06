@@ -55,28 +55,30 @@ public: // API
     int Coloring(int nT, const string& method);
     int Coloring(int nT, const string& method, const string &optionStr, const INT switch_iter);
         // Algorithms 
-    int D1_OMP_GM(int nT, INT&color, vector<INT>&vtxColors);
-    int D1_OMP_IP(int nT, INT&color, vector<INT>&vtxColors);
+    int D1_OMP_GM3P(int nT, INT&color, vector<INT>&vtxColors);
+    int D1_OMP_GMMP(int nT, INT&color, vector<INT>&vtxColors);
 
     int D1_OMP_LB(int nT, INT&color, vector<INT>&vtxColors);
+    
     int D1_OMP_JP(int nT, INT&color, vector<INT>&vtxColors);
-    int D1_OMP_JP_profile(int nT, INT&color, vector<INT>&vtxColors);
-    int D1_OMP_JP_LargeAndSmall(int nT, INT&color, vector<INT>&vtxColors);
-    int D1_OMP_JP_hyper_orig_greedy(int nT, INT&color, vector<INT>&vtxColors, const int option, const INT swtich_iter);
-    int D1_OMP_JP_hyper_LaS_greedy(int nT, INT&color, vector<INT>&vtxColors, const int option, const INT switch_iter);
-   
-    inline void hyperJP_greedy_GM3P(vector<INT>&Q, const INT &QTail, vector<vector<INT>>&QQ, const int&nT, INT const * const &verPtr, INT const * const &verIdx, INT& colors, vector<INT>&vtxColors); 
-    inline void hyperJP_greedy_GMMP(vector<INT>&Q, const INT &QTail, vector<INT>&conflictQ, const int&nT, INT const * const &verPtr, INT const * const &verIdx, INT& colors, vector<INT>&vtxColors); 
-    inline void hyperJP_greedy_serial(vector<INT>&Q, const INT &QTail, INT const * const &verPtr, INT const * const &verIdx, INT& colors, vector<INT>&vtxColors); 
-    inline void hyperJP_stream(vector<INT>&Q, const INT &QTail, vector<vector<INT>>&QQ, const int&nT, INT const * const &verPtr, INT const * const &verIdx, INT& colors, vector<INT>&vtxColors); 
+    int D1_OMP_JP2S(int nT, INT&color, vector<INT>&vtxColors);
 
+    int D1_OMP_GM3P_LO(int nT, INT&color, vector<INT>&vtxColors, const string& local_ordering);
+    int D1_OMP_GMMP_LO_perloop(int nT, INT&color, vector<INT>&vtxColors, const string& local_ordering);
+    int D1_OMP_GMMP_LO_once(int nT, INT&color, vector<INT>&vtxColors, const string& local_ordering);
 
-    int D1_OMP_JP_AW_LF(int nT, INT&color, vector<INT>&vtxColors);
-    int D1_OMP_JP_AW_SL(int nT, INT&color, vector<INT>&vtxColors);
+    int D1_OMP_JP_LF(int nT, INT&color, vector<INT>&vtxColors);
+    int D1_OMP_JP_SL(int nT, INT&color, vector<INT>&vtxColors);
+    
+    int D1_OMP_JP_hyber(int nT, INT&color, vector<INT>&vtxColors, const int option, const INT swtich_iter);
+    int D1_OMP_JP2S_hyber(int nT, INT&color, vector<INT>&vtxColors, const int option, const INT switch_iter);
 
-    int D1_OMP_GM_LO(int nT, INT&color, vector<INT>&vtxColors, const string& local_ordering);
-    int D1_OMP_IP_LO_perloop(int nT, INT&color, vector<INT>&vtxColors, const string& local_ordering);
-    int D1_OMP_IP_LO_once(int nT, INT&color, vector<INT>&vtxColors, const string& local_ordering);
+    int D1Greedy(int nT, INT&color, vector<INT>&vtxColors);
+private:
+    inline void hyberJP_implement_GM3P(vector<INT>&Q, const INT &QTail, vector<vector<INT>>&QQ, const int&nT, INT const * const &verPtr, INT const * const &verInd, INT& colors, vector<INT>&vtxColors); 
+    inline void hyberJP_implement_GMMP(vector<INT>&Q, const INT &QTail, vector<INT>&conflictQ,                INT const * const &verPtr, INT const * const &verInd, INT& colors, vector<INT>&vtxColors); 
+    void hyberJP_implement_greedy_serial(vector<INT>&Q, const INT &QTail,                              INT const * const &verPtr, INT const * const &verInd, INT& colors, vector<INT>&vtxColors); 
+    inline void hyberJP_implement_stream(vector<INT>&Q, const INT &QTail, vector<vector<INT>>&QQ, const int&nT, INT const * const &verPtr, INT const * const &verInd, INT& colors, vector<INT>&vtxColors); 
 
 
 protected: // Utilites

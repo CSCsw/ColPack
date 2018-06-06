@@ -52,13 +52,13 @@ public: // in comman Computer is LP64 Model. change the following in case not.
     typedef          long long int  int64;
     typedef unsigned int           uint32;
     typedef          int            int32;
-#ifndef INT32
-    typedef uint64 UINT;
-    typedef int64  INT ;
-#else
+//#ifndef INT32
+//    typedef uint64 UINT;
+//    typedef int64  INT ;
+//#else
     typedef uint32 UINT;
     typedef int32  INT ;
-#endif
+//#endif
 public: // Constructions
     SMPGCCore();
     SMPGCCore(const string& fname, const string& format, double*iotime);
