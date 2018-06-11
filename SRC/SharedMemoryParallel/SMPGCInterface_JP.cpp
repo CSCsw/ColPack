@@ -4,152 +4,16 @@
     > Descriptions: 
     > Created Time: Fri 25 May 2018 02:55:49 PM EDT
  ************************************************************************/
-
+#include <sstream>
 #include "SMPGCInterface.h"
 #include <chrono> //c++11 system time
 #include <random> //c++11 random
 using namespace std;
 using namespace ColPack;
 
-
-
-
-
-int SMPGCInterface::D1Greedy(int nT, INT&colors, vector<INT>&vtxColors) {
-    if(nT<=0) { printf("Warning, number of threads changed from %d to 1\n",nT); nT=1; }
-    omp_set_num_threads(nT);
-    string tag ="hyber";
-    vector<INT> conflictQ;
-
-    double tim_Wgt =0;                    // run time
-    double tim_MIS =0;                    // run time
-    double tim_ReG =0;                    // run time
-    double tim_Hyb =0;
-    double tim_MxC =0;                    // run time
-    double tim_Tot =0;                    // run time
-    INT    nLoops = 0;                    // number of iteration
- 
-    const INT N = nodes();                // number of vertex
-    const INT MaxDegreeP1 = maxDeg()+1;   // maxDegree
-   
-    INT const * const verPtr=CSRiaPtr();  // ia of csr
-    INT const * const verInd=CSRjaPtr();  // ja of csr
-    
-    INT QTail = N;
-    vector<INT> Q;
-
- 
-    Q.clear();
-    for(int i=0; i<N; i++)
-        Q.push_back(i);
-    vtxColors.assign(N,-1);
-    colors=0;
-   
-    hyberJP_implement_greedy_serial  (Q,N,verPtr,verInd,colors,vtxColors);
-    
-    
-    double tim_order =0;
-    double tim_color =0;                      // run time
-    //const INT N = nodes();                   // number of vertex
-    //const INT MaxDegreeP1 = maxDeg()+1;    // maxDegree
-    
-    //INT const * const verPtr=CSRiaPtr();     // ia of csr
-    //INT const * const verInd=CSRjaPtr();     // ja of csr
-    
-    Q.clear();
-    for(int i=0; i<N; i++)
-        Q.push_back(i);
-    vtxColors.assign(N,-1);
-    colors=0;
-
-    hyberJP_implement_greedy_serial(Q, N, verPtr, verInd, colors, vtxColors); //vector<INT>&Q, const INT &QTail, INT const * const &verPtr, INT const * const &verInd, INT& colors, vector<INT>&vtxColors){
-
-
-    Q.clear();
-    for(int i=0; i<N; i++)
-        Q.push_back(i);
-    vtxColors.assign(N,-1);
-    colors=0;
-
-
-
-    tim_order = -omp_get_wtime();
-    { //ordering
-        vector<vector<INT>> GroupedVertexDegree(MaxDegreeP1);
-        for(auto i=0; i<N; i++){
-            const auto v = Q[i];
-            INT deg = verPtr[v+1]-verPtr[v];
-            GroupedVertexDegree[deg].push_back(v);
-        }
-        
-        Q.clear();
-        for(int i=MaxDegreeP1-1; i>=0; i--){
-            int i_VertexDegreeCount = (signed)GroupedVertexDegree[i].size();
-            for(int j=0; j<i_VertexDegreeCount; j++) {
-                Q.push_back(GroupedVertexDegree[i][j]);
-            }
-        }
-    
-        //INT pos=0;
-        //for(INT d=MaxDegreeP1-1, it=MaxDegreeP1; it!=0; it--, d--){
-        //    for(auto v : GroupedVertexDegree[d]){
-        //        Q[pos++]=v;
-        //    }
-        //}
-
-        GroupedVertexDegree.clear();   
-
-    }
-    
-    tim_order+=omp_get_wtime();
-
-    vector<INT> Mask(MaxDegreeP1,-1);
-    tim_color=-omp_get_wtime();
-    for(INT vit=0; vit<N; vit++){
-        const auto v   = Q[vit];
-        for(INT wit=verPtr[v]; wit<verPtr[v+1]; wit++){
-            const auto w = verInd[wit];
-            const auto wc = vtxColors[w];
-            if(wc<0) continue;
-            Mask[wc]=v;
-        }
-        INT c;
-        for(c=0; c<MaxDegreeP1; c++)
-            if(Mask[c]!=v){
-                vtxColors[v]=c;
-                if(colors<c) colors=c;
-                break;
-            }
-
-    }
-   
-    tim_color +=omp_get_wtime();
-    //tim_MxC = -omp_get_wtime();
-    //colors=0;
-    //#pragma omp parallel for reduction(max:colors)
-    //for(int i=0; i<N; i++){
-    //    auto c = vtxColors[i];
-    //    if(c>colors) colors=c;
-   // }
-    colors++;
-    //tim_MxC += omp_get_wtime();
-
-    tim_Tot = tim_order+ tim_color;
-    printf("@Greedy_nT_c_T_Torder_Tcolor\t");
-    printf("%d\t",  nT);
-    printf("%d\t",  colors);    
-    printf("%lf\t", tim_Tot);
-    printf("%lf\t", tim_order);
-    printf("%lf\t", tim_color);
-    printf("\n");
-
-    return _TRUE;
-}
-
-
-
-
-
+#ifdef DEBUG_JP_PROFILE
+    extern string profile_name;
+#endif
 
 
 // ============================================================================
@@ -455,12 +319,26 @@ int SMPGCInterface::D1_OMP_JP_hyber(int nT, INT&colors, vector<INT>&vtxColors, c
 //        if(cnt<N) { printf("Error! only read %d random numers expect %d\n",cnt, N); exit(1); }
 //    }
 
+#ifdef  DEBUG_JP_PROFILE
+    vector<int>    profile_nodes;
+    vector<double> profile_times;
+#endif
+
+
     colors=0;
     // phase 1 : JP Part
     while(QTail!=0){
         if(nLoops >= switch_iter) break;
 
+
+#ifdef DEBUG_JP_PROFILE
+        auto t_jp_color_curiter = -tim_MIS;
+        auto t_jp_recon_curiter = -tim_ReG;
+        auto n_jp_nodes_curiter = QTail;
+#endif
+
         tim_MIS -= omp_get_wtime();
+
         #pragma omp parallel
         {
             int tid = omp_get_thread_num();
@@ -513,6 +391,18 @@ int SMPGCInterface::D1_OMP_JP_hyber(int nT, INT&colors, vector<INT>&vtxColors, c
             QQ[tid].clear();
         }
         tim_ReG += omp_get_wtime();
+
+
+#ifdef DEBUG_JP_PROFILE
+        n_jp_nodes_curiter -=QTail;
+        t_jp_color_curiter +=tim_MIS;
+        t_jp_recon_curiter +=tim_ReG;
+        
+        profile_nodes.push_back(n_jp_nodes_curiter);
+        profile_times.push_back(t_jp_color_curiter+t_jp_recon_curiter);
+#endif
+
+
         nLoops++;
     } //end while( QTail!=0);
 
@@ -569,7 +459,22 @@ int SMPGCInterface::D1_OMP_JP_hyber(int nT, INT&colors, vector<INT>&vtxColors, c
     printf("%lf\t", tim_Hyb);
     printf("%lf\t", tim_MxC);
     printf("\n"); 
-    
+
+#ifdef DEBUG_JP_PROFILE
+    {
+        profile_name; 
+        ofstream of(profile_name.c_str());
+        stringstream ss;
+        ss<<profile_name;
+        ss<<"\nnodes_per_iter\ttime_per_iter\tt/n_per_iter\n";
+        for(int i=0; i<profile_nodes.size(); i++)
+            ss<<profile_nodes[i]<<"\t"<<profile_times[i]<<"\t"<<profile_times[i]/profile_nodes[i]<<"\n";
+        of<<ss.str();
+        of.close();
+    }
+#endif
+
+
     return _TRUE;
 }
 
@@ -663,10 +568,21 @@ int SMPGCInterface::D1_OMP_JP2S_hyber(int nT, INT&colors, vector<INT>&vtxColors,
 //        if(cnt<N) { printf("Error! only read %d random numers expect %d\n",cnt, N); exit(1); }
 //    }
 
+#ifdef DEBUG_JP_PROFILE
+    vector<int>    profile_nodes;
+    vector<double> profile_times;
+#endif
+
 
     colors=0;
     // phase 1:  JP part
     while(QTail!=0) {
+
+#ifdef DEBUG_JP_PROFILE
+    auto t_jp_color_curiter = -tim_MIS;
+    auto t_jp_recon_curiter = -tim_ReG;
+    auto n_jp_nodes_curiter = QTail;
+#endif
         if(nLoops>=switch_iter) break;
         tim_MIS -= omp_get_wtime();
         #pragma omp parallel
@@ -715,6 +631,16 @@ int SMPGCInterface::D1_OMP_JP2S_hyber(int nT, INT&colors, vector<INT>&vtxColors,
         }
         tim_ReG += omp_get_wtime();
         nLoops++;
+
+#ifdef DEBUG_JP_PROFILE
+        n_jp_nodes_curiter -=QTail;
+        t_jp_color_curiter +=tim_MIS;
+        t_jp_recon_curiter +=tim_ReG;
+        
+        profile_nodes.push_back(n_jp_nodes_curiter);
+        profile_times.push_back(t_jp_color_curiter+t_jp_recon_curiter);
+#endif
+
 
     } // end while(QTail!=0);
 
@@ -769,7 +695,27 @@ int SMPGCInterface::D1_OMP_JP2S_hyber(int nT, INT&colors, vector<INT>&vtxColors,
     printf("%lf\t", tim_Hyb);
     printf("%lf\t", tim_MxC);
     printf("\n"); 
+
+#ifdef DEBUG_JP_PROFILE
+    {
+        profile_name; 
+        ofstream of(profile_name.c_str());
+        stringstream ss;
+        ss<<profile_name;
+        ss<<"\nnodes_per_iter\ttime_per_iter\tt/n_per_iter\n";
+        for(int i=0; i<profile_nodes.size(); i++)
+            ss<<profile_nodes[i]<<"\t"<<profile_times[i]<<"\t"<<profile_times[i]/profile_nodes[i]<<"\n";
+        of<<ss.str();
+        of.close();
+    }
+#endif
+
+    
+    
+
     return _TRUE;
+
+
 }
 
 
@@ -926,10 +872,11 @@ inline void SMPGCInterface::hyberJP_implement_greedy_serial(vector<INT>&Q, const
     double tim_color=0;
     const INT MaxDegreeP1 = maxDeg()+1;
     const INT N = QTail;
-    printf("Begin ");
-    printf("(input N%d)\t",N);
-    printf("(MaxDegreeP1 %d)",MaxDegreeP1);
-    printf("(Q.size() %d, expect %d)",Q.size(), QTail);
+    //printf("Begin ");
+   // printf("(input N%d)\t",N);
+    //printf("(MaxDegreeP1 %d)",MaxDegreeP1);
+    //printf("(Q.size() %d, expect %d)",Q.size(), QTail);
+    
     //Q.clear();
     //for(int i=0; i<N; i++)
     //    Q.push_back(i);
@@ -998,10 +945,10 @@ inline void SMPGCInterface::hyberJP_implement_greedy_serial(vector<INT>&Q, const
         if(colors<vtxColors[i]){
             colors = vtxColors[i];
         }
-    }
-    printf("(c%d)\t",colors+1);
-    printf("(%g=%g+%g)\t",tim_order+tim_color, tim_order, tim_color);
-    printf("END\t");
+     }
+    //printf("(c%d)\t",colors+1);
+    //printf("(%g=%g+%g)\t",tim_order+tim_color, tim_order, tim_color);
+    //printf("END\t");
 }
 
 
@@ -1201,6 +1148,143 @@ tim_Tot =tim_Wgt+ tim_MIS+tim_ReG+tim_MxC;
     of2.close();
     return _TRUE;
 }
+*/
+
+
+
+
+
+/*
+int SMPGCInterface::D1Greedy(int nT, INT&colors, vector<INT>&vtxColors) {
+    if(nT<=0) { printf("Warning, number of threads changed from %d to 1\n",nT); nT=1; }
+    omp_set_num_threads(nT);
+    vector<INT> conflictQ;
+
+    double tim_Wgt =0;                    // run time
+    double tim_MIS =0;                    // run time
+    double tim_ReG =0;                    // run time
+    double tim_Hyb =0;
+    double tim_MxC =0;                    // run time
+    double tim_Tot =0;                    // run time
+    INT    nLoops = 0;                    // number of iteration
+ 
+    const INT N = nodes();                // number of vertex
+    const INT MaxDegreeP1 = maxDeg()+1;   // maxDegree
+   
+    INT const * const verPtr=CSRiaPtr();  // ia of csr
+    INT const * const verInd=CSRjaPtr();  // ja of csr
+    
+    INT QTail = N;
+    vector<INT> Q;
+
+ 
+    Q.clear();
+    for(int i=0; i<N; i++)
+        Q.push_back(i);
+    vtxColors.assign(N,-1);
+    colors=0;
+   
+    hyberJP_implement_greedy_serial  (Q,N,verPtr,verInd,colors,vtxColors);
+    
+    
+    double tim_order =0;
+    double tim_color =0;                      // run time
+    //const INT N = nodes();                   // number of vertex
+    //const INT MaxDegreeP1 = maxDeg()+1;    // maxDegree
+    
+    //INT const * const verPtr=CSRiaPtr();     // ia of csr
+    //INT const * const verInd=CSRjaPtr();     // ja of csr
+    
+    Q.clear();
+    for(int i=0; i<N; i++)
+        Q.push_back(i);
+    vtxColors.assign(N,-1);
+    colors=0;
+
+    hyberJP_implement_greedy_serial(Q, N, verPtr, verInd, colors, vtxColors); //vector<INT>&Q, const INT &QTail, INT const * const &verPtr, INT const * const &verInd, INT& colors, vector<INT>&vtxColors){
+
+
+    Q.clear();
+    for(int i=0; i<N; i++)
+        Q.push_back(i);
+    vtxColors.assign(N,-1);
+    colors=0;
+
+
+
+    tim_order = -omp_get_wtime();
+    { //ordering
+        vector<vector<INT>> GroupedVertexDegree(MaxDegreeP1);
+        for(auto i=0; i<N; i++){
+            const auto v = Q[i];
+            INT deg = verPtr[v+1]-verPtr[v];
+            GroupedVertexDegree[deg].push_back(v);
+        }
+        
+        Q.clear();
+        for(int i=MaxDegreeP1-1; i>=0; i--){
+            int i_VertexDegreeCount = (signed)GroupedVertexDegree[i].size();
+            for(int j=0; j<i_VertexDegreeCount; j++) {
+                Q.push_back(GroupedVertexDegree[i][j]);
+            }
+        }
+    
+        //INT pos=0;
+        //for(INT d=MaxDegreeP1-1, it=MaxDegreeP1; it!=0; it--, d--){
+        //    for(auto v : GroupedVertexDegree[d]){
+        //        Q[pos++]=v;
+        //    }
+        //}
+
+        GroupedVertexDegree.clear();   
+
+    }
+    
+    tim_order+=omp_get_wtime();
+
+    vector<INT> Mask(MaxDegreeP1,-1);
+    tim_color=-omp_get_wtime();
+    for(INT vit=0; vit<N; vit++){
+        const auto v   = Q[vit];
+        for(INT wit=verPtr[v]; wit<verPtr[v+1]; wit++){
+            const auto w = verInd[wit];
+            const auto wc = vtxColors[w];
+            if(wc<0) continue;
+            Mask[wc]=v;
+        }
+        INT c;
+        for(c=0; c<MaxDegreeP1; c++)
+            if(Mask[c]!=v){
+                vtxColors[v]=c;
+                if(colors<c) colors=c;
+                break;
+            }
+
+    }
+   
+    tim_color +=omp_get_wtime();
+    //tim_MxC = -omp_get_wtime();
+    //colors=0;
+    //#pragma omp parallel for reduction(max:colors)
+    //for(int i=0; i<N; i++){
+    //    auto c = vtxColors[i];
+    //    if(c>colors) colors=c;
+   // }
+    colors++;
+    //tim_MxC += omp_get_wtime();
+
+    tim_Tot = tim_order+ tim_color;
+    printf("@Greedy_nT_c_T_Torder_Tcolor\t");
+    printf("%d\t",  nT);
+    printf("%d\t",  colors);    
+    printf("%lf\t", tim_Tot);
+    printf("%lf\t", tim_order);
+    printf("%lf\t", tim_color);
+    printf("\n");
+
+    return _TRUE;
+}
+
 */
 
 

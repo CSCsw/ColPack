@@ -17,8 +17,6 @@ using namespace ColPack;
 // ============================================================================
 int SMPGCInterface::Coloring(int nT, const string& method){
     
-    if     (method.compare("D1Greedy")==0) return D1Greedy(nT, num_colors_, vertex_color_);
-
     if     (method.compare("DISTANCE_ONE_OMP_GM3P")==0) return D1_OMP_GM3P(nT, num_colors_, vertex_color_);
     else if(method.compare("DISTANCE_ONE_OMP_GMMP")==0) return D1_OMP_GMMP(nT, num_colors_, vertex_color_);
     else if(method.compare("DISTANCE_ONE_OMP_JP")==0)   return D1_OMP_JP  (nT, num_colors_, vertex_color_);
