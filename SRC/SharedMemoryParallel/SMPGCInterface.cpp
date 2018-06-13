@@ -33,6 +33,9 @@ int SMPGCInterface::Coloring(int nT, const string& method){
     else if(method.compare("DISTANCE_ONE_OMP_GMMP_LF_ONCE")==0)  return D1_OMP_GMMP_LO_once(nT, num_colors_, vertex_color_, "LARGEST_FIRST");
     else if(method.compare("DISTANCE_ONE_OMP_GMMP_SL_ONCE")==0)  return D1_OMP_GMMP_LO_once(nT, num_colors_, vertex_color_, "SMALLEST_LAST");
     else if(method.compare("DISTANCE_ONE_OMP_GMMP_SL1_ONCE")==0) return D1_OMP_GMMP_LO_once(nT, num_colors_, vertex_color_, "SMALLEST_LAST1");
+    
+    else if(method.compare("DISTANCE_TWO_OMP_GM3P")==0)  return D2_OMP_GM3P(nT, num_colors_, vertex_color_);
+    else if(method.compare("DISTANCE_TWO_OMP_GMMP")==0) return D2_OMP_GMMP(nT, num_colors_, vertex_color_);
 
     else if(method.compare("DISTANCE_ONE_OMP_LB")==0) return D1_OMP_LB(nT, num_colors_, vertex_color_);
     else { fprintf(stdout, "Unknow method %s\n",method.c_str()); exit(1); }   
