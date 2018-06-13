@@ -62,6 +62,9 @@ public: // API
     
     int D1_OMP_JP(int nT, INT&color, vector<INT>&vtxColors);
     int D1_OMP_JP2S(int nT, INT&color, vector<INT>&vtxColors);
+    int D1_OMP_JP2S_noRepartition(int nT, INT&color, vector<INT>&vtxColors);
+    int D1_OMP_JP2Shash(int nT, INT&color, vector<INT>&vtxColors);
+    int D1_OMP_JP2Shashsingle(int nT, INT&color, vector<INT>&vtxColors);
 
     int D1_OMP_GM3P_LO(int nT, INT&color, vector<INT>&vtxColors, const string& local_ordering);
     int D1_OMP_GMMP_LO_perloop(int nT, INT&color, vector<INT>&vtxColors, const string& local_ordering);
@@ -72,6 +75,7 @@ public: // API
     
     int D1_OMP_JP_hyber(int nT, INT&color, vector<INT>&vtxColors, const int option, const INT swtich_iter);
     int D1_OMP_JP2S_hyber(int nT, INT&color, vector<INT>&vtxColors, const int option, const INT switch_iter);
+    int D1_OMP_JP2S_hyber_slow(int nT, INT&color, vector<INT>&vtxColors, const int option, const INT switch_iter);
 
     int D1Greedy(int nT, INT&color, vector<INT>&vtxColors);
 private:

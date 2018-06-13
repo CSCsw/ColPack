@@ -16,6 +16,646 @@ using namespace ColPack;
 #endif
 
 
+
+unsigned int mhash(unsigned int a, unsigned int seed){
+    a ^= seed;
+    a = (a + 0x7ed55d16) + (a << 12);
+    a = (a ^ 0xc761c23c) + (a >> 19);
+    a = (a + 0x165667b1) + (a << 5);
+    a = (a ^ 0xd3a2646c) + (a << 9);
+    a = (a + 0xfd7046c5) + (a << 3);
+    a = (a ^ 0xb55a4f09) + (a >> 16);
+    return a;
+}
+
+//option ==1 origJP + greedyGM-3Phase
+//option ==2 oirgJP + greedyGM-MultiPhase
+//option ==3 origJP + serial-greedy
+//option ==4 origJP + stream
+int SMPGCInterface::D1_OMP_JP2S_hyber(int nT, INT&colors, vector<INT>&vtxColors, const int option, const INT switch_iter = 0) {
+    if(nT<=0) { printf("Warning, number of threads changed from %d to 1\n",nT); nT=1; }
+    omp_set_num_threads(nT);
+    
+    string tag="Hyber";
+    vector<INT> conflictQ;
+    double tim_Wgt =0;    //run time
+    double tim_MIS =0;    //run time
+    double tim_ReG =0;    //run time
+    double tim_Hyb =0;
+    double tim_MxC =0;    //run time
+    double tim_Tot =0;    //run time
+    INT    nLoops = 0;    //Number of iterations 
+ 
+    const INT N = nodes(); //number of vertex
+    //const INT MaxDegreeP1 = maxDeg()+1; //maxDegree
+    
+    INT const * const verPtr=CSRiaPtr();      //ia of csr
+    INT const * const verInd=CSRjaPtr();      //ja of csr
+    
+    colors=0;
+    vtxColors.clear(); vtxColors.resize(N, -1);
+   
+    const vector<INT> &orig_ordered_vertices = ordered_vertex();
+    INT QTail=N;
+
+    vector<vector<INT>> QQ; QQ.resize(nT); 
+    #pragma omp parallel
+    {
+        const int tid = omp_get_thread_num(); 
+        QQ[tid].reserve(N/nT+1+16);
+        #pragma omp for
+        for(int i=0; i<N; i++){
+            QQ[tid].push_back(orig_ordered_vertices[i]);
+        }
+    }
+
+    if(option==JP_HYBER_IMPLEMENT_GM3P) {
+        tag = "GM3P";
+    }
+    else if(option==JP_HYBER_IMPLEMENT_GMMP) {
+        tag = "GMMP";
+        conflictQ.resize(N,-1);
+    }
+    else if(option==JP_HYBER_IMPLEMENT_GREEDY) {
+        tag = "GREEDY";
+    }
+    else if(option==JP_HYBER_IMPLEMENT_STREAM) {
+        tag ="STEAM";
+    }
+    else{
+        printf("Error! Unknown option %d, should be {1,2,3,4}\n",option);
+        exit(1);
+    }
+
+#ifdef DEBUG_JP_PROFILE
+    vector<int>    profile_nodes;
+    vector<double> profile_times;
+#endif
+
+    colors=0;
+    // phase 1:  JP part
+    while(QTail!=0) {
+        QTail=0;
+#ifdef DEBUG_JP_PROFILE
+    auto t_jp_color_curiter = -tim_MIS;
+    auto t_jp_recon_curiter = -tim_ReG;
+    auto n_jp_nodes_curiter = QTail;
+#endif
+        if(nLoops>=switch_iter) break;
+        tim_MIS -= omp_get_wtime();
+        #pragma omp parallel
+        {
+            int tid = omp_get_thread_num();
+            vector<INT> cand_nodes_color;
+            vector<INT> &Q = QQ[tid];
+            const INT remains_num_nodes = Q.size();
+            INT num_leftover = 0;
+            const unsigned int seed   = SMPGC_RAND_SEED;
+            const unsigned int shift  = 0xC2A50F;
+            const unsigned int num_hash = SMPGC_NUM_HASH;
+            const int capacity  = 2*num_hash;
+            const int color_base = nLoops*capacity;
+            for(INT vit=0; vit<remains_num_nodes; vit++){
+                const auto v = Q[vit];
+                int vwt[num_hash];
+                for(int i=0; i<num_hash; i++) vwt[i]=mhash(v, seed+shift*i);
+                int bDomain= (1<<capacity)-1;  //0 neither; 1 LargeDomain; 2 SmallestDomain; 3 Both/Reserve/Init;
+                const INT kEnd=verPtr[v+1];
+                for(INT k=verPtr[v]; k!=kEnd; k++){
+                    const auto w = verInd[k];
+                    if(vtxColors[w]!=-1) continue;
+                    for(int i=0; i<num_hash; i++) {
+                        const auto wwt = mhash(w, seed+shift*i);
+                        if( (bDomain&(0x1<<(i<<1))) && (vwt[i] <= wwt) ) bDomain^= (0x1<<(i<<1));
+                        if( (bDomain&(0x2<<(i<<1))) && (vwt[i] >= wwt) ) bDomain^= (0x2<<(i<<1));
+                    }
+                    if(bDomain==0)  break;
+                }
+                if(bDomain==0) {
+                    Q[num_leftover++]=v;
+                }
+                else{
+                    for(int i=0; i<capacity; i++){
+                        if(bDomain&(1<<i)){
+                            cand_nodes_color.push_back(v);
+                            cand_nodes_color.push_back(color_base+i);
+                            break;
+                        }
+                    }
+                }
+            } // end for
+            Q.resize(num_leftover);
+            #pragma omp barrier
+            for(int i=0; i<cand_nodes_color.size(); i+=2) 
+                vtxColors[ cand_nodes_color[i] ]= cand_nodes_color[i+1];
+        } // end of omp parallel
+        tim_MIS += omp_get_wtime();
+        
+        tim_ReG -= omp_get_wtime();
+        for(int tid=0; tid<nT; tid++){
+            QTail+=QQ[tid].size();
+        }
+        tim_ReG += omp_get_wtime();
+        nLoops++;
+
+#ifdef DEBUG_JP_PROFILE
+        n_jp_nodes_curiter -=QTail;
+        t_jp_color_curiter +=tim_MIS;
+        t_jp_recon_curiter +=tim_ReG;
+        
+        profile_nodes.push_back(n_jp_nodes_curiter);
+        profile_times.push_back(t_jp_color_curiter+t_jp_recon_curiter);
+#endif
+
+
+    } // end while(QTail!=0);
+
+
+    double tim_cx =- omp_get_wtime(); 
+    vector<INT> Q;
+    for(int i=0; i<nT; i++)
+        Q.insert(Q.end(), QQ[i].begin(), QQ[i].end());
+    QTail=Q.size();
+    tim_cx += omp_get_wtime();
+
+    // Phase 2, Greedy coloring
+    if(option==JP_HYBER_IMPLEMENT_GM3P) {
+        tim_Hyb =- omp_get_wtime();
+        hyberJP_implement_GM3P  (Q,QTail,QQ,nT,verPtr,verInd,colors,vtxColors);
+        tim_Hyb += omp_get_wtime();
+    }
+    else if(option==JP_HYBER_IMPLEMENT_GMMP) {
+        tim_Hyb =- omp_get_wtime();
+        hyberJP_implement_GMMP  (Q,QTail,conflictQ,verPtr,verInd,colors,vtxColors);
+        tim_Hyb += omp_get_wtime();
+    }
+    else if(option==JP_HYBER_IMPLEMENT_GREEDY) {
+        tim_Hyb =- omp_get_wtime();
+        hyberJP_implement_greedy_serial  (Q,QTail, verPtr,verInd,colors,vtxColors);
+        tim_Hyb += omp_get_wtime();
+    }
+    else if(option==JP_HYBER_IMPLEMENT_STREAM) {
+        tim_Hyb =- omp_get_wtime();
+        hyberJP_implement_stream  (Q,QTail,QQ,nT,verPtr,verInd,colors,vtxColors);
+        tim_Hyb += omp_get_wtime();
+    }
+    else{
+        tim_Hyb = 0;
+        printf("Error! option=%d, should be in {1,2,3,4}\n",option);
+        exit(1);
+    }
+
+    // Phase 3, get max colors
+    tim_MxC = -omp_get_wtime();
+    colors=0;
+    #pragma omp parallel for reduction(max:colors)
+    for(int i=0; i<N; i++){
+        auto c = vtxColors[i];
+        if(c>colors) colors=c;
+    }
+    colors++;
+    tim_MxC += omp_get_wtime();
+
+    tim_Tot =tim_Wgt+ tim_MIS + tim_ReG + tim_Hyb + tim_MxC;
+    printf("@JP2SHyber%s_@%lld_nT_c_T_TWgt_TMISC_TReG_Tcx_THyb_TMxC\t",tag.c_str(), switch_iter);
+    printf("%d\t",  nT);    
+    printf("%lld\t",  colors);    
+    printf("%lf\t", tim_Tot);
+    printf("%lf\t", tim_Wgt);
+    printf("%lf\t", tim_MIS);
+    printf("%lf\t", tim_ReG);
+    printf("%lf\t", tim_cx);
+    printf("%lf\t", tim_Hyb);
+    printf("%lf\t", tim_MxC);
+    printf("\n"); 
+
+#ifdef DEBUG_JP_PROFILE
+    {
+        profile_name; 
+        ofstream of(profile_name.c_str());
+        stringstream ss;
+        ss<<profile_name;
+        ss<<"\nnodes_per_iter\ttime_per_iter\tt/n_per_iter\n";
+        for(int i=0; i<profile_nodes.size(); i++)
+            ss<<profile_nodes[i]<<"\t"<<profile_times[i]<<"\t"<<profile_times[i]/profile_nodes[i]<<"\n";
+        of<<ss.str();
+        of.close();
+    }
+#endif
+
+    
+    
+
+    return _TRUE;
+
+
+}
+
+
+int SMPGCInterface::D1_OMP_JP2Shash(int nT, INT& colors, vector<INT>&vtxColors) {
+    if(nT<=0) { printf("Warning, number of threads changed from %d to 1\n",nT); nT=1; }
+    omp_set_num_threads(nT);
+    
+    double tim_Wgt  =0;                      // run time
+    double tim_MIS =0;                       // run time
+    double tim_ReG =0;                       // run time
+    double tim_MxC =0;                       // run time
+    double tim_Tot =0;                       // run time
+    INT    nLoops = 0;                       // number of iteration 
+ 
+    const INT N = nodes();                   // number of vertex
+    //const INT MaxDegreeP1 = maxDeg()+1;    // maxDegree
+    
+    INT const * const verPtr=CSRiaPtr();     // ia of csr
+    INT const * const verInd=CSRjaPtr();     // ja of csr
+    
+    colors=0;
+    vtxColors.clear(); vtxColors.resize(N, -1);
+   
+#ifdef JP_PROFILE
+    vector<int> profile_num_nodes_remains;
+    vector<int> profile_num_colors;
+#endif
+
+    const vector<INT> &orig_ordered_vertexs = ordered_vertex();
+    INT QTail=N;
+    
+    vector<vector<INT>>  QQ; QQ.resize(nT);    
+    #pragma omp parallel
+    {
+        int tid = omp_get_thread_num();
+        QQ[tid].reserve(N/nT+1+16);
+        #pragma omp for
+        for(int i=0;i<N; i++){
+            QQ[tid].push_back(orig_ordered_vertexs[i]);
+        }
+    }
+    
+
+
+    colors=0;
+    while(QTail!=0){
+        QTail=0;
+        //phase 1: find maximal indenpenent set, and color it
+        tim_MIS -= omp_get_wtime();
+        #pragma omp parallel
+        {
+            int tid = omp_get_thread_num();
+            vector<INT> cand_vetex;
+            vector<INT> cand_color;
+            vector<INT>& Q = QQ[tid];
+            const INT orig_Q_len= Q.size();
+            INT num_leftover = 0;
+            const unsigned int seed     = SMPGC_RAND_SEED;
+            const unsigned int shift    = 0xC2A50F;
+            const unsigned int num_hash = SMPGC_NUM_HASH;
+            const int capacity  = 2*num_hash;
+            const int color_base = nLoops*capacity;
+            for(INT vit=0; vit<orig_Q_len; vit++){
+                const auto v = Q[vit];
+                int vwt[num_hash];
+                for(int i=0;i<num_hash; i++) vwt[i]=mhash(v,seed+shift*i);//WeightRnd[v];
+                int bDomain=(1<<(capacity))-1;  //0:neither, 1: LargeDomain, 2:SmallDomain, 3 Both/Reserve/Init;
+                for(INT k=verPtr[v],kEnd=verPtr[v+1]; k!=kEnd; k++){
+                    const auto w = verInd[k];
+                    if(vtxColors[w]!=-1) continue;
+                    for(int i=0; i<num_hash; i++) {
+                        const auto wwt = mhash(w, seed+shift*i);
+                        if( (bDomain&(1<<(i<<1))) && vwt[i] <= wwt) bDomain ^=(1<<(i<<1));
+                        if( (bDomain&(2<<(i<<1))) && vwt[i] >= wwt) bDomain ^=(2<<(i<<1));
+                    }
+                    if( bDomain==0 ){
+                        break;
+                    }
+                }
+
+                if(bDomain==0) Q[num_leftover++]=v;
+                else{
+                    for(int i=0; i<capacity; i++){
+                        if(bDomain&(1<<i)){
+                            cand_vetex.push_back(v);
+                            cand_color.push_back(color_base+i);
+                            break;
+                        }
+                    }
+                }
+            }
+            Q.resize(num_leftover);
+            #pragma omp barrier
+            for(int i=0; i<cand_vetex.size(); i++)
+                vtxColors[cand_vetex[i]]=cand_color[i];
+        }   //end of omp parallel
+        tim_MIS += omp_get_wtime();
+        
+        tim_ReG -= omp_get_wtime();
+        //phase 2: rebuild the graph
+        for(int tid=0; tid<nT; tid++){
+            QTail += QQ[tid].size();
+        }
+        tim_ReG += omp_get_wtime();
+    
+#ifdef JP_PROFILE
+        { //for profile
+            INT colors=0;
+            #pragma omp parallel for reduction(max:colors)
+            for(int i=0; i<N; i++){
+                auto c = vtxColors[i];
+                if(c>colors) colors=c;
+            }
+            colors++;
+            profile_num_nodes_remains.push_back(QTail);
+            profile_num_colors.push_back(colors);
+            printf("loop %d remains %d\n", nLoops, QTail);
+        }//end for profile
+#endif 
+        nLoops++;
+    } //while(QTail!=0);
+
+    tim_MxC = -omp_get_wtime();
+    colors=0;
+    #pragma omp parallel for reduction(max:colors)
+    for(int i=0; i<N; i++){
+        auto c = vtxColors[i];
+        if(c>colors) colors=c;
+    }
+    colors++;
+    tim_MxC += omp_get_wtime();
+
+    tim_Tot =tim_Wgt+ tim_MIS+tim_ReG+tim_MxC;
+    printf("@JP2Shash_nT_c_T_TWgt_TMISC_TReG_TMxC_nL\t");
+    printf("%d\t",  nT);    
+    printf("%d\t",  colors);    
+    printf("%lf\t", tim_Tot);
+    printf("%lf\t", tim_Wgt);
+    printf("%lf\t", tim_MIS);
+    printf("%lf\t", tim_ReG);
+    printf("%lf\t", tim_MxC);
+    printf("%d\n", nLoops);
+
+#ifdef JP_PROFILE
+    if(0)
+    {
+        stringstream ss;
+        ss<<"JP2SnoRepart_num_nodes_L_nT"<<nT<<".log";
+        ofstream of1(ss.str().c_str());
+        for(auto x : profile_num_nodes_L)
+            of1<<x<<endl;
+        of1.close();
+    }
+
+    if(0)
+    {
+        stringstream ss; //ss.str("");
+        ss<<"JP2SnoRepart_num_nodes_S_nT"<<nT<<".log";
+        ofstream of1(ss.str().c_str());
+        for(auto x : profile_num_nodes_S)
+            of1<<x<<endl;
+        of1.close();
+    }
+
+    if(0)
+    {
+        stringstream ss; //ss.str("");
+        ss<<"JP2SnoRepart_num_colored_nT"<<nT<<".log";
+        ofstream of1(ss.str().c_str());
+        for(auto x : profile_num_colors)
+            of1<<x<<endl;//fprintf(of2, "%d\n",x);
+        of1.close();
+    }
+
+    if(0)
+    {
+        stringstream ss;
+        ss<<"JP2SnoPepart_num_colored_nodes_nT"<<nT<<".log";
+        ofstream of1(ss.str().c_str());
+        for(int i=0; i< profile_num_nodes_remains.size(); i++) {
+            if(i==0)
+                of1<<N-profile_num_nodes_remains[i]<<endl;
+            else
+                of1<<profile_num_nodes_remains[i+1]-profile_num_nodes_remains[i]<<endl;
+        }
+    }
+#endif
+
+    return _TRUE;
+}
+
+
+
+
+int SMPGCInterface::D1_OMP_JP2S_noRepartition(int nT, INT& colors, vector<INT>&vtxColors) {
+    if(nT<=0) { printf("Warning, number of threads changed from %d to 1\n",nT); nT=1; }
+    omp_set_num_threads(nT);
+    
+    double tim_Wgt  =0;                      // run time
+    double tim_MIS =0;                       // run time
+    double tim_ReG =0;                       // run time
+    double tim_MxC =0;                       // run time
+    double tim_Tot =0;                       // run time
+    INT    nLoops = 0;                       // number of iteration 
+ 
+    const INT N = nodes();                   // number of vertex
+    //const INT MaxDegreeP1 = maxDeg()+1;    // maxDegree
+    
+    INT const * const verPtr=CSRiaPtr();     // ia of csr
+    INT const * const verInd=CSRjaPtr();     // ja of csr
+    
+    colors=0;
+    vtxColors.clear(); vtxColors.resize(N, -1);
+   
+#ifdef JP_PROFILE
+    vector<int> profile_num_nodes_remains;
+    vector<int> profile_num_colors;
+#endif
+
+    const vector<INT> &orig_ordered_vertexs = ordered_vertex();
+    INT QTail=N;
+    
+    vector<vector<INT>>  QQ; QQ.resize(nT);    
+    #pragma omp parallel
+    {
+        int tid = omp_get_thread_num();
+        QQ[tid].reserve(N/nT+1+16);
+        #pragma omp for
+        for(int i=0;i<N; i++){
+            QQ[tid].push_back(orig_ordered_vertexs[i]);
+        }
+    }
+    
+//    // weight by uniform
+//    vector<double> WeightRnd; WeightRnd.resize(N);
+//    //std::default_random_engine generator(std::chrono::system_clock::now().time_since_epoch().count());
+//    std::default_random_engine generator(12345);
+//    std::uniform_real_distribution<double> distribution(0.0,1.0);
+//    tim_Wgt =-omp_get_wtime();
+//        for(int i=0; i<N; i++)
+//            WeightRnd[i] = distribution(generator);
+//    tim_Wgt +=omp_get_wtime();
+
+    // weight by shuffle
+    vector<INT> WeightRnd; WeightRnd.reserve(N);
+    for(int i=0; i<N; i++)
+        WeightRnd.push_back(i);
+#ifdef SMPGC_RAND_SEED
+    srand(SMPGC_RAND_SEED);
+#else
+    srand(12345);
+#endif
+    tim_Wgt =-omp_get_wtime();
+        std::random_shuffle ( WeightRnd.begin(), WeightRnd.end() );
+    tim_Wgt +=omp_get_wtime();
+
+//    // weight by file
+//    vector<double> WeightRnd; WeightRnd.resize(N);
+//    {
+//        ifstream in('RandomWeight1000.mat');
+//        int cnt=0;
+//        while(!in.eof && cnt<N)
+//            in>>WeightRnd[cnt++];
+//        if(cnt<N) { printf("Error! only read %d random numers expect %d\n",cnt, N); exit(1); }
+//    }
+
+    colors=0;
+    while(QTail!=0){
+        QTail=0;
+        //phase 1: find maximal indenpenent set, and color it
+        tim_MIS -= omp_get_wtime();
+        #pragma omp parallel
+        {
+            int tid = omp_get_thread_num();
+            vector<INT> candiLrg;
+            vector<INT> candiSml;
+            vector<INT>& Q = QQ[tid];
+            const INT orig_Q_len= Q.size();
+            INT num_leftover = 0;
+            for(INT vit=0; vit<orig_Q_len; vit++){
+                const auto v   = Q[vit];
+                const auto vwt = WeightRnd[v];
+                char bDomain=0x03;  //0:neither, 1: LargeDomain, 2:SmallDomain, 3 Both/Reserve/Init;
+                for(INT k=verPtr[v],kEnd=verPtr[v+1]; k!=kEnd; k++){
+                    const auto w = verInd[k];
+                    if(vtxColors[w]!=-1) continue;
+                    const auto wwt = WeightRnd[w];
+                    if( (bDomain&0x1) && ( (vwt<wwt)||(vwt==wwt&&v>w) ) ) bDomain&=0xFE;
+                    if( (bDomain&0x2) && ( (vwt>wwt)||(vwt==wwt&&v>w) ) ) bDomain&=0xFD;
+                    if( bDomain==0) break;
+                }
+                if(bDomain==0) {
+                    Q[num_leftover++]=v;
+                }
+                else{
+                    if(bDomain!=2) candiLrg.push_back(v);
+                    else           candiSml.push_back(v);
+                }
+            }
+            Q.resize(num_leftover);
+            #pragma omp barrier
+            for(auto v : candiLrg) 
+                vtxColors[v]=(nLoops<<1);
+            for(auto v : candiSml) 
+                vtxColors[v]=(nLoops<<1) +1;
+
+        }   //end of omp parallel
+        tim_MIS += omp_get_wtime();
+        
+        tim_ReG -= omp_get_wtime();
+        //phase 2: rebuild the graph
+        for(int tid=0; tid<nT; tid++){
+            QTail += QQ[tid].size();
+        }
+        tim_ReG += omp_get_wtime();
+    
+#ifdef JP_PROFILE
+        { //for profile
+            INT colors=0;
+            #pragma omp parallel for reduction(max:colors)
+            for(int i=0; i<N; i++){
+                auto c = vtxColors[i];
+                if(c>colors) colors=c;
+            }
+            colors++;
+            profile_num_nodes_remains.push_back(QTail);
+            profile_num_colors.push_back(colors);
+            printf("loop %d remains %d\n", nLoops, QTail);
+        }//end for profile
+#endif 
+        nLoops++;
+    } //while(QTail!=0);
+
+    tim_MxC = -omp_get_wtime();
+    colors=0;
+    #pragma omp parallel for reduction(max:colors)
+    for(int i=0; i<N; i++){
+        auto c = vtxColors[i];
+        if(c>colors) colors=c;
+    }
+    colors++;
+    tim_MxC += omp_get_wtime();
+
+    tim_Tot =tim_Wgt+ tim_MIS+tim_ReG+tim_MxC;
+    printf("@JP2SnR_nT_c_T_TWgt_TMISC_TReG_TMxC_nL\t");
+    printf("%d\t",  nT);    
+    printf("%d\t",  colors);    
+    printf("%lf\t", tim_Tot);
+    printf("%lf\t", tim_Wgt);
+    printf("%lf\t", tim_MIS);
+    printf("%lf\t", tim_ReG);
+    printf("%lf\t", tim_MxC);
+    printf("%d\n", nLoops);
+
+#ifdef JP_PROFILE
+    if(0)
+    {
+        stringstream ss;
+        ss<<"JP2SnoRepart_num_nodes_L_nT"<<nT<<".log";
+        ofstream of1(ss.str().c_str());
+        for(auto x : profile_num_nodes_L)
+            of1<<x<<endl;
+        of1.close();
+    }
+
+    if(0)
+    {
+        stringstream ss; //ss.str("");
+        ss<<"JP2SnoRepart_num_nodes_S_nT"<<nT<<".log";
+        ofstream of1(ss.str().c_str());
+        for(auto x : profile_num_nodes_S)
+            of1<<x<<endl;
+        of1.close();
+    }
+
+    if(0)
+    {
+        stringstream ss; //ss.str("");
+        ss<<"JP2SnoRepart_num_colored_nT"<<nT<<".log";
+        ofstream of1(ss.str().c_str());
+        for(auto x : profile_num_colors)
+            of1<<x<<endl;//fprintf(of2, "%d\n",x);
+        of1.close();
+    }
+
+    if(0)
+    {
+        stringstream ss;
+        ss<<"JP2SnoPepart_num_colored_nodes_nT"<<nT<<".log";
+        ofstream of1(ss.str().c_str());
+        for(int i=0; i< profile_num_nodes_remains.size(); i++) {
+            if(i==0)
+                of1<<N-profile_num_nodes_remains[i]<<endl;
+            else
+                of1<<profile_num_nodes_remains[i+1]-profile_num_nodes_remains[i]<<endl;
+        }
+    }
+#endif
+
+    return _TRUE;
+}
+
+
+
+
+
+
 // ============================================================================
 // based on Jone Plassmann's JP algorithm [3]
 // ============================================================================
@@ -184,13 +824,13 @@ int SMPGCInterface::D1_OMP_JP2S(int nT, INT&colors, vector<INT>&vtxColors) {
     tim_Tot =tim_Wgt+ tim_MIS+tim_ReG+tim_MxC;
     printf("@JP2S_nT_c_T_TWgt_TMISC_TReG_TMxC_nLoop\t");
     printf("%d\t",  nT);    
-    printf("%lld\t",  colors);    
+    printf("%d\t",  colors);    
     printf("%lf\t", tim_Tot);
     printf("%lf\t", tim_Wgt);
     printf("%lf\t", tim_MIS);
     printf("%lf\t", tim_ReG);
     printf("%lf\t", tim_MxC);
-    printf("%lld\n", nLoops);
+    printf("%d\n", nLoops);
 
 #ifdef JP_PROFILE
     {
@@ -482,7 +1122,7 @@ int SMPGCInterface::D1_OMP_JP_hyber(int nT, INT&colors, vector<INT>&vtxColors, c
 //option ==2 oirgJP + greedyGM-MultiPhase
 //option ==3 origJP + serial-greedy
 //option ==4 origJP + stream
-int SMPGCInterface::D1_OMP_JP2S_hyber(int nT, INT&colors, vector<INT>&vtxColors, const int option, const INT switch_iter = 0) {
+int SMPGCInterface::D1_OMP_JP2S_hyber_slow(int nT, INT&colors, vector<INT>&vtxColors, const int option, const INT switch_iter = 0) {
     if(nT<=0) { printf("Warning, number of threads changed from %d to 1\n",nT); nT=1; }
     omp_set_num_threads(nT);
     
@@ -685,7 +1325,7 @@ int SMPGCInterface::D1_OMP_JP2S_hyber(int nT, INT&colors, vector<INT>&vtxColors,
     tim_MxC += omp_get_wtime();
 
     tim_Tot =tim_Wgt+ tim_MIS + tim_ReG + tim_Hyb + tim_MxC;
-    printf("@JP2SHyber%s_@%lld_nT_c_T_TWgt_TMISC_TReG_THyb_TMxC\t",tag.c_str(), switch_iter);
+    printf("@JP2SHyber%s_slow_@%lld_nT_c_T_TWgt_TMISC_TReG_THyb_TMxC\t",tag.c_str(), switch_iter);
     printf("%d\t",  nT);    
     printf("%lld\t",  colors);    
     printf("%lf\t", tim_Tot);
@@ -963,6 +1603,181 @@ inline void SMPGCInterface::hyberJP_implement_stream(vector<INT>&Q, const INT &Q
     exit(1);
 }
 
+
+
+int SMPGCInterface::D1_OMP_JP2Shashsingle(int nT, INT& colors, vector<INT>&vtxColors) {
+    if(nT<=0) { printf("Warning, number of threads changed from %d to 1\n",nT); nT=1; }
+    omp_set_num_threads(nT);
+    
+    double tim_Wgt  =0;                      // run time
+    double tim_MIS =0;                       // run time
+    double tim_ReG =0;                       // run time
+    double tim_MxC =0;                       // run time
+    double tim_Tot =0;                       // run time
+    INT    nLoops = 0;                       // number of iteration 
+ 
+    const INT N = nodes();                   // number of vertex
+    //const INT MaxDegreeP1 = maxDeg()+1;    // maxDegree
+    
+    INT const * const verPtr=CSRiaPtr();     // ia of csr
+    INT const * const verInd=CSRjaPtr();     // ja of csr
+    
+    colors=0;
+    vtxColors.clear(); vtxColors.resize(N, -1);
+   
+#ifdef JP_PROFILE
+    vector<int> profile_num_nodes_remains;
+    vector<int> profile_num_colors;
+#endif
+
+    const vector<INT> &orig_ordered_vertexs = ordered_vertex();
+    INT QTail=N;
+    
+    vector<vector<INT>>  QQ; QQ.resize(nT);    
+    #pragma omp parallel
+    {
+        int tid = omp_get_thread_num();
+        QQ[tid].reserve(N/nT+1+16);
+        #pragma omp for
+        for(int i=0;i<N; i++){
+            QQ[tid].push_back(orig_ordered_vertexs[i]);
+        }
+    }
+    
+
+    unsigned int seed = 123456;
+    colors=0;
+    while(QTail!=0){
+        QTail=0;
+        //phase 1: find maximal indenpenent set, and color it
+        tim_MIS -= omp_get_wtime();
+        #pragma omp parallel
+        {
+            int tid = omp_get_thread_num();
+            vector<INT> candiLrg;
+            vector<INT> candiSml;
+            vector<INT>&Q = QQ[tid];
+            const INT orig_Q_len = Q.size();
+            INT num_leftover = 0;
+            for(INT vit=0; vit<orig_Q_len; vit++){
+                const auto v = Q[vit];
+                const auto vwt = mhash(v, seed);
+                char bDomain = 0x03;
+                for(INT k=verPtr[v],kEnd=verPtr[v+1]; k!=kEnd; k++){
+                    const auto w = verInd[k];
+                    if(vtxColors[w]!=-1) continue;
+                    const auto wwt = mhash(w, seed);
+                    if( (bDomain&0x1) && ( (vwt<wwt)||(vwt==wwt&&v>w) ) ) bDomain&=0xFE;
+                    if( (bDomain&0x2) && ( (vwt>wwt)||(vwt==wwt&&v>w) ) ) bDomain&=0xFD;
+                    if( bDomain==0) break;
+                }
+                if(bDomain==0) Q[num_leftover++]=v;
+                else{
+                    if(bDomain!=2) candiLrg.push_back(v);
+                    else           candiSml.push_back(v);
+                }
+            }
+            Q.resize(num_leftover);
+            #pragma omp barrier
+            for(auto v : candiLrg)
+                vtxColors[v]=2*nLoops;
+            for(auto v : candiSml)
+                vtxColors[v]=2*nLoops+1;
+        }   //end of omp parallel
+        tim_MIS += omp_get_wtime();
+        
+        tim_ReG -= omp_get_wtime();
+        //phase 2: rebuild the graph
+        for(int tid=0; tid<nT; tid++){
+            QTail += QQ[tid].size();
+        }
+        tim_ReG += omp_get_wtime();
+    
+#ifdef JP_PROFILE
+        { //for profile
+            INT colors=0;
+            #pragma omp parallel for reduction(max:colors)
+            for(int i=0; i<N; i++){
+                auto c = vtxColors[i];
+                if(c>colors) colors=c;
+            }
+            colors++;
+            profile_num_nodes_remains.push_back(QTail);
+            profile_num_colors.push_back(colors);
+            printf("loop %d remains %d\n", nLoops, QTail);
+        }//end for profile
+#endif 
+        nLoops++;
+    } //while(QTail!=0);
+
+    tim_MxC = -omp_get_wtime();
+    colors=0;
+    #pragma omp parallel for reduction(max:colors)
+    for(int i=0; i<N; i++){
+        auto c = vtxColors[i];
+        if(c>colors) colors=c;
+    }
+    colors++;
+    tim_MxC += omp_get_wtime();
+
+    tim_Tot =tim_Wgt+ tim_MIS+tim_ReG+tim_MxC;
+    printf("@JP2Shash_nT_c_T_TWgt_TMISC_TReG_TMxC_nL\t");
+    printf("%d\t",  nT);    
+    printf("%d\t",  colors);    
+    printf("%lf\t", tim_Tot);
+    printf("%lf\t", tim_Wgt);
+    printf("%lf\t", tim_MIS);
+    printf("%lf\t", tim_ReG);
+    printf("%lf\t", tim_MxC);
+    printf("%d\n", nLoops);
+
+#ifdef JP_PROFILE
+    if(0)
+    {
+        stringstream ss;
+        ss<<"JP2SnoRepart_num_nodes_L_nT"<<nT<<".log";
+        ofstream of1(ss.str().c_str());
+        for(auto x : profile_num_nodes_L)
+            of1<<x<<endl;
+        of1.close();
+    }
+
+    if(0)
+    {
+        stringstream ss; //ss.str("");
+        ss<<"JP2SnoRepart_num_nodes_S_nT"<<nT<<".log";
+        ofstream of1(ss.str().c_str());
+        for(auto x : profile_num_nodes_S)
+            of1<<x<<endl;
+        of1.close();
+    }
+
+    if(0)
+    {
+        stringstream ss; //ss.str("");
+        ss<<"JP2SnoRepart_num_colored_nT"<<nT<<".log";
+        ofstream of1(ss.str().c_str());
+        for(auto x : profile_num_colors)
+            of1<<x<<endl;//fprintf(of2, "%d\n",x);
+        of1.close();
+    }
+
+    if(0)
+    {
+        stringstream ss;
+        ss<<"JP2SnoPepart_num_colored_nodes_nT"<<nT<<".log";
+        ofstream of1(ss.str().c_str());
+        for(int i=0; i< profile_num_nodes_remains.size(); i++) {
+            if(i==0)
+                of1<<N-profile_num_nodes_remains[i]<<endl;
+            else
+                of1<<profile_num_nodes_remains[i+1]-profile_num_nodes_remains[i]<<endl;
+        }
+    }
+#endif
+
+    return _TRUE;
+}
 
 
 

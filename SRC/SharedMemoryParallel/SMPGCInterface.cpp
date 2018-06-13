@@ -21,6 +21,7 @@ int SMPGCInterface::Coloring(int nT, const string& method){
     else if(method.compare("DISTANCE_ONE_OMP_GMMP")==0) return D1_OMP_GMMP(nT, num_colors_, vertex_color_);
     else if(method.compare("DISTANCE_ONE_OMP_JP")==0)   return D1_OMP_JP  (nT, num_colors_, vertex_color_);
     else if(method.compare("DISTANCE_ONE_OMP_JP2S")==0) return D1_OMP_JP2S(nT, num_colors_, vertex_color_);
+    else if(method.compare("DISTANCE_ONE_OMP_JP2Shash")==0) return D1_OMP_JP2Shash(nT, num_colors_, vertex_color_);
 
     else if(method.compare("DISTANCE_ONE_OMP_JP_LF")==0) return D1_OMP_JP_LF(nT, num_colors_, vertex_color_);
     else if(method.compare("DISTANCE_ONE_OMP_JP_SL")==0) return D1_OMP_JP_SL(nT, num_colors_, vertex_color_);
@@ -45,12 +46,13 @@ int SMPGCInterface::Coloring(int nT, const string& method, const string &optionS
     else if(optionStr.compare("GREEDY")==0)   option=JP_HYBER_IMPLEMENT_GREEDY;
     else if(optionStr.compare("STREAM")==0)   option=JP_HYBER_IMPLEMENT_STREAM;
     else{
-        printf("JP hyper method,\"%s\" is not an option. Should be one of {GM3P,GMMP,GREEDY,STREAM}\n",optionStr.c_str());
+        printf("JP hybird method,\"%s\" is not an option. Should be one of {GM3P,GMMP,GREEDY,STREAM}\n",optionStr.c_str());
         exit(1);
     }
-    if     (method.compare("DISTANCE_ONE_OMP_JP2S_HYBER")==0) 
-        return  D1_OMP_JP2S_hyber(nT, num_colors_, vertex_color_, option, switch_iter);
-    else if(method.compare("DISTANCE_ONE_OMP_JP_HYBER")==0) 
+    if     (method.compare("DISTANCE_ONE_OMP_JP2S_HYBIRD")==0) return  D1_OMP_JP2S_hyber(nT, num_colors_, vertex_color_, option, switch_iter);
+    if     (method.compare("DISTANCE_ONE_OMP_JP2S_HYBIRD_slow")==0) return  D1_OMP_JP2S_hyber_slow(nT, num_colors_, vertex_color_, option, switch_iter);
+
+    else if(method.compare("DISTANCE_ONE_OMP_JP_HYBIRD")==0) 
         return D1_OMP_JP_hyber(nT, num_colors_, vertex_color_, option, switch_iter);
     else {fprintf(stdout, "Unknown method %s\n",method.c_str()); exit(1); }
     return _TRUE;
