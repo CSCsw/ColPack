@@ -78,6 +78,12 @@ public: // API
     int D1_OMP_JP2S_hyber_slow(int nT, INT&color, vector<INT>&vtxColors, const int option, const INT switch_iter);
 
     int D1Greedy(int nT, INT&color, vector<INT>&vtxColors);
+
+
+    int D2_OMP_GM3P(int nT, INT&color, vector<INT>&vtxColors);
+    int D2_OMP_GMMP(int nT, INT&color, vector<INT>&vtxColors);
+
+
 private:
     inline void hyberJP_implement_GM3P(vector<INT>&Q, const INT &QTail, vector<vector<INT>>&QQ, const int&nT, INT const * const &verPtr, INT const * const &verInd, INT& colors, vector<INT>&vtxColors); 
     inline void hyberJP_implement_GMMP(vector<INT>&Q, const INT &QTail, vector<INT>&conflictQ,                INT const * const &verPtr, INT const * const &verInd, INT& colors, vector<INT>&vtxColors); 
@@ -87,6 +93,7 @@ private:
 
 protected: // Utilites
     INT cnt_conflict(INT colors,const vector<INT>& vc);
+    INT cnt_d2coloring_conflict(INT colors,const vector<INT>& vc);
     virtual void error(const string& s){ fprintf(stderr,"Err in class SMPGCInterface with msg \"%s\"\n",s.c_str()); exit(1);}
 
 protected:
