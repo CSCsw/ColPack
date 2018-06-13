@@ -7,6 +7,7 @@
 
 #include "SMPGCInterface.h"
 #include <unordered_set>
+
 using namespace std;
 using namespace ColPack;
 
@@ -17,12 +18,12 @@ using namespace ColPack;
 // ----------------------------------------------------------------------------
 // uncolored vertex will not conflict with any other vertex
 // ============================================================================
-int SMPGCInterface::cnt_conflict(int colors, const verctor<INT>&vtxColor) {
+int SMPGCInterface::cnt_d2coloring_conflict(int colors, const vector<INT>&vtxColor) {
     const int N = nodes();
     const vector<int>& vtxPtr = CSRia();
     const vector<int>& vtxVal = CSRja();
-    int   conflits = 0;
-    #pragma omp prallel reduction(+:conflicts)
+    int   conflicts = 0;
+    #pragma omp parallel reduction(+:conflicts)
     {
         #pragma omp for
         for(int v=0; v<N; v++){
@@ -38,7 +39,7 @@ int SMPGCInterface::cnt_conflict(int colors, const verctor<INT>&vtxColor) {
                 const auto d1w = vtxVal[d1wit];
                 for(int d2wit=vtxPtr[d1w]; d2wit!=vtxPtr[d1w+1]; d2wit++){
                     const auto d2w = vtxVal[d2wit];
-                    if( d0123_neighbors.find(d2w)!=d0123_neighbors.end() ) continue;
+                    if( d012_neighbors.find(d2w)!=d012_neighbors.end() ) continue;
                     if( vc == vtxColor[d2w]) conflicts++;
                     d012_neighbors.insert(d2w);
                 }
@@ -53,14 +54,15 @@ int SMPGCInterface::cnt_conflict(int colors, const verctor<INT>&vtxColor) {
 // ============================================================================
 // distance two coloring GM 3 phase
 // ============================================================================
-int SMPGCInterface::D2_OMP_GM3P(const int nT, INT &colors, vector<INT>& vtxColor) {
+int SMPGCInterface::D2_OMP_GM3P(int nT, INT &colors, vector<INT>& vtxColor) {
     if(nT<=0) { printf("Warning, number of threads changed from %d to 1\n",nT); nT=1; }
     omp_set_num_threads(nT);
 
-    double tim_color  = 0;                     // run time
-    double tim_detect = 0;                     // run time
-    double tim_recolor= 0;                     // run time
     double tim_Tot=0;                          // run time
+    double tim_Color  = 0;                     // run time
+    double tim_Detect = 0;                     // run time
+    double tim_Recolor= 0;                     // run time
+    double tim_MxC    = 0;                     // run time
     INT    nConflicts = 0;                     // Number of conflicts 
     
     const INT N = nodes();   //number of vertex
@@ -79,11 +81,11 @@ int SMPGCInterface::D2_OMP_GM3P(const int nT, INT &colors, vector<INT>& vtxColor
         QQ[tid].reserve(N/nT+1+16);
         #pragma omp for
         for(INT i=0; i<N; i++){
-            QQ[tid].push_back(orig_ordered_vertex[i])
+            QQ[tid].push_back(orig_ordered_vertex[i]);
         }
     }
 
-    tim_color =- omp_get_wtime();
+    tim_Color =- omp_get_wtime();
     #pragma omp parallel
     {
         const int tid = omp_get_thread_num();
@@ -92,122 +94,154 @@ int SMPGCInterface::D2_OMP_GM3P(const int nT, INT &colors, vector<INT>& vtxColor
         const INT Nloc = Q.size();
         for(INT vit=0; vit<Nloc; vit++) {
             const auto v=Q[vit];
-            unordered_set<INT> d012_neighbors;
+            unordered_set<INT> d012_neighbors={v};
             Mask.assign(MaxColorCapacity, -1);
             for(INT d1wit=verPtr[v]; d1wit!=verPtr[v+1]; d1wit++ ) {
                 const auto d1w  = verVal[d1wit];
-                const auto d1wc = verColor[d1w];
+                const auto d1wc = vtxColor[d1w];
                 if(d1wc!=-1) Mask[d1wc] = v;
                 d012_neighbors.insert(d1w);
             }
             for(INT d1wit=verPtr[v]; d1wit!=verPtr[v+1]; d1wit++) {
                 const auto d1w = verVal[d1wit];
-                for(INT d2wit=verPtr[w]; d2wit!=verPtr[w+1]; d2wit++) {
+                for(INT d2wit=verPtr[d1w]; d2wit!=verPtr[d1w+1]; d2wit++) {
                     const auto d2w  = verVal[d2wit];
-                    if(d012_neighbors.find(d2w)!=d012_neighbor.end()) continue;
-                    const auto d2wc = verColor[d2w];
+                    if(d012_neighbors.find(d2w)!=d012_neighbors.end()) continue;
+                    const auto d2wc = vtxColor[d2w];
                     if(d2wc!=-1) Mask[d2wc] = v;
                 }
             }
             
             int c;
-            for (c=0; c!=MaxDegreeP1; c++)
-                if(Mask[c] == false)
+            for (c=0; c!=MaxColorCapacity; c++)
+                if(Mask[c]!=v)
                     break;
             vtxColor[v] = c;
-        } //End of omp for
+        } //end for
     }//end of omp parallel
-    tim_color  += omp_get_wtime();    
+    tim_Color  += omp_get_wtime();    
 
-
-// Phase 2: Detect conflicts
-    tim_detect =- omp_get_wtime();
+    // Phase 2: Detect conflicts
+    tim_Detect =- omp_get_wtime();
     #pragma omp parallel
     {
-        int tid=omp_get_thread_num();
-        vector<INT>& Qtmp = QQ[tid];
-        //const int Nloc =  qtnt + (tid<rmnd?1:0);
-        //const int low  =  tid*qtnt + (tid<rmnd?tid:rmnd);
-        //const int high =  low+Nloc;
-        //for(int qit=low; qit<high; qit++){
-#pragma omp for
-        for(INT it=0; it<N; it++){
-            const auto v  = Q[it];
+        const int tid=omp_get_thread_num();
+        vector<INT>& Q = QQ[tid];
+        INT num_leftover = 0;
+        const INT Nloc = Q.size();
+        for(INT vit=0; vit<Nloc; vit++){
+            const auto v  = Q[vit];
             const auto vc = vtxColor[v];
-            for(INT jt=verPtr[v],jtEnd=verPtr[v+1]; jt!=jtEnd; jt++) {
-                const auto w = verInd[jt];
-                if(v<w && vc == vtxColor[w]) {
-                    Qtmp.push_back(v);
-                    vtxColor[v] = -1;  //Will prevent v from being in conflict in another pairing
+            unordered_set<INT> d012_neighbors={v};
+            bool b_find_conflict=false;
+            for(INT d1wit=verPtr[v]; d1wit!=verPtr[v+1]; d1wit++) {
+                const auto d1w = verVal[d1wit];
+                if(v>=d1w) continue;   // check conflict is little brother's job
+                if(vc == vtxColor[d1w]) {
+                    Q[num_leftover++]=v;
+                    vtxColor[v]=-1;
+                    b_find_conflict=true;
                     break;
-                } //End of if( vtxColor[v] == vtxColor[verInd[k]] )
-            } //end of inner for loop: w in adj(v)
-        } //end of omp for
+                }
+                d012_neighbors.insert(d1w);
+            }
+            if(b_find_conflict) continue;
+            for(INT d1wit=verPtr[v]; d1wit!=verPtr[v+1]; d1wit++) {
+                const auto d1w = verVal[d1wit];
+                for(INT d2wit=verPtr[d1w]; d2wit!=verPtr[d1w+1]; d2wit++) {
+                    const auto d2w = verVal[d2wit];
+                    if(v>=d2w) continue; // check conflict is little brother's job
+                    if(d012_neighbors.find(d2w)!=d012_neighbors.end()) continue;
+                    if(vc == vtxColor[d2w]) {
+                        Q[num_leftover++]=v;
+                        vtxColor[v]=-1;
+                        b_find_conflict=true;
+                        break;
+                    }
+                }
+                if(b_find_conflict) break;
+            } //end for d1wit
+        } //end for v
+        Q.resize(num_leftover);
     } //end of omp parallel
-    tim_detect  += omp_get_wtime();
+    tim_Detect  += omp_get_wtime();
     
 // Phase 3: Resolve conflicts
-    tim_recolor =- omp_get_wtime();
+    tim_Recolor =- omp_get_wtime();
     vector<bool> Mark;
     for(int tid=0;tid<nT; tid++){
-        if(QQ[tid].empty()) continue;
         nConflicts+=QQ[tid].size();
-        for(auto v: QQ[tid]){
-            Mark.assign(MaxDegreeP1, false);
-            for(auto wit=verPtr[v], witEnd=verPtr[v+1]; wit!=witEnd; wit++ ) {
-                const auto wc=vtxColor[verInd[wit]];
-                if(wc >= 0) 
-                    Mark[wc] = true; //assert(adjColor<Mark.size())
-            } 
+        for(const auto v: QQ[tid]){
+            Mark.assign(MaxColorCapacity, -1);
+            unordered_set<INT> b012_neighbors={v};
+            for(auto d1wit=verPtr[v]; d1wit!=verPtr[v+1]; d1wit++) {
+                const auto d1w =verVal[d1wit];
+                const auto d1wc=vtxColor[d1w];
+                if(d1wc!=-1) Mark[d1wc]=v;
+                b012_neighbors.insert(d1w);
+            }
+            for(auto d1wit=verPtr[v]; d1wit!=verPtr[v+1]; d1wit++) {
+                const auto d1w = verVal[d1wit];
+                for(auto d2wit=verPtr[d1w]; d2wit!=verPtr[d1w+1]; d2wit++) {
+                    const auto d2w =verVal[d2wit];
+                    if(b012_neighbors.find(d2w)!=b012_neighbors.end()) continue;
+                    const auto d2wc=vtxColor[d2w];
+                    if(d2wc!=-1) Mark[d2wc]=v;
+                    b012_neighbors.insert(d2w);
+                }
+            }
             INT c;
-            for (c=0; c!=MaxDegreeP1; c++)
-                if(Mark[c] == false)
+            for (c=0; c!=MaxColorCapacity; c++)
+                if(Mark[c]!=v)
                     break;
             vtxColor[v] = c;
         }
     }
-    tim_recolor += omp_get_wtime();
-
+    tim_Recolor += omp_get_wtime();
 
     // get number of colors
-    double tim_4 = -omp_get_wtime();
-#pragma omp parallel for reduction(max:colors)
+    tim_MxC = -omp_get_wtime();
+    #pragma omp parallel for reduction(max:colors)
     for(INT i=0; i<N; i++){
         colors = max(colors, vtxColor[i]);
     }
     colors++; //number of colors, 
-    tim_4 += omp_get_wtime();
+    tim_MxC += omp_get_wtime();
 
-    tim_Tot = tim_color+tim_detect+tim_recolor+tim_4;
+    tim_Tot = tim_Color+tim_Detect+tim_Recolor+tim_MxC;
 #ifdef PRINT_DETAILED_STATS_
     printf("***********************************************\n");
-    printf("Total number of threads    : %d \n", nT);    
-    printf("Total number of colors used: %d \n", colors);    
-    printf("Number of conflicts overall: %d \n",nConflicts);  
-    printf("Total Time                 : %lf sec\n", tim_Tot);
-    printf("Phase para color           : %lf sec\n", tim_color);
-    printf("Phase detect               : %lf sec\n", tim_detect);
-    printf("Phase recolor              : %lf sec\n", tim_recolor);
-    printf("Phase find max color       : %lf sec\n", tim_4);
-    if( do_verify_colors(colors, vtxColors)) 
-        printf("Verified, correct.\n");
-    else 
-        printf("Verified, fail.\n");
+    int debug_conflict=cnt_d2coloring_conflict(colors, vector<INT> &vtxColor);
+    if( debug_conflict!=0 )
+        printf("fail D2Coloring, there are %d conflict in the graph.\n",debug_conflict);
+    else
+        printf("correct D2Coloring.\n");
     printf("***********************************************\n");
-
 #endif  
 
-    printf("@GM_nT_c_T_Tcolor_Tdetect_Trecolor_TmaxC_nCnf\t");
+    printf("@D2GM3P_nT_c_T_TColor_TDetect_TRecolor_TMxC_nCnf\t");
     printf("%d\t",  nT);    
-    printf("%lld\t",  colors);    
+    printf("%d\t",  colors);    
     printf("%lf\t", tim_Tot);
-    printf("%lf\t", tim_color);
-    printf("%lf\t", tim_detect);
-    printf("%lf\t", tim_recolor);
-    printf("%lf\t", tim_4);
-    printf("%lld\n", nConflicts);
+    printf("%lf\t", tim_Color);
+    printf("%lf\t", tim_Detect);
+    printf("%lf\t", tim_Recolor);
+    printf("%lf\t", tim_MxC);
+    printf("%d\n", nConflicts);
     return _TRUE;   
 }
+
+
+
+
+int SMPGCInterface::D2_OMP_GMMP(int nT, INT &colors, vector<INT>&vtxColors){
+    printf("under construction!\n");
+    return _TRUE;
+}
+
+
+
+
 
 
 
