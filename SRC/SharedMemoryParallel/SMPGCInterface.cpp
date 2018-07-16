@@ -34,8 +34,15 @@ int SMPGCInterface::Coloring(int nT, const string& method){
     else if(method.compare("DISTANCE_ONE_OMP_GMMP_SL_ONCE")==0)  return D1_OMP_GMMP_LO_once(nT, num_colors_, vertex_color_, "SMALLEST_LAST");
     else if(method.compare("DISTANCE_ONE_OMP_GMMP_SL1_ONCE")==0) return D1_OMP_GMMP_LO_once(nT, num_colors_, vertex_color_, "SMALLEST_LAST1");
     
+    else if(method.compare("D2_OMP_GM3P_")==0)  return D2_OMP_GM3P_(nT, num_colors_, vertex_color_);
+    else if(method.compare("D2_OMP_GMMP_")==0) return D2_OMP_GMMP_(nT, num_colors_, vertex_color_);
+    else if(method.compare("D2_OMP_GM3P_LF_")==0) return D2_OMP_GM3P_LO_(nT, num_colors_, vertex_color_, "LARGEST_FIRST");
+    else if(method.compare("D2_OMP_GMMP_LF_")==0) return D2_OMP_GMMP_LO_(nT, num_colors_, vertex_color_, "LARGEST_FIRST");
+
     else if(method.compare("D2_OMP_GM3P")==0)  return D2_OMP_GM3P(nT, num_colors_, vertex_color_);
     else if(method.compare("D2_OMP_GMMP")==0) return D2_OMP_GMMP(nT, num_colors_, vertex_color_);
+    else if(method.compare("D2_OMP_GM3P_LF")==0) return D2_OMP_GM3P_LO(nT, num_colors_, vertex_color_, "LARGEST_FIRST");
+    else if(method.compare("D2_OMP_GMMP_LF")==0) return D2_OMP_GMMP_LO(nT, num_colors_, vertex_color_, "LARGEST_FIRST");
 
     else if(method.compare("DISTANCE_ONE_OMP_LB")==0) return D1_OMP_LB(nT, num_colors_, vertex_color_);
     else { fprintf(stdout, "Unknow method %s\n",method.c_str()); exit(1); }   
@@ -92,24 +99,23 @@ void SMPGCInterface::dump(){
 // ============================================================================
 // check if the graph is correct colored
 // ============================================================================
-SMPGCInterface::INT SMPGCInterface::cnt_conflict(INT colors, const vector<INT>& vtxColor){
+SMPGCInterface::INT SMPGCInterface::cnt_d1conflict(const vector<INT>& vtxColor){
     const INT N         = nodes();
     vector<INT>& vtxPtr = CSRia();
     vector<INT>& vtxVal = CSRja();
     INT Conflicts=0;
-#pragma omp parallel reduction(+:Conflicts)
+    #pragma omp parallel reduction(+:Conflicts)
     {
-#pragma omp for
-    for (INT v=0; v<N; v++) {
-        INT vc=vtxColor[v];
-        for(INT wit=vtxPtr[v],witEnd=vtxPtr[v+1]; wit!=witEnd; wit++ ) {
-            if ( vc == vtxColor[vtxVal[wit]] ) {
-                if(v>vtxVal[wit])
-                    Conflicts++; //sync_fetch_and_add(&Conflicts, 1); //increment the counter
+        #pragma omp for
+        for (INT v=0; v<N; v++) {
+            INT vc=vtxColor[v];
+            for(INT wit=vtxPtr[v],witEnd=vtxPtr[v+1]; wit!=witEnd; wit++ ) {
+                if ( vc == vtxColor[vtxVal[wit]] ) {
+                    if(v>vtxVal[wit])
+                        Conflicts++; //sync_fetch_and_add(&Conflicts, 1); //increment the counter
+                }
             }
         }
-    }
-
     }
     return Conflicts;
 }
@@ -255,13 +261,13 @@ int SMPGCInterface::D1_OMP_GM3P(int nT, INT&colors, vector<INT>&vtxColor) {
 
     printf("@GM_nT_c_T_Tcolor_Tdetect_Trecolor_TmaxC_nCnf\t");
     printf("%d\t",  nT);    
-    printf("%lld\t",  colors);    
+    printf("%d\t",  colors);    
     printf("%lf\t", tim_Tot);
     printf("%lf\t", tim_color);
     printf("%lf\t", tim_detect);
     printf("%lf\t", tim_recolor);
     printf("%lf\t", tim_4);
-    printf("%lld\n", nConflicts);
+    printf("%d\n", nConflicts);
     return _TRUE;   
 }
 
@@ -378,14 +384,14 @@ int SMPGCInterface::D1_OMP_GMMP(int nT, INT&colors, vector<INT>&vtxColors) {
 
     printf("@GMmp_nT_c_T_TColor_TDetect_TMaxC_nCnf_nLoop____profiles\t");
     printf("%d\t",  nT);    
-    printf("%lld\t",  colors);    
+    printf("%d\t",  colors);    
     printf("%lf\t", tim_total);
     printf("%lf\t", tim_color);
     printf("%lf\t", tim_detect);
     printf("%lf\t", tim_max_c);
-    printf("%lld\t", nConflicts);  
+    printf("%d\t", nConflicts);  
     printf("%d\t\t\t",  nLoops);      
-    for(size_t i=0; i<profile_tim_colors.size(); i++) printf("\t%g\t%g\t%lld\t",profile_tim_colors[i], profile_tim_detects[i], profile_conflicts[i]);
+    for(size_t i=0; i<profile_tim_colors.size(); i++) printf("\t%g\t%g\t%d\t",profile_tim_colors[i], profile_tim_detects[i], profile_conflicts[i]);
     printf("\n");      
     return _TRUE;
 }
@@ -496,7 +502,7 @@ tim_ReG += omp_get_wtime();
 tim_Tot = tim_Wgt+tim_MIS+tim_ReG;
     printf("@LB_nT_c_T_Twt_TPse_TReG\t");
     printf("%d\t",  nT);    
-    printf("%lld\t",  colors);    
+    printf("%d\t",  colors);    
     printf("%lf\t", tim_Tot);
     printf("%lf\t", tim_Wgt);
     printf("%lf\t", tim_MIS);
@@ -629,13 +635,13 @@ tim_MxC += omp_get_wtime();
 tim_Tot =tim_Wgt+ tim_MIS+tim_ReG+tim_MxC;
     printf("@JP_nT_c_T_TWgt_TMISC_TReG_TMxC_nLoop\t");
     printf("%d\t",  nT);    
-    printf("%lld\t",  colors);    
+    printf("%d\t",  colors);    
     printf("%lf\t", tim_Tot);
     printf("%lf\t", tim_Wgt);
     printf("%lf\t", tim_MIS);
     printf("%lf\t", tim_ReG);
     printf("%lf\t", tim_MxC);
-    printf("%lld\n", nLoops);
+    printf("%d\n", nLoops);
     return _TRUE;
 }
 
@@ -780,14 +786,14 @@ tim_Wgt_LF +=omp_get_wtime();
 
     printf("@AJPLF_nT_c_T_TWgtRnd_TWgtLF_TMISC_TReG_TMxC_nLoops\t");
     printf("%d\t",  nT);
-    printf("%lld\t",  colors);    
+    printf("%d\t",  colors);    
     printf("%lf\t", tim_Tot);
     printf("%lf\t", tim_Wgt_Rnd);
     printf("%lf\t", tim_Wgt_LF);
     printf("%lf\t", tim_MIS);
     printf("%lf\t", tim_ReG);
     printf("%lf\t", tim_MxC);
-    printf("%lld\n", nLoops);
+    printf("%d\n", nLoops);
     return _TRUE;
 }
 
@@ -999,12 +1005,12 @@ tim_Wgt +=omp_get_wtime();
 
     printf("@AJPSL_np_c_T_TWgt_TMISReG_TMxC_nLoop\t");
     printf("%d\t",  nT);    
-    printf("%lld\t",  colors);    
+    printf("%d\t",  colors);    
     printf("%lf\t", tim_Tot);
     printf("%lf\t", tim_Wgt);
     printf("%lf\t", tim_MISReG);
     printf("%lf\t", tim_MxC);
-    printf("%lld\n",nLoops);
+    printf("%d\n",nLoops);
     return _TRUE;
 }
 

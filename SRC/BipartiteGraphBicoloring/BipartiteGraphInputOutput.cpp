@@ -196,7 +196,12 @@ namespace ColPack
 		char * result = mm_typecode_to_str(matcode);
 		printf("Graph of Market Market type: [%s]\n", result);
 		free(result);
-		if( !( mm_is_coordinate(matcode) && (mm_is_symmetric(matcode) || mm_is_general(matcode) ) && ( mm_is_real(matcode) || mm_is_pattern(matcode) || mm_is_integer(matcode) ) ) ) {
+		if( !( 
+                            mm_is_coordinate(matcode) && 
+                            (mm_is_symmetric(matcode) || mm_is_general(matcode) ) && 
+                            ( mm_is_real(matcode) || mm_is_pattern(matcode) || mm_is_integer(matcode) )
+                     ) 
+                ) {
 		  printf("Sorry, this application does not support this type.");
 		  exit(1);
 		}

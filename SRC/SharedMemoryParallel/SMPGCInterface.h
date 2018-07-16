@@ -54,12 +54,19 @@ public: // API
     virtual void dump();
     int Coloring(int nT, const string& method);
     int Coloring(int nT, const string& method, const string &optionStr, const INT switch_iter);
-        // Algorithms 
+    
+    INT get_num_colors(){ return num_colors_; } 
+    vector<INT>& get_vertex_colors() { return vertex_color_; }
+    void get_vertex_colors(vector<INT> x) { x.assign(vertex_color_.begin(), vertex_color_.end()); }
+    
+
+    
+    // Algorithms 
     int D1_OMP_GM3P(int nT, INT&color, vector<INT>&vtxColors);
     int D1_OMP_GMMP(int nT, INT&color, vector<INT>&vtxColors);
 
     int D1_OMP_LB(int nT, INT&color, vector<INT>&vtxColors);
-    
+   
     int D1_OMP_JP(int nT, INT&color, vector<INT>&vtxColors);
     int D1_OMP_JP2S(int nT, INT&color, vector<INT>&vtxColors);
     int D1_OMP_JP2S_noRepartition(int nT, INT&color, vector<INT>&vtxColors);
@@ -82,6 +89,15 @@ public: // API
 
     int D2_OMP_GM3P(int nT, INT&color, vector<INT>&vtxColors);
     int D2_OMP_GMMP(int nT, INT&color, vector<INT>&vtxColors);
+    int D2_OMP_GM3P_LO(int nT, INT&color, vector<INT>&vtxColors, const string& local_ordering);
+    int D2_OMP_GMMP_LO(int nT, INT&color, vector<INT>&vtxColors, const string& local_ordering);
+    
+    int D2_OMP_GM3P_(int nT, INT&color, vector<INT>&vtxColors);
+    int D2_OMP_GMMP_(int nT, INT&color, vector<INT>&vtxColors);
+    int D2_OMP_GM3P_LO_(int nT, INT&color, vector<INT>&vtxColors, const string& local_ordering);
+    int D2_OMP_GMMP_LO_(int nT, INT&color, vector<INT>&vtxColors, const string& local_ordering);
+
+public:
 
 
 private:
@@ -91,14 +107,16 @@ private:
     inline void hyberJP_implement_stream(vector<INT>&Q, const INT &QTail, vector<vector<INT>>&QQ, const int&nT, INT const * const &verPtr, INT const * const &verInd, INT& colors, vector<INT>&vtxColors); 
 
 
-protected: // Utilites
-    INT cnt_conflict(INT colors,const vector<INT>& vc);
-    INT cnt_d2coloring_conflict(INT colors,const vector<INT>& vc);
+public: // Utilites
+    INT cnt_d1conflict(const vector<INT>& vc);
+    INT cnt_d2conflict(const vector<INT>& vc);
+protected:
     virtual void error(const string& s){ fprintf(stderr,"Err in class SMPGCInterface with msg \"%s\"\n",s.c_str()); exit(1);}
 
 protected:
     INT num_colors_;
     vector<INT> vertex_color_;
+    string method_;
 
 }; // end of class SMPGCInterface
 
