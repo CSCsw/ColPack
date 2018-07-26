@@ -147,6 +147,10 @@ namespace ColPack
 		/// Read sparsity pattern of a matrix specified in MeTiS format from a file and build a corresponding bipartite graph
 		int ReadMeTiSBipartiteGraph(string s_InputFile);
 
+                /// xin cheng's new read matrix market using c++11 standard
+                int ReadMMBipartiteGraphCpp11(string s_InputFile);
+
+
 	  // -----OUTPUT FUNCTIONS-----
 
 		void PrintBipartiteGraph();

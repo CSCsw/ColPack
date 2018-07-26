@@ -19,7 +19,7 @@
 ************************************************************************************/
 
 #include "ColPackHeaders.h"
-
+#include <unordered_map>
 using namespace std;
 
 namespace ColPack
@@ -1155,4 +1155,130 @@ namespace ColPack
 
 		return(_TRUE);
 	}
-}
+
+
+
+        // author xin cheng
+        // 2018 Jul
+	int BipartiteGraphInputOutput::ReadMMBipartiteGraphCpp11(string s_InputFile)
+	{
+            bool b_symmetric=false;
+            int entry_encounter=0, expect_entries=0;
+            int row_count=0, col_count=0;
+
+            string line, word;
+            istringstream iss;
+            Clear();
+
+            m_s_InputFile = s_InputFile;
+            if(s_InputFile=="") {
+                printf("Error, ReadMMBipartiteGraphCpp11() tries to read a graph with empty filename\n"); 
+                exit(1);
+            }
+
+            ifstream in(s_InputFile.c_str());
+            if(!in.is_open()){
+                printf("Error, ReadMMBipartiteGraphCpp11() tries to open \"%s\". But the file cannot be open.\n", s_InputFile.c_str());
+                exit(1);
+            }
+            
+
+            // Parse structure
+            getline(in, line);
+            iss.str(line);
+            if( !(iss>>word) || word!="%%MatrixMarket" || !(iss>>word) || word!="matrix"){
+                printf("Error,ReadMMBipartiteGraphCpp11() tries to open \"%s\". But it is not MatrixMarket format\n",s_InputFile.c_str());
+                exit(1);
+            }
+            if(!(iss>>word) || word!="coordinate"){
+                printf("Error, ReadMMBipartiteGraphCpp11() tries to open \"%s\". But the graph is a complet graph.\n", s_InputFile.c_str());
+                exit(1);
+            }
+            if(!(iss>>word) || word=="complex"){
+                printf("Error, RreadMMBipartiteGraphCpp11() tries to open \"%s\". But the each vertex is complex value.\n", s_InputFile.c_str());
+                exit(1);
+            }
+            //if(!iss>>word || word!="pattern")
+            //    b_value = true;
+            if(!(iss>>word) || word!="general")
+                b_symmetric=true;
+
+
+            // Parse dimension
+            while(in){
+                getline(in,line);
+                if(line==""||line[0]=='%')
+                    continue;
+                break;
+            }
+            if(!in) {
+                printf("Error, ReadMMBipartiteGraphCpp11() tries to open\"%s\". But cannot read dimension inforation.\n", s_InputFile.c_str());
+                exit(1);
+            }
+            iss.clear(); iss.str(line);
+            iss>>row_count>>col_count>>expect_entries;
+            
+
+            // Read matrix into G
+            unordered_map<int, vector<int>> Grow,Gcol;
+            int r,c;
+            while(in){
+                getline(in, line);
+                if(line=="" || line[0]=='%') 
+                    continue;
+                iss.clear(); iss.str(line);
+                entry_encounter++;
+                iss>>r>>c;
+                r--;c--;
+                Grow[r].push_back(c);
+                Gcol[c].push_back(r);
+                if(b_symmetric && r!=c){
+                    Grow[c].push_back(r);
+                    Gcol[r].push_back(c);
+                }
+            }
+            in.close();
+            if(entry_encounter!=expect_entries){
+                printf("Error, ReadMMBipartiteGraphCpp11() tries to read \"%s\". But only read %d entries (expect %d)\n",s_InputFile.c_str(), entry_encounter, expect_entries);
+                exit(1);
+            }
+            
+            // G into class member 
+            m_i_MaximumLeftVertexDegree = 0;
+            m_i_MinimumLeftVertexDegree = col_count;
+            for(int i=0; i<row_count; i++){
+                m_vi_LeftVertices.push_back((signed) m_vi_Edges.size());
+                const int deg = Grow[i].size();
+                if(m_i_MaximumLeftVertexDegree < deg) 
+                    m_i_MaximumLeftVertexDegree = deg;
+                if(m_i_MinimumLeftVertexDegree > deg)
+                    m_i_MinimumLeftVertexDegree = deg;
+                m_vi_Edges.insert(m_vi_Edges.end(), Grow[i].begin(), Grow[i].end());
+            }
+            m_vi_LeftVertices.push_back((signed) m_vi_Edges.size());
+            
+            m_i_MaximumRightVertexDegree = 0;
+            m_i_MinimumRightVertexDegree = row_count;
+            for(int i=0; i<col_count; i++){
+                m_vi_RightVertices.push_back((signed) m_vi_Edges.size());
+                const int deg = Grow[i].size();
+                if(m_i_MaximumRightVertexDegree < deg) 
+                    m_i_MaximumRightVertexDegree = deg;
+                if(m_i_MinimumRightVertexDegree > deg)
+                    m_i_MinimumRightVertexDegree = deg;
+                m_vi_Edges.insert(m_vi_Edges.end(), Gcol[i].begin(), Gcol[i].end());
+            }
+            m_vi_RightVertices.push_back((signed) m_vi_Edges.size());
+            
+            m_i_MaximumVertexDegree = max(m_i_MaximumLeftVertexDegree, m_i_MaximumRightVertexDegree);
+            m_i_MinimumVertexDegree = min(m_i_MinimumLeftVertexDegree, m_i_MinimumRightVertexDegree);
+            
+            m_d_AverageLeftVertexDegree  = (m_vi_LeftVertices.back() - m_vi_LeftVertices.front())*1.0/row_count;
+            m_d_AverageRightVertexDegree = (m_vi_RightVertices.back() - m_vi_RightVertices.front())*1.0/col_count;
+            m_d_AverageVertexDegree      = (m_vi_LeftVertices.back() - m_vi_LeftVertices.front() + m_vi_RightVertices.back() - m_vi_RightVertices.front())*1.0/(row_count+col_count);
+             
+            return (_TRUE);
+        }// end fun ReadMMBipartiteGraphCpp11 
+
+
+}// end namespace ColPack

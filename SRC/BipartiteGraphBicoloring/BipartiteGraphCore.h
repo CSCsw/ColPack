@@ -82,7 +82,12 @@ namespace ColPack
 		vector<int>* GetLeftVerticesPtr() ;
 		vector<int>* GetRightVerticesPtr() ;
 
-		void GetRowVertices(vector<int> &output) const;
+                const vector<int>& GetLeftVertices() const { return m_vi_LeftVertices; }
+                const vector<int>& GetRightVertices() const { return m_vi_RightVertices;}
+                const int GetMaximumLeftVertexDegree() const { return m_i_MaximumLeftVertexDegree; }
+                const int GetMaximumRightVertexDegree() const { return m_i_MaximumRightVertexDegree; }
+		const vector<int>& GetEdges() const { return m_vi_Edges; }
+                void GetRowVertices(vector<int> &output) const;
 		void GetLeftVertices(vector<int> &output) const;
 
 		void GetColumnVertices(vector<int> &output) const;
@@ -98,6 +103,7 @@ namespace ColPack
 		int GetEdgeCount();
 
 		int GetMaximumRowVertexDegree();
+
 
 		int GetMaximumColumnVertexDegree();
 
