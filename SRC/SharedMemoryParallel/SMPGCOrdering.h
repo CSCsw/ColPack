@@ -41,7 +41,7 @@ namespace ColPack {
 // ============================================================================
 // Shared Memory Parallel Greedy/Graph Coloring Ordering wrap
 // ============================================================================
-class SMPGCOrdering : public SMPGCCore {
+class SMPGCOrdering : public SMPGCGraph {
 public: // construction
     SMPGCOrdering(const string& file_name, const string& fmt, double*iotime, const string& order, double *ordtime);
     virtual ~SMPGCOrdering();
@@ -53,32 +53,34 @@ public: // deplete construction
     SMPGCOrdering& operator=(const SMPGCOrdering&)=delete;
 
 public: // API: global ordering
-    void set_global_ordering(const string& order, double*t);
+    void global_ordering(const string& order, double*t);
+    const vector<int>& global_ordered_vertex() const { return m_global_ordered_vertex; }
+    const string&      global_ordered_method() const { return m_global_ordered_method; }
+    void set_rseed(const int x){ m_mt.seed(x); }
+
+protected:
     void global_natural_ordering();
     void global_random_ordering();
 
-public: // API: local ordering
-    void set_local_ordering(vector<INT>&vtxs, const string& order, double *t);
-    void local_natural_ordering(vector<INT>& vtxs);
-    void local_random_ordering (vector<INT>& vtxs);
-    void local_largest_degree_first_ordering(vector<INT>& vtxs); 
-    void local_largest_degree_first_ordering_emplace(vector<INT>& vtxs, const INT beg, const INT end); 
-    void local_smallest_degree_last_ordering(vector<INT>& vtxs);
-    void local_smallest_degree_last_ordering_B1a(vector<INT>& vtxs);
+protected: // API: local ordering
+    void local_natural_ordering(vector<int>& vtxs);
+    void local_random_ordering (vector<int>& vtxs);
+    void local_largest_degree_first_ordering(vector<int>& vtxs); 
+    void local_largest_degree_first_ordering(vector<int>& vtxs, const int beg, const int end); 
+    void local_smallest_degree_last_ordering(vector<int>& vtxs);
+    void local_smallest_degree_last_ordering_B1a(vector<int>& vtxs);
     
     //void SmallestDegreeLastOrdering(vector<INT>& vtxs, INT N);
     //void DynamicLargestDegreeFirstOrdering(vector<INT>& vtxs, INT N);
     //void IncidenceDegreeOrdering(vector<INT>& vtxs, INT N);
     //void LogOrdering(vector<INT>& vtxs, INT N);
     
-    void set_rseed(const INT x){ mt_.seed(x); }
-    
     virtual void dump();
-    vector<INT>& ordered_vertex(){ return ordered_vertex_; }
 
 protected: // members
-    vector<INT> ordered_vertex_;   
-    mt19937_64 mt_;
+    vector<int> m_global_ordered_vertex;   
+    string      m_global_ordered_method;
+    mt19937     m_mt;
 };
 
 

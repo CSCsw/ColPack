@@ -1242,7 +1242,13 @@ namespace ColPack
                 printf("Error, ReadMMBipartiteGraphCpp11() tries to read \"%s\". But only read %d entries (expect %d)\n",s_InputFile.c_str(), entry_encounter, expect_entries);
                 exit(1);
             }
-            
+           
+            for(auto &g : Grow)
+                sort(g.second.begin(), g.second.end());
+            for(auto &g : Gcol)
+                sort(g.second.begin(), g.second.end());
+
+
             // G into class member 
             m_i_MaximumLeftVertexDegree = 0;
             m_i_MinimumLeftVertexDegree = col_count;

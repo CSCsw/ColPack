@@ -1,0 +1,165 @@
+/*************************************************************************
+    File Name: SMPGCCore.cpp
+    Author: Xin Cheng
+    Descriptions: 
+    Created Time: Tue 06 Mar 2018 10:46:58 AM EST
+*********************************************************************/
+
+#include "SMPGCGraph.h"
+#include <time.h>   //clock
+using namespace std;
+using namespace ColPack;
+
+// ============================================================================
+// Construction
+// ============================================================================
+SMPGCGraph::SMPGCGraph(const string& graph_name, const string& format, double* iotime) {
+    m_graph_name = graph_name;
+    if(format=="mm" || format == "MM")
+        do_read_MM_struct(m_graph_name, m_ia, m_ja, &m_max_degree, &m_min_degree, &m_avg_degree, iotime);
+    else if(format=="binary")
+        do_read_Binary_struct(m_graph_name, m_ia, m_ja, &m_max_degree, &m_min_degree, &m_avg_degree, iotime);
+    else{
+        printf("Error! SMPGCCore() tried read graph \"%s\" with format \"%s\". But it is not supported\n", graph_name.c_str(), format.c_str());
+        exit(1);
+    }
+}
+
+
+SMPGCGraph::~SMPGCGraph(){
+}
+
+// ============================================================================
+// Read MatrixMarket only structure into memory
+// ----------------------------------------------------------------------------
+// Note: store as sparsed CSR format
+// ============================================================================
+void SMPGCGraph::do_read_MM_struct(const string& graph_name, vector<int>&ia, vector<int>&ja, int* pMaxDeg, int* pMinDeg, double* pAvgDeg, double* iotime) {
+    if(graph_name.empty()) { printf("Error! SMPGCCore() tried to read a graph with empty name.\n"); exit(1); }
+
+    bool bSymmetric = true;
+    int  entry_encount = 0;
+    int  entry_expect  = 0;
+    int  row_expect    = 0;
+    int  col_expect    = 0;
+    string line,word;
+    istringstream iss;
+    
+    ia.clear(); { vector<int> tmp; tmp.swap(ia); } 
+    ja.clear(); { vector<int> tmp; tmp.swap(ja); }
+
+    if(iotime) { *iotime=0; *(clock_t *)iotime = -clock(); }
+    ifstream in(graph_name.c_str());
+    if(!in.is_open()) { printf("Error! SMPGCCore() cannot open \"%s\".\n", graph_name.c_str()); exit(1); }
+   
+    // parse head
+    getline(in, line);
+    iss.str(line);
+    if( !(iss>>word) || word!="\%\%MatrixMarket" || !(iss>>word) || word!="matrix") {
+        printf("Error! SMPGCCore() read matrix market file \"%s\". But it is not matrix market format.\n", graph_name.c_str());
+        exit(1);
+    }
+    if( !(iss>>word) || word!="coordinate") {
+        printf("Error! SMPGCCore() %s is a dense graph\"%s\". Dense graph is a complete graph. Chromatic number will be simply N+1.\n", graph_name.c_str());
+        exit(1);
+    }
+    if( !(iss>>word) || word=="complex") {
+        printf("Error! SMPGCCore() graph \"%s\" is a complex matrix. Which is not supported.\n", graph_name.c_str());
+        exit(1);
+    }
+    if( !(iss>>word) || word=="general") {
+        bSymmetric = false;
+        printf("Warning! SMPGCCore() grpah \"%s\" is not symmetric.\n", graph_name.c_str());
+    }
+
+    // parse dimension
+    while(in){
+        getline(in,line);
+        if(line==""||line[0]=='%')
+            continue;
+        break;
+    }
+    if(!in){ 
+        printf("Error! SMPGCCore() cannot get graph \"%s\" dimension.\n", graph_name.c_str());
+        exit(1);
+    }
+    iss.clear(); iss.str(line);
+    iss>>row_expect>>col_expect>>entry_expect;
+
+    // read graph into G
+    unordered_map<int, vector<int>> G;
+    int row, col;
+    ifstream fp(graph_name.c_str(), "r");
+    while(in&&entry_encount<=entry_expect){
+        getline(in,line);
+        if(line=="" || line[0]=='%')
+            continue;
+        entry_encount ++;
+        iss.clear(); iss.str(line);
+        iss>>row>>col;
+        if(row==col) continue;     //eliminate self edge
+        row--; col--;              //1-based to 0-based
+        G[row].push_back(col);
+        if(bSymmetric){
+            G[col].push_back(row);
+            if(row<col){
+                fclose(fp);
+                printf("Error! SMPGCCore() read \"%s\", but find non zero entry (row %s, col %s) in upper triangular part in a symmetric graph. This is not allowed by matrix market standard.\n", graph_name.c_str(), row+1, col+1);
+                exit(1);
+            }
+        }
+    }
+    if(entry_encount != entry_expect){
+        printf("Error! graph \"%s\" expected has %d entries, but we have found %d. Check the file.\n", graph_name.c_str(), entry_expect, entry_encount);
+        fclose(fp); fp=nullptr;
+        exit(1);
+    }
+    for(auto it=G.begin();  it!=G.end(); it++) 
+        sort((it->second).begin(), (it->second).end());
+
+    // G into CSR
+    ia.push_back(ja.size());
+    for(int i=0; i<N; i++){
+        auto it=G.find(i);
+        if(it!=G.end()) ja.insert(ja.end(), (it->second).begin(), (it->second).end());
+        ia.push_back(ja.size());
+    }
+
+    // calc degrees if needed
+    if(pMaxDeg||pMinDeg){
+        int maxDeg=0, minDeg=ia.size()-1;
+        for(auto it : G){
+            int d = (it.second).size();
+            maxDeg = (maxDeg<d)?d:maxDeg;
+            minDeg = (minDeg>d)?d:minDeg;
+        }
+        if(pMaxDeg) *pMaxDeg = maxDeg;
+        if(pMinDeg) *pMinDeg = minDeg;
+    }
+    if(pAvgDeg) *pAvgDeg=1.0*(ja.size())/(ia.size()-1);
+
+    if(iotime) { *(clock_t*)iotime += clock(); *iotime = double(*((clock_t*)iotime))/CLOCKS_PER_SEC; }
+    return;
+}
+
+
+// ============================================================================
+//
+// ============================================================================
+
+//void SMPGCCore::do_read_Binary_struct(const string&graph_name, vector<INT>&ia_, vector<INT>&ja_, INT* maxDeg_,INT* minDeg_,double* avgDeg_,double* iotime){
+//    return;
+//}
+//void SMPGCCore::do_write_Binary_struct(const string&graph_name, vector<INT>&ia_, vector<INT>&ja_,double* iotime){
+//    return;
+//}
+
+
+// ============================================================================
+// dump information
+// ============================================================================
+void SMPGCGraph::dump(){
+    ;
+}
+
+

@@ -32,9 +32,9 @@ public: // Constructions
 public: // API
     int Coloring(const int side, int nT, const string& method);
     
-    int get_num_colors(){ return m_total_num_colors; } 
-    vector<int>& get_vertex_colors() { return m_vertex_color; }
-    void         get_vertex_colors(vector<int> x) { x.assign(m_vertex_color.begin(), m_vertex_color.end()); }
+    int get_num_colors() const { return m_total_num_colors; } 
+    vector<int>& get_vertex_colors() const { return m_vertex_color; }
+    void         get_vertex_colors(vector<int>& x) { x.assign(m_vertex_color.begin(), m_vertex_color.end()); }
     
     // Algorithms 
     int PD2_OMP_GM3P(const int side, int nT, int&color, vector<int>&vtxColors);
