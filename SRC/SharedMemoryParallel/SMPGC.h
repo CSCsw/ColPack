@@ -50,15 +50,19 @@ class SMPGC{
     //#endif
 
 public:
-    const int RAND_SEED =  12345678;
-    const int NUM_HASH  =  4;
+    static const int RAND_SEED ;
+    static const int NUM_HASH  ;
+    
+    static const int ORDER_NATURAL;
+    static const int ORDER_RANDOM;
+    static const int ORDER_LARGEST_FIRST;
+    static const int ORDER_SMALLEST_LAST;
 
-    const int JP_HYBER_IMPLEMENT_GM3P = 1;
-    const int JP_HYBER_IMPLEMENT_GMMP = 2;
-    const int JP_HYBER_IMPLEMENT_GREEDY = 3;
-    const int JP_HYBER_IMPLEMENT_STREAM = 4;
+    static const int JP_HYBER_IMPLEMENT_GM3P ;
+    static const int JP_HYBER_IMPLEMENT_GMMP ;
+    static const int JP_HYBER_IMPLEMENT_GREEDY ;
+    static const int JP_HYBER_IMPLEMENT_STREAM ;
 
-    const int _TRUE = 0;
 
 public:
     SMPGC(){};

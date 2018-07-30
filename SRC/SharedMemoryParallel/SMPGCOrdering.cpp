@@ -15,7 +15,7 @@ using namespace ColPack;
 // Construction
 // ============================================================================
 SMPGCOrdering::SMPGCOrdering(const string& graph_name, const string& fmt, double*iotime,  const string& order="NATURAL", double* ordtime=nullptr) 
-: SMPGCGraph(graph_name, fmt, iotime), mt_(5489u) {
+: SMPGCGraph(graph_name, fmt, iotime), mt_(SMPGC::RAND_SEED) {
     const int N = SMPGCCore::num_nodes();
     m_global_ordered_vertex.assign(N,0);
     global_ordering(order, ordtime);

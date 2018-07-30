@@ -1,11 +1,11 @@
 /*************************************************************************
-    File Name: SMPGCInterface.h
+    File Name: SMPGCColoring.h
     Author: Xin Cheng
     Descriptions: 
     Created Time: Tue 06 Mar 2018 10:19:24 AM EST
 *********************************************************************/
-#ifndef SMPGCInterface_H
-#define SMPGCInterface_H
+#ifndef SMPGCColoring_H
+#define SMPGCColoring_H
 #include <vector>
 #include <omp.h>
 #include "ColPackHeaders.h" //#include "GraphOrdering.h"
@@ -38,87 +38,80 @@ namespace ColPack {
 // ============================================================================
 // Shared Memeory Parallel Greedy/Graph Coloring
 // ============================================================================
-class SMPGCInterface : public SMPGCOrdering {
+class SMPGCColoring : public SMPGCOrdering {
 public: // Constructions
-    SMPGCInterface(const string& graph_name);
-    SMPGCInterface(const string& graph_name, const string& fmt, double*iotime, const string&ord, double*ordtime);
-    virtual ~SMPGCInterface(){}
+    SMPGCColoring(const string& graph_name);
+    SMPGCColoring(const string& graph_name, const string& fmt, double*iotime, const string&ord, double*ordtime);
+    virtual ~SMPGCColoring(){}
 
         // Deplete constructions
-        SMPGCInterface(SMPGCInterface&&)=delete;
-        SMPGCInterface(const SMPGCInterface&)=delete;
-        SMPGCInterface& operator=(SMPGCInterface&&)=delete;
-        SMPGCInterface& operator=(const SMPGCInterface&)=delete;
+        SMPGCColoring(SMPGCColoring&&)=delete;
+        SMPGCColoring(const SMPGCColoring&)=delete;
+        SMPGCColoring& operator=(SMPGCColoring&&)=delete;
+        SMPGCColoring& operator=(const SMPGCColoring&)=delete;
 
 public: // API
-    virtual void dump();
     int Coloring(int nT, const string& method);
-    int Coloring(int nT, const string& method, const string &optionStr, const INT switch_iter);
+    int Coloring(int nT, const string& method, const string &s_option, const int switch_iter);
     
-    INT get_num_colors(){ return num_colors_; } 
-    vector<INT>& get_vertex_colors() { return vertex_color_; }
-    void get_vertex_colors(vector<INT> x) { x.assign(vertex_color_.begin(), vertex_color_.end()); }
-    
-
+    int get_num_colors(){ return m_total_num_colors; } 
+    const vector<int>& get_vertex_colors() const { return m_vertex_color; }
+    void get_vertex_colors(vector<int>& x) { x.assign(m_vertex_color.begin(), m_vertex_color.end()); }
     
     // Algorithms 
-    int D1_OMP_GM3P(int nT, INT&color, vector<INT>&vtxColors);
-    int D1_OMP_GMMP(int nT, INT&color, vector<INT>&vtxColors);
+    int D1_serial(int &color, vector<int>&vtxColors);
 
-    int D1_OMP_LB(int nT, INT&color, vector<INT>&vtxColors);
-   
-    int D1_OMP_JP(int nT, INT&color, vector<INT>&vtxColors);
-    int D1_OMP_JP2S(int nT, INT&color, vector<INT>&vtxColors);
-    int D1_OMP_JP2S_noRepartition(int nT, INT&color, vector<INT>&vtxColors);
-    int D1_OMP_JP2Shash(int nT, INT&color, vector<INT>&vtxColors);
-    int D1_OMP_JP2Shashsingle(int nT, INT&color, vector<INT>&vtxColors);
+    int D1_OMP_GM3P(int nT, int&color, vector<int>&vtxColors);
+    int D1_OMP_GMMP(int nT, int&color, vector<int>&vtxColors);
+    int D1_OMP_JP(int nT, int&color, vector<int>&vtxColors);
+    int D1_OMP_JP2S(int nT, int&color, vector<int>&vtxColors);
+    int D1_OMP_LB(int nT, int&color, vector<int>&vtxColors);
 
-    int D1_OMP_GM3P_LO(int nT, INT&color, vector<INT>&vtxColors, const string& local_ordering);
-    int D1_OMP_GMMP_LO_perloop(int nT, INT&color, vector<INT>&vtxColors, const string& local_ordering);
-    int D1_OMP_GMMP_LO_once(int nT, INT&color, vector<INT>&vtxColors, const string& local_ordering);
-
-    int D1_OMP_JP_LF(int nT, INT&color, vector<INT>&vtxColors);
-    int D1_OMP_JP_SL(int nT, INT&color, vector<INT>&vtxColors);
+    int D1_OMP_GM3P_LO(int nT, int&color, vector<int>&vtxColors, const int local_ordering);
+    int D1_OMP_GMMP_LO(int nT, int&color, vector<int>&vtxColors, const int local_ordering);
+    int D1_OMP_JP_LO  (int nT, int&color, vector<int>&vtxColors,   const int local_ordering);
     
-    int D1_OMP_JP_hyber(int nT, INT&color, vector<INT>&vtxColors, const int option, const INT swtich_iter);
-    int D1_OMP_JP2S_hyber(int nT, INT&color, vector<INT>&vtxColors, const int option, const INT switch_iter);
-    int D1_OMP_JP2S_hyber_slow(int nT, INT&color, vector<INT>&vtxColors, const int option, const INT switch_iter);
+    int D1_OMP_JP_hyber(int nT, int&color, vector<int>&vtxColors, const int option, const int swtich_iter);
+    int D1_OMP_JP2S_hyber(int nT, int&color, vector<int>&vtxColors, const int option, const int switch_iter);
 
-    int D1Greedy(int nT, INT&color, vector<INT>&vtxColors);
+    // Algorithm for distance two coloring
+    int D2_serial(int &color, vector<int>&vtxColors);
 
-
-    int D2_OMP_GM3P(int nT, INT&color, vector<INT>&vtxColors);
-    int D2_OMP_GMMP(int nT, INT&color, vector<INT>&vtxColors);
-    int D2_OMP_GM3P_LO(int nT, INT&color, vector<INT>&vtxColors, const string& local_ordering);
-    int D2_OMP_GMMP_LO(int nT, INT&color, vector<INT>&vtxColors, const string& local_ordering);
+    int D2_OMP_GM3P(int nT, int&color, vector<int>&vtxColors);
+    int D2_OMP_GMMP(int nT, int&color, vector<int>&vtxColors);
+    int D2_OMP_GM3P_LO(int nT, int&color, vector<int>&vtxColors, const int local_ordering);
+    int D2_OMP_GMMP_LO(int nT, int&color, vector<int>&vtxColors, const int local_ordering);
     
-    int D2_OMP_GM3P_(int nT, INT&color, vector<INT>&vtxColors);
-    int D2_OMP_GMMP_(int nT, INT&color, vector<INT>&vtxColors);
-    int D2_OMP_GM3P_LO_(int nT, INT&color, vector<INT>&vtxColors, const string& local_ordering);
-    int D2_OMP_GMMP_LO_(int nT, INT&color, vector<INT>&vtxColors, const string& local_ordering);
+    // Some experimental funtions
+    int D1_OMP_GMMP_LO_once(int nT, int&color, vector<int>&vtxColors, const int local_ordering);
 
-public:
+    int D1_OMP_JP2S_noRepartition(int nT, int&color, vector<int>&vtxColors);
+    int D1_OMP_JP2Shash(int nT, int&color, vector<int>&vtxColors);
+    int D1_OMP_JP2Shashsingle(int nT, int&color, vector<int>&vtxColors);
+    int D1_OMP_JP2S_hyber_slow(int nT, int&color, vector<int>&vtxColors, const int option, const int switch_iter);
+    int D2_OMP_GM3P_(int nT, int&color, vector<int>&vtxColors);
+    int D2_OMP_GMMP_(int nT, int&color, vector<int>&vtxColors);
+    int D2_OMP_GM3P_LO_(int nT, int&color, vector<int>&vtxColors, const string& local_ordering);
+    int D2_OMP_GMMP_LO_(int nT, int&color, vector<int>&vtxColors, const string& local_ordering);
 
 
 private:
-    inline void hyberJP_implement_GM3P(vector<INT>&Q, const INT &QTail, vector<vector<INT>>&QQ, const int&nT, INT const * const &verPtr, INT const * const &verInd, INT& colors, vector<INT>&vtxColors); 
-    inline void hyberJP_implement_GMMP(vector<INT>&Q, const INT &QTail, vector<INT>&conflictQ,                INT const * const &verPtr, INT const * const &verInd, INT& colors, vector<INT>&vtxColors); 
-    void hyberJP_implement_greedy_serial(vector<INT>&Q, const INT &QTail,                              INT const * const &verPtr, INT const * const &verInd, INT& colors, vector<INT>&vtxColors); 
-    inline void hyberJP_implement_stream(vector<INT>&Q, const INT &QTail, vector<vector<INT>>&QQ, const int&nT, INT const * const &verPtr, INT const * const &verInd, INT& colors, vector<INT>&vtxColors); 
+    inline void hyberJP_implement_GM3P(vector<int>&Q, const int &QTail, vector<vector<int>>&QQ, const int&nT, int const * const &verPtr, int const * const &verInd, int& colors, vector<int>&vtxColors); 
+    inline void hyberJP_implement_GMMP(vector<int>&Q, const int &QTail, vector<int>&conflictQ,                int const * const &verPtr, int const * const &verInd, int& colors, vector<int>&vtxColors); 
+    void hyberJP_implement_greedy_serial(vector<int>&Q, const int &QTail,                              int const * const &verPtr, int const * const &verInd, int& colors, vector<int>&vtxColors); 
+    inline void hyberJP_implement_stream(vector<int>&Q, const int &QTail, vector<vector<int>>&QQ, const int&nT, int const * const &verPtr, int const * const &verInd, int& colors, vector<int>&vtxColors); 
 
 
 public: // Utilites
-    INT cnt_d1conflict(const vector<INT>& vc);
-    INT cnt_d2conflict(const vector<INT>& vc);
-protected:
-    virtual void error(const string& s){ fprintf(stderr,"Err in class SMPGCInterface with msg \"%s\"\n",s.c_str()); exit(1);}
+    int cnt_d1conflict(const vector<int>& vc);
+    int cnt_d2conflict(const vector<int>& vc);
 
 protected:
-    INT num_colors_;
-    vector<INT> vertex_color_;
-    string method_;
+    int         m_total_num_colors;
+    vector<int> m_vertex_color;
+    string      m_method;
 
-}; // end of class SMPGCInterface
+}; // end of class SMPGCColoring
 
 
 }// endof namespace ColPack

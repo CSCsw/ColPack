@@ -1,11 +1,12 @@
 /*************************************************************************
-    File Name: SMPGCInterface.cpp
+    File Name: SMPGCColoring.cpp
     Author: Xin Cheng
     Descriptions: 
     Created Time: Tue 06 Mar 2018 10:46:58 AM EST
 *********************************************************************/
 
-#include "SMPGCInterface.h"
+#include "SMPGCColoring.h"
+
 #include <chrono> //c++11 system time
 #include <random> //c++11 random
 using namespace std;
@@ -15,67 +16,120 @@ using namespace ColPack;
 // ============================================================================
 // Interface
 // ============================================================================
-int SMPGCInterface::Coloring(int nT, const string& method){
-    
-    if     (method.compare("DISTANCE_ONE_OMP_GM3P")==0) return D1_OMP_GM3P(nT, num_colors_, vertex_color_);
-    else if(method.compare("DISTANCE_ONE_OMP_GMMP")==0) return D1_OMP_GMMP(nT, num_colors_, vertex_color_);
-    else if(method.compare("DISTANCE_ONE_OMP_JP")==0)   return D1_OMP_JP  (nT, num_colors_, vertex_color_);
-    else if(method.compare("DISTANCE_ONE_OMP_JP2S")==0) return D1_OMP_JP2S(nT, num_colors_, vertex_color_);
-    else if(method.compare("DISTANCE_ONE_OMP_JP2Shash")==0) return D1_OMP_JP2Shash(nT, num_colors_, vertex_color_);
-
-    else if(method.compare("DISTANCE_ONE_OMP_JP_LF")==0) return D1_OMP_JP_LF(nT, num_colors_, vertex_color_);
-    else if(method.compare("DISTANCE_ONE_OMP_JP_SL")==0) return D1_OMP_JP_SL(nT, num_colors_, vertex_color_);
-    else if(method.compare("DISTANCE_ONE_OMP_GM3P_SL")==0) return  D1_OMP_GM3P_LO(nT, num_colors_, vertex_color_, "SMALLEST_LAST");
-    else if(method.compare("DISTANCE_ONE_OMP_GM3P_SL1")==0) return D1_OMP_GM3P_LO(nT, num_colors_, vertex_color_, "SMALLEST_LAST1");
-    else if(method.compare("DISTANCE_ONE_OMP_GMMP_LF")==0)  return D1_OMP_GMMP_LO_perloop(nT, num_colors_, vertex_color_, "LARGEST_FIRST");
-    else if(method.compare("DISTANCE_ONE_OMP_GMMP_SL")==0)  return D1_OMP_GMMP_LO_perloop(nT, num_colors_, vertex_color_, "SMALLEST_LAST");
-    else if(method.compare("DISTANCE_ONE_OMP_GMMP_SL1")==0) return D1_OMP_GMMP_LO_perloop(nT, num_colors_, vertex_color_, "SMALLEST_LAST1");
-    else if(method.compare("DISTANCE_ONE_OMP_GMMP_LF_ONCE")==0)  return D1_OMP_GMMP_LO_once(nT, num_colors_, vertex_color_, "LARGEST_FIRST");
-    else if(method.compare("DISTANCE_ONE_OMP_GMMP_SL_ONCE")==0)  return D1_OMP_GMMP_LO_once(nT, num_colors_, vertex_color_, "SMALLEST_LAST");
-    else if(method.compare("DISTANCE_ONE_OMP_GMMP_SL1_ONCE")==0) return D1_OMP_GMMP_LO_once(nT, num_colors_, vertex_color_, "SMALLEST_LAST1");
-    
-    else if(method.compare("D2_OMP_GM3P_")==0)  return D2_OMP_GM3P_(nT, num_colors_, vertex_color_);
-    else if(method.compare("D2_OMP_GMMP_")==0) return D2_OMP_GMMP_(nT, num_colors_, vertex_color_);
-    else if(method.compare("D2_OMP_GM3P_LF_")==0) return D2_OMP_GM3P_LO_(nT, num_colors_, vertex_color_, "LARGEST_FIRST");
-    else if(method.compare("D2_OMP_GMMP_LF_")==0) return D2_OMP_GMMP_LO_(nT, num_colors_, vertex_color_, "LARGEST_FIRST");
-
-    else if(method.compare("D2_OMP_GM3P")==0)  return D2_OMP_GM3P(nT, num_colors_, vertex_color_);
-    else if(method.compare("D2_OMP_GMMP")==0) return D2_OMP_GMMP(nT, num_colors_, vertex_color_);
-    else if(method.compare("D2_OMP_GM3P_LF")==0) return D2_OMP_GM3P_LO(nT, num_colors_, vertex_color_, "LARGEST_FIRST");
-    else if(method.compare("D2_OMP_GMMP_LF")==0) return D2_OMP_GMMP_LO(nT, num_colors_, vertex_color_, "LARGEST_FIRST");
-
-    else if(method.compare("DISTANCE_ONE_OMP_LB")==0) return D1_OMP_LB(nT, num_colors_, vertex_color_);
-    else { fprintf(stdout, "Unknow method %s\n",method.c_str()); exit(1); }   
-    return _TRUE;
-}
-
-int SMPGCInterface::Coloring(int nT, const string& method, const string &optionStr, const INT switch_iter=1){
-    int option=JP_HYBER_IMPLEMENT_GM3P;  //default
-    if     (optionStr.compare("GM3P")==0)     option=JP_HYBER_IMPLEMENT_GM3P;
-    else if(optionStr.compare("GMMP")==0)     option=JP_HYBER_IMPLEMENT_GMMP;
-    else if(optionStr.compare("GREEDY")==0)   option=JP_HYBER_IMPLEMENT_GREEDY;
-    else if(optionStr.compare("STREAM")==0)   option=JP_HYBER_IMPLEMENT_STREAM;
+int SMPGCInterface::Coloring(int nT, const string& method, const int switch_iter=0){
+    if     (method.substr(0,17).compare("DISTANCE_ONE_OMP_")==0) {
+        // distance one coloring algorithms
+        const string mthd = method.substr(17);
+        const auto iter_under_line = mthd.find('_');
+        if(iter_under_line==string::npos){
+            if     (mthd.compare("GM3P")==0) return D1_OMP_GM3P(nT, m_total_num_colors, m_vertex_color);
+            else if(mthd.compare("GMMP")==0) return D1_OMP_GMMP(nT, m_total_num_colors, m_vertex_color);
+            else if(mthd.compare("JP")  ==0) return D1_OMP_JP  (nT, m_total_num_colors, m_vertex_color);
+            else if(mthd.compare("MTJP")==0) return D1_OMP_MTJP(nT, m_total_num_colors, m_vertex_color, false, SMPGC::NUM_HASH);
+            else if(mthd.compare("SERIAL")==0) return D1_serial(m_total_num_colors, m_vertex_color);
+            else { printf("Error! method \"%s\" with \"%s\" is not supported.\n", method.c_str(), mthd.c_str()); exit(1); }
+        }
+        else{
+            // local ordered algs or hybird algs,
+            const string md = mthd.substr(0, iter_under_line+1);
+            if(md.compare("GM3PLO_")==0) {
+                const string s_ord = mthd.substr(7);
+                if     (s_ord.compare("LF")==0) return D1_OMP_GM3P_LO(nT, m_total_num_colors, m_vertex_color, SMPGC::ORDER_LARGEST_FIRST);
+                else if(s_ord.compare("SL")==0) return D1_OMP_GM3P_LO(nT, m_total_num_colors, m_vertex_color, SMPGC::ORDER_SMALLEST_LAST);
+                else if(s_ord.compare("NT")==0) return D1_OMP_GM3P_LO(nT, m_total_num_colors, m_vertex_color, SMPGC::ORDER_NATURAL);
+                else if(s_ord.compare("RD")==0) return D1_OMP_GM3P_LO(nT, m_total_num_colors, m_vertex_color, SMPGC::ORDER_RANDOM);
+                else { printf("Error! method \"%s\" with \"%s\" is not supported.\n",method.c_str(), s_ord.c_str()); exit(1); }
+            }
+            else if(md.compare("GMMPLO_")==0) {
+                const string s_ord = mthd.substr(7);
+                if     (s_ord.compare("LF")==0) return D1_OMP_GMMP_LO(nT, m_total_num_colors, m_vertex_color, SMPGC::ORDER_LARGEST_FIRST);
+                else if(s_ord.compare("SL")==0) return D1_OMP_GMMP_LO(nT, m_total_num_colors, m_vertex_color, SMPGC::ORDER_SMALLEST_LAST);
+                else if(s_ord.compare("NT")==0) return D1_OMP_GMMP_LO(nT, m_total_num_colors, m_vertex_color, SMPGC::ORDER_NATURAL);
+                else if(s_ord.compare("RD")==0) return D1_OMP_GMMP_LO(nT, m_total_num_colors, m_vertex_color, SMPGC::ORDER_RANDOM);
+                else { printf("Error! method \"%s\" with \"%s\" is not supported.\n",method.c_str(), s_ord.c_str()); exit(1); }
+            }
+            else if(md.compare("JPLO_")==0) {
+                const string s_ord = mthd.substr(5);
+                if     (s_ord.compare("LF")==0) return D1_OMP_JP_LO(nT, m_total_num_colors, m_vertex_color, SMPGC::ORDER_LARGEST_FIRST);
+                else if(s_ord.compare("SL")==0) return D1_OMP_JP_LO(nT, m_total_num_colors, m_vertex_color, SMPGC::ORDER_SMALLEST_LAST);
+                else if(s_ord.compare("NT")==0) return D1_OMP_JP_LO(nT, m_total_num_colors, m_vertex_color, SMPGC::ORDER_NATURAL);
+                else if(s_ord.compare("RD")==0) return D1_OMP_JP_LO(nT, m_total_num_colors, m_vertex_color, SMPGC::ORDER_RANDOM);
+                else { printf("Error! method \"%s\" with \"%s\" is not supported.\n",method.c_str(), s_ord.c_str()); exit(1); }
+            }
+            else if(md.compare("HYBIRD_")==0) {
+                const string m = mthod.substr(7);
+                const auto   under_line_pos = m.find('_');
+                const string alg1 = rest.substr(0, under_line_pos);
+                const string alg2 = rest.substr(under_line_pos);
+                if(alg1.compare("JP")==0){
+                    if     (alg2.compare("_GM3P")==0) return D1_OMP_HYBIRD_JP(nT, m_num_colors, m_vertex_color, SMPGC::HYBIRD_GM3P, switch_iter);
+                    else if(alg2.compare("_GMMP")==0) return D1_OMP_HYBIRD_JP(nT, m_num_colors, m_vertex_color, SMPGC::HYBIRD_GMMP, switch_iter);
+                    else if(alg2.compare("_SERIAL")==0) return D1_OMP_HYBIRD_JP(nT, m_num_colors, m_vertex_color, SMPGC::HYBIRD_SERIAL, switch_iter);
+                    else if(alg2.compare("_STREAM")==0) return D1_OMP_HYBIRD_JP(nT, m_num_colors, m_vertex_color, SMPGC::HYBIRD_STREAM, switch_iter);
+                    else { printf("Error! method \"%s\" is not supported.\n", method.c_str()); exit(1);}
+                }
+                else if(alg1.compare("MTJP")==0){
+                    if     (alg2.compare("_GM3P")==0) return D1_OMP_HYBIRD_MTJP(nT, m_num_colors, m_vertex_color, SMPGC::HYBIRD_GM3P, switch_iter);
+                    else if(alg2.compare("_GMMP")==0) return D1_OMP_HYBIRD_MTJP(nT, m_num_colors, m_vertex_color, SMPGC::HYBIRD_GMMP, switch_iter);
+                    else if(alg2.compare("_SERIAL")==0) return D1_OMP_HYBIRD_MTJP(nT, m_num_colors, m_vertex_color, SMPGC::HYBIRD_SERIAL, switch_iter);
+                    else if(alg2.compare("_STREAM")==0) return D1_OMP_HYBIRD_MTJP(nT, m_num_colors, m_vertex_color, SMPGC::HYBIRD_STREAM, switch_iter);
+                    else { printf("Error! method \"%s\" is not supported.\n", method.c_str()); exit(1); }
+                }
+                else { printf("Error! method \"%s\" is not supported.\n", method.c_str()); exit(1); }
+            }
+            else{
+                printf("Error! method \"%s\" is not support.\n",method.c_str()); 
+                exit(1);
+            }
+        }
+    }
+    else if(method.substr(0,17).compare("DISTANCE_TWO_OMP_")==0) {
+        // distance two coloring algorithms
+        const string mthd = method.substr(17);
+        const auto iter_under_line = mthd.find('_');
+        if(iter_under_line==string::npos){
+            if     (mthd.compare("GM3P")==0) return D2_OMP_GM3P(nT, m_total_num_colors, m_vertex_color);
+            else if(mthd.compare("GMMP")==0) return D2_OMP_GMMP(nT, m_total_num_colors, m_vertex_color);
+            else if(mthd.compare("SERIAL")==0) return D2_serial(m_total_num_colors, m_vertex_color);
+            else { printf("Error! method \"%s\" is not supported.\n", method.c_str()); exit(1); }
+        }
+        else{
+            if     (mthd.substr(0,7).compare("GM3PLO_")==0) {
+                const string s_ord = mthd.substr(7);
+                if     (s_ord.compare("LF")==0) return D2_OMP_GM3P_LO(nT, m_total_num_colors, m_vertex_color, SMPGC::ORDER_LARGEST_FIRST);
+                else if(s_ord.compare("SL")==0) return D2_OMP_GM3P_LO(nT, m_total_num_colors, m_vertex_color, SMPGC::ORDER_SMALLEST_LAST);
+                else if(s_ord.compare("NT")==0) return D2_OMP_GM3P_LO(nT, m_total_num_colors, m_vertex_color, SMPGC::ORDER_NATURAL);
+                else if(s_ord.compare("RD")==0) return D2_OMP_GM3P_LO(nT, m_total_num_colors, m_vertex_color, SMPGC::ORDER_RANDOM);
+                else { printf("Error! method \"%s\" with \"%s\" is not supported.\n",method.c_str(), s_ord.c_str()); exit(1); }
+            }
+            else if(mthd.substr(0,7).compare("GMMPLO_")==0) {
+                const string s_ord = mthd.substr(7);
+                if     (s_ord.compare("LF")==0) return D2_OMP_GMMP_LO(nT, m_total_num_colors, m_vertex_color, SMPGC::ORDER_LARGEST_FIRST);
+                else if(s_ord.compare("SL")==0) return D2_OMP_GMMP_LO(nT, m_total_num_colors, m_vertex_color, SMPGC::ORDER_SMALLEST_LAST);
+                else if(s_ord.compare("NT")==0) return D2_OMP_GMMP_LO(nT, m_total_num_colors, m_vertex_color, SMPGC::ORDER_NATURAL);
+                else if(s_ord.compare("RD")==0) return D2_OMP_GMMP_LO(nT, m_total_num_colors, m_vertex_color, SMPGC::ORDER_RANDOM);
+                else { printf("Error! method \"%s\" with \"%s\" is not supported.\n",method.c_str(), s_ord.c_str()); exit(1); }
+            }
+            else{
+                printf("Error! method \"%s\" with \"%s\" is not support.\n", method.c_str(), mthd.c_str());
+                exit(1);
+            }
+        }
+    }
     else{
-        printf("JP hybird method,\"%s\" is not an option. Should be one of {GM3P,GMMP,GREEDY,STREAM}\n",optionStr.c_str());
+        printf("Error! method \"%s\" is not supported.\n", method.c_str());
         exit(1);
     }
-    if     (method.compare("DISTANCE_ONE_OMP_JP2S_HYBIRD")==0) return  D1_OMP_JP2S_hyber(nT, num_colors_, vertex_color_, option, switch_iter);
-    if     (method.compare("DISTANCE_ONE_OMP_JP2S_HYBIRD_slow")==0) return  D1_OMP_JP2S_hyber_slow(nT, num_colors_, vertex_color_, option, switch_iter);
-
-    else if(method.compare("DISTANCE_ONE_OMP_JP_HYBIRD")==0) 
-        return D1_OMP_JP_hyber(nT, num_colors_, vertex_color_, option, switch_iter);
-    else {fprintf(stdout, "Unknown method %s\n",method.c_str()); exit(1); }
-    return _TRUE;
-}
+} //end function
 
 // ============================================================================
 // Construction
 // ============================================================================
 SMPGCInterface::SMPGCInterface(const string& graph_name)
 : SMPGCOrdering(graph_name, "MM", nullptr, "NATURAL",nullptr) {
-    INT N = SMPGCCore::nodes();
-    vertex_color_.assign(N,-1);
-    num_colors_=0;
+    const int N = num_nodes();
+    m_vertex_color.reserve(N);
+    m_totoal_num_colors=0;
 }
 
 // ============================================================================
