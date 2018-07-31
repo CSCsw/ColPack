@@ -53,6 +53,8 @@ public:
     static const int RAND_SEED ;
     static const int NUM_HASH  ;
     
+    static const string FORMAT_MM;
+
     static const int ORDER_NATURAL;
     static const int ORDER_RANDOM;
     static const int ORDER_LARGEST_FIRST;

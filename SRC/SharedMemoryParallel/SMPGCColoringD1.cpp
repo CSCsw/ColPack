@@ -5,270 +5,143 @@
     Created Time: Tue 06 Mar 2018 10:46:58 AM EST
 *********************************************************************/
 
-#include "SMPGCInterface.h"
+#include "SMPGCColoring.h"
 #include <chrono> //c++11 system time
 #include <random> //c++11 random
 using namespace std;
 using namespace ColPack;
 
-
-// ============================================================================
-// Interface
-// ============================================================================
-int SMPGCInterface::Coloring(int nT, const string& method){
-    
-    if     (method.compare("DISTANCE_ONE_OMP_GM3P")==0) return D1_OMP_GM3P(nT, num_colors_, vertex_color_);
-    else if(method.compare("DISTANCE_ONE_OMP_GMMP")==0) return D1_OMP_GMMP(nT, num_colors_, vertex_color_);
-    else if(method.compare("DISTANCE_ONE_OMP_JP")==0)   return D1_OMP_JP  (nT, num_colors_, vertex_color_);
-    else if(method.compare("DISTANCE_ONE_OMP_JP2S")==0) return D1_OMP_JP2S(nT, num_colors_, vertex_color_);
-    else if(method.compare("DISTANCE_ONE_OMP_JP2Shash")==0) return D1_OMP_JP2Shash(nT, num_colors_, vertex_color_);
-
-    else if(method.compare("DISTANCE_ONE_OMP_JP_LF")==0) return D1_OMP_JP_LF(nT, num_colors_, vertex_color_);
-    else if(method.compare("DISTANCE_ONE_OMP_JP_SL")==0) return D1_OMP_JP_SL(nT, num_colors_, vertex_color_);
-    else if(method.compare("DISTANCE_ONE_OMP_GM3P_SL")==0) return  D1_OMP_GM3P_LO(nT, num_colors_, vertex_color_, "SMALLEST_LAST");
-    else if(method.compare("DISTANCE_ONE_OMP_GM3P_SL1")==0) return D1_OMP_GM3P_LO(nT, num_colors_, vertex_color_, "SMALLEST_LAST1");
-    else if(method.compare("DISTANCE_ONE_OMP_GMMP_LF")==0)  return D1_OMP_GMMP_LO_perloop(nT, num_colors_, vertex_color_, "LARGEST_FIRST");
-    else if(method.compare("DISTANCE_ONE_OMP_GMMP_SL")==0)  return D1_OMP_GMMP_LO_perloop(nT, num_colors_, vertex_color_, "SMALLEST_LAST");
-    else if(method.compare("DISTANCE_ONE_OMP_GMMP_SL1")==0) return D1_OMP_GMMP_LO_perloop(nT, num_colors_, vertex_color_, "SMALLEST_LAST1");
-    else if(method.compare("DISTANCE_ONE_OMP_GMMP_LF_ONCE")==0)  return D1_OMP_GMMP_LO_once(nT, num_colors_, vertex_color_, "LARGEST_FIRST");
-    else if(method.compare("DISTANCE_ONE_OMP_GMMP_SL_ONCE")==0)  return D1_OMP_GMMP_LO_once(nT, num_colors_, vertex_color_, "SMALLEST_LAST");
-    else if(method.compare("DISTANCE_ONE_OMP_GMMP_SL1_ONCE")==0) return D1_OMP_GMMP_LO_once(nT, num_colors_, vertex_color_, "SMALLEST_LAST1");
-    
-    else if(method.compare("D2_OMP_GM3P_")==0)  return D2_OMP_GM3P_(nT, num_colors_, vertex_color_);
-    else if(method.compare("D2_OMP_GMMP_")==0) return D2_OMP_GMMP_(nT, num_colors_, vertex_color_);
-    else if(method.compare("D2_OMP_GM3P_LF_")==0) return D2_OMP_GM3P_LO_(nT, num_colors_, vertex_color_, "LARGEST_FIRST");
-    else if(method.compare("D2_OMP_GMMP_LF_")==0) return D2_OMP_GMMP_LO_(nT, num_colors_, vertex_color_, "LARGEST_FIRST");
-
-    else if(method.compare("D2_OMP_GM3P")==0)  return D2_OMP_GM3P(nT, num_colors_, vertex_color_);
-    else if(method.compare("D2_OMP_GMMP")==0) return D2_OMP_GMMP(nT, num_colors_, vertex_color_);
-    else if(method.compare("D2_OMP_GM3P_LF")==0) return D2_OMP_GM3P_LO(nT, num_colors_, vertex_color_, "LARGEST_FIRST");
-    else if(method.compare("D2_OMP_GMMP_LF")==0) return D2_OMP_GMMP_LO(nT, num_colors_, vertex_color_, "LARGEST_FIRST");
-
-    else if(method.compare("DISTANCE_ONE_OMP_LB")==0) return D1_OMP_LB(nT, num_colors_, vertex_color_);
-    else { fprintf(stdout, "Unknow method %s\n",method.c_str()); exit(1); }   
-    return _TRUE;
-}
-
-int SMPGCInterface::Coloring(int nT, const string& method, const string &optionStr, const INT switch_iter=1){
-    int option=JP_HYBER_IMPLEMENT_GM3P;  //default
-    if     (optionStr.compare("GM3P")==0)     option=JP_HYBER_IMPLEMENT_GM3P;
-    else if(optionStr.compare("GMMP")==0)     option=JP_HYBER_IMPLEMENT_GMMP;
-    else if(optionStr.compare("GREEDY")==0)   option=JP_HYBER_IMPLEMENT_GREEDY;
-    else if(optionStr.compare("STREAM")==0)   option=JP_HYBER_IMPLEMENT_STREAM;
-    else{
-        printf("JP hybird method,\"%s\" is not an option. Should be one of {GM3P,GMMP,GREEDY,STREAM}\n",optionStr.c_str());
-        exit(1);
-    }
-    if     (method.compare("DISTANCE_ONE_OMP_JP2S_HYBIRD")==0) return  D1_OMP_JP2S_hyber(nT, num_colors_, vertex_color_, option, switch_iter);
-    if     (method.compare("DISTANCE_ONE_OMP_JP2S_HYBIRD_slow")==0) return  D1_OMP_JP2S_hyber_slow(nT, num_colors_, vertex_color_, option, switch_iter);
-
-    else if(method.compare("DISTANCE_ONE_OMP_JP_HYBIRD")==0) 
-        return D1_OMP_JP_hyber(nT, num_colors_, vertex_color_, option, switch_iter);
-    else {fprintf(stdout, "Unknown method %s\n",method.c_str()); exit(1); }
-    return _TRUE;
-}
-
-// ============================================================================
-// Construction
-// ============================================================================
-SMPGCInterface::SMPGCInterface(const string& graph_name)
-: SMPGCOrdering(graph_name, "MM", nullptr, "NATURAL",nullptr) {
-    INT N = SMPGCCore::nodes();
-    vertex_color_.assign(N,-1);
-    num_colors_=0;
-}
-
-// ============================================================================
-// Construction
-// ============================================================================
-SMPGCInterface::SMPGCInterface(const string& graph_name, const string& fmt, double* iotime, const string& glb_order="NATURAL", double *ordtime=nullptr) 
-: SMPGCOrdering(graph_name, fmt, iotime, glb_order, ordtime){
-    INT N = SMPGCCore::nodes();
-    vertex_color_.assign(N,-1);
-    num_colors_=0;
-}
-
-// ============================================================================
-// dump information
-// ============================================================================
-void SMPGCInterface::dump(){
-    ;
-}
-
-
-// ============================================================================
-// check if the graph is correct colored
-// ============================================================================
-SMPGCInterface::INT SMPGCInterface::cnt_d1conflict(const vector<INT>& vtxColor){
-    const INT N         = nodes();
-    vector<INT>& vtxPtr = CSRia();
-    vector<INT>& vtxVal = CSRja();
-    INT Conflicts=0;
-    #pragma omp parallel reduction(+:Conflicts)
-    {
-        #pragma omp for
-        for (INT v=0; v<N; v++) {
-            INT vc=vtxColor[v];
-            for(INT wit=vtxPtr[v],witEnd=vtxPtr[v+1]; wit!=witEnd; wit++ ) {
-                if ( vc == vtxColor[vtxVal[wit]] ) {
-                    if(v>vtxVal[wit])
-                        Conflicts++; //sync_fetch_and_add(&Conflicts, 1); //increment the counter
-                }
-            }
-        }
-    }
-    return Conflicts;
-}
-
-
-
 // ============================================================================
 // based on Gebremedhin and Manne's GM algorithm [1]
 // ============================================================================
-int SMPGCInterface::D1_OMP_GM3P(int nT, INT&colors, vector<INT>&vtxColor) {
+int SMPGCColoring::D1_OMP_GM3P(int nT, int&colors, vector<int>&vtxColor) {
     if(nT<=0) { printf("Warning, number of threads changed from %d to 1\n",nT); nT=1; }
     omp_set_num_threads(nT);
-
+    
+    double tim_partition = 0;
     double tim_color  = 0;                     // run time
     double tim_detect = 0;                     // run time
     double tim_recolor= 0;                     // run time
-    double tim_Tot=0;                          // run time
-    INT    nConflicts = 0;                     // Number of conflicts 
+    double tim_total  =0;                          // run time
     
-    const INT N = nodes();   //number of vertex
-    const INT MaxDegreeP1 = maxDeg()+1; //maxDegree
-    const vector<INT>& verPtr = CSRia();
-    const vector<INT>& verInd = CSRja();
-    const vector<INT>& Q = ordered_vertex(); 
+    int    n_conflicts = 0;                     // Number of conflicts 
     
+    const int N = num_nodes();   //number of vertex
+    const vector<int>& vtxPtr = get_CSR_ia();
+    const vector<int>& vtxVal = get_CSR_ja();
+    const vector<int>& const_ordered_vertex = global_ordered_vertex(); 
+    const int BufSize         = max_degree()+1;
     colors=0;                       
     vtxColor.assign(N, -1);
 
-    vector<vector<INT>> QQ(nT);
-    const INT qtnt = N/nT;
-    const INT rmnd = N%nT;
-    for(INT tid=0; tid<nT; tid++){
-        const INT Nloc = qtnt + (tid<rmnd?1:0);
-        QQ[tid].reserve(Nloc);
-    }
+    vector<vector<int>> QQ(nT); 
+    for(int i=0; i<nT; i++)
+        QQ[i].reserve(N/nT+1+16); //1-odd/even, 16-bus wides
+    
 
-    tim_color =- omp_get_wtime();
-#pragma omp parallel
+    // pre-partition the graph
+    tim_partition =- omp_get_wtime();
     {
-        //// Phase 0: Partition
-        //const int Nloc =  qtnt + (tid<rmnd?1:0);
-        //const int low  =  tid*qtnt + (tid<rmnd?tid:rmnd);
-        //const int high =  low+Nloc;        
-        //// Phase 1: Pseudo-color
-        //for(int it=low; it<high; it++){
-        
-        vector<bool> Mask;
-#pragma omp for
-        for(INT it=0; it<N; it++) {
-            const auto v=Q[it];
-            Mask.assign(MaxDegreeP1, false);
-            for(INT jt=verPtr[v], jtEnd=verPtr[v+1]; jt!=jtEnd; jt++ ) {
-                const auto wColor=vtxColor[verInd[jt]];
-                if( wColor >= 0) 
-                    Mask[wColor] = true; //assert(adjColor<Mark.size())
+        vector<int> lens(nT, N/nT); for(int i=0; i<N%nT; i++) lens[i]++;
+        vector<int> disps(nT+1, 0); for(int i=1; i<nT+1; i++) disps[i]=disp[i-1]+lens[i-1];
+        for(int i=0; i<nT; i++)
+            QQ[i].insert(QQ[i].end(), const_ordered_vertex.begin()+disps[i], 
+                    const_ordered_vertex.begin()+disps[i+1]);
+    }
+    tim_partition += omp_get_wtime();
+
+    // phase pseudo color
+    tim_color =- omp_get_wtime();
+    #pragma omp parallel
+    {
+        const int tid = omp_get_thread_num();
+        const vector<int>& Q = QQ[tid];
+        vector<int> Mask; Mask.assign(BufSize,-1);
+        for(const auto v : Q){
+            const auto vc = vtxColor[v];
+            for(int iw=vtxPtr[v]; iw!=vtxPtr[v+1]; iw++) {
+                const auto wc=vtxColor[vtxVal[iw]];
+                if( wc >= 0) 
+                    Mask[wc] = v;
             } 
-            int c;
-            for (c=0; c!=MaxDegreeP1; c++)
-                if(Mask[c] == false)
+            int c=0;
+            for (; c!=BufSize; c++)
+                if(Mask[c]!=v)
                     break;
             vtxColor[v] = c;
-        } //End of omp for
-    }//end of omp parallel
+        }
+    } //end omp parallel
     tim_color  += omp_get_wtime();    
 
-
-// Phase 2: Detect conflicts
+    // phase conflicts detection
     tim_detect =- omp_get_wtime();
     #pragma omp parallel
     {
-        int tid=omp_get_thread_num();
-        vector<INT>& Qtmp = QQ[tid];
-        //const int Nloc =  qtnt + (tid<rmnd?1:0);
-        //const int low  =  tid*qtnt + (tid<rmnd?tid:rmnd);
-        //const int high =  low+Nloc;
-        //for(int qit=low; qit<high; qit++){
-#pragma omp for
-        for(INT it=0; it<N; it++){
-            const auto v  = Q[it];
+        int qsize = 0;
+        const int tid=omp_get_thread_num();
+        vector<int>& Q = QQ[tid];
+        for(int iv=0; iv<(signed)Q.size(); iv++) {
+            const auto v  = Q[iv];
             const auto vc = vtxColor[v];
-            for(INT jt=verPtr[v],jtEnd=verPtr[v+1]; jt!=jtEnd; jt++) {
-                const auto w = verInd[jt];
+            for(int iw=vtxPtr[v]; iw!=vtxPtr[v+1]; iw++){ 
+                const auto w = vtxVal[iw];
                 if(v<w && vc == vtxColor[w]) {
-                    Qtmp.push_back(v);
+                    Q[qsize++] = v;
                     vtxColor[v] = -1;  //Will prevent v from being in conflict in another pairing
                     break;
-                } //End of if( vtxColor[v] == vtxColor[verInd[k]] )
-            } //end of inner for loop: w in adj(v)
-        } //end of omp for
-    } //end of omp parallel
+                } 
+            } 
+        }
+        Q.resize(qsize);
+    } //end omp parallel
     tim_detect  += omp_get_wtime();
     
-// Phase 3: Resolve conflicts
+    // phase serial coloring remain part
     tim_recolor =- omp_get_wtime();
-    vector<bool> Mark;
-    for(int tid=0;tid<nT; tid++){
-        if(QQ[tid].empty()) continue;
-        nConflicts+=QQ[tid].size();
-        for(auto v: QQ[tid]){
-            Mark.assign(MaxDegreeP1, false);
-            for(auto wit=verPtr[v], witEnd=verPtr[v+1]; wit!=witEnd; wit++ ) {
-                const auto wc=vtxColor[verInd[wit]];
-                if(wc >= 0) 
-                    Mark[wc] = true; //assert(adjColor<Mark.size())
-            } 
-            INT c;
-            for (c=0; c!=MaxDegreeP1; c++)
-                if(Mark[c] == false)
-                    break;
-            vtxColor[v] = c;
+    {
+        vector<bool> Mark; Mark.assign(BufSize, -1);
+        for(int tid=0; tid<nT; tid++){
+            for(const auto v : QQ[tid]){
+                for(auto iw=vtxPtr[v]; iw!=vtxPtr[v+1]; iw++) {
+                    const auto wc = vtxColor[vtxVal[iw]];
+                    if(wc>0) Mark[wc]=v;
+                }
+                int c=0;
+                for(; c!=BufSize; c++)
+                    if( Mark[c]==v)
+                        break;
+                vtxColor[v]=c;
+            }
         }
     }
     tim_recolor += omp_get_wtime();
 
-
     // get number of colors
-    double tim_4 = -omp_get_wtime();
-#pragma omp parallel for reduction(max:colors)
-    for(INT i=0; i<N; i++){
+    double tim_maxc = -omp_get_wtime();
+    #pragma omp parallel for reduction(max:colors)
+    for(int i=0; i<N; i++){
         colors = max(colors, vtxColor[i]);
     }
     colors++; //number of colors, 
-    tim_4 += omp_get_wtime();
+    tim_maxc += omp_get_wtime();
 
-    tim_Tot = tim_color+tim_detect+tim_recolor+tim_4;
-#ifdef PRINT_DETAILED_STATS_
-    printf("***********************************************\n");
-    printf("Total number of threads    : %d \n", nT);    
-    printf("Total number of colors used: %d \n", colors);    
-    printf("Number of conflicts overall: %d \n",nConflicts);  
-    printf("Total Time                 : %lf sec\n", tim_Tot);
-    printf("Phase para color           : %lf sec\n", tim_color);
-    printf("Phase detect               : %lf sec\n", tim_detect);
-    printf("Phase recolor              : %lf sec\n", tim_recolor);
-    printf("Phase find max color       : %lf sec\n", tim_4);
-    if( do_verify_colors(colors, vtxColors)) 
-        printf("Verified, correct.\n");
-    else 
-        printf("Verified, fail.\n");
-    printf("***********************************************\n");
+    tim_total = tim_color+tim_detect+tim_recolor+tim_maxc;
 
-#endif  
 
-    printf("@GM_nT_c_T_Tcolor_Tdetect_Trecolor_TmaxC_nCnf\t");
-    printf("%d\t",  nT);    
-    printf("%d\t",  colors);    
-    printf("%lf\t", tim_Tot);
-    printf("%lf\t", tim_color);
-    printf("%lf\t", tim_detect);
-    printf("%lf\t", tim_recolor);
-    printf("%lf\t", tim_4);
-    printf("%d\n", nConflicts);
-    return _TRUE;   
+
+    printf("@GM3P_nT_c_T_Tcolor_Tdetect_Trecolor_TmaxC_nCnf_Tpart");
+    printf("\t%d",  nT);    
+    printf("\t%d",  colors);    
+    printf("\t%lf", tim_total);
+    printf("\t%lf", tim_color);
+    printf("\t%lf", tim_detect);
+    printf("\t%lf", tim_recolor);
+    printf("\t%lf", tim_maxc);
+    for(int i=0; i<nT; i++) n_conflicts+=QQ[i].size();
+    printf("\t%d", n_conflicts);
+    printf("\t%lf", tim_partition);
+    printf("\n");
+    return true;   
 }
 
 
