@@ -1780,6 +1780,377 @@ int SMPGCInterface::D1_OMP_JP2Shashsingle(int nT, INT& colors, vector<INT>&vtxCo
 }
 
 
+// ============================================================================
+// based on Allwright's LF JP algorithm [3]
+// ============================================================================
+int SMPGCInterface::D1_OMP_JP_LF(int nT, INT&colors, vector<INT>&vtxColors) {
+    if(nT<=0) { printf("Warning, number of threads changed from %d to 1\n",nT); nT=1; }
+    omp_set_num_threads(nT);
+    
+    double tim_Wgt_Rnd=0;    //run time
+    double tim_Wgt_LF=0;    //run time
+    double tim_MIS=0;    //run time
+    double tim_ReG=0;    //run time
+    double tim_MxC=0;    //run time
+    double tim_Tot=0;               //run time
+    INT    nLoops = 0;                         //Number of rounds 
+    
+    const INT N = nodes(); //GraphCore::GetVertexCount(); //number of vertex
+    
+    INT const * const verPtr  = CSRiaPtr();      //ia of csr
+    INT const * const verInd  = CSRjaPtr();      //ja of csr
+    
+    const INT MaxDegreeP1 = maxDeg()+1; //maxDegree
+    
+    colors=0;
+    vtxColors.clear();
+    vtxColors.resize(N, -1);
+   
+    vector<INT> Q; Q.resize(N,-1);
+    int QTail=0;
+    #pragma omp parallel for
+    for(int i=0; i<N; i++){
+        Q[i]  = ordered_vertex()[i];
+    }
+    QTail = N;
+   
+    vector<vector<INT>>  QQ; QQ.resize(nT);
+#pragma omp parallel for
+    for(int i=0;i<nT; i++){
+        QQ[i].reserve(N/nT+1+16);
+    }
+
+    // weight 
+    vector<double> WeightRnd;
+    WeightRnd.resize(N,-1);
+    vector<double> WeightDeg;
+    WeightDeg.resize(N,-1);
+
+    std::uniform_real_distribution<double> distribution(0.0,1.0);
+tim_Wgt_Rnd =-omp_get_wtime();
+#pragma omp parallel
+{
+    int pid = omp_get_thread_num();
+    std::default_random_engine generator(pid);
+#pragma omp for
+    for(INT i=0; i<N; i++)
+        WeightRnd[i] = distribution(generator);
+}
+tim_Wgt_Rnd += omp_get_wtime();
+
+
+tim_Wgt_LF =- omp_get_wtime();
+#pragma omp parallel for
+    for(INT v=0; v<N; v++)
+        WeightDeg[v] = verPtr[v+1]-verPtr[v];
+tim_Wgt_LF +=omp_get_wtime();
+    
+    colors=0;
+    do{
+
+        //phase 0: find maximal indenpenent set, and color it
+        tim_MIS -= omp_get_wtime();
+        #pragma omp parallel
+        {
+            INT tid = omp_get_thread_num();
+            vector<INT> candi;
+            vector<INT> MASK(MaxDegreeP1,-1);
+            
+            #pragma omp for
+            for(INT vit=0; vit<QTail; vit++){
+                INT v = Q[vit];
+                double vwt = WeightDeg[v];
+                bool bDomain=true;
+                for(auto wit=verPtr[v],witEnd=verPtr[v+1]; wit!=witEnd; wit++){
+                    auto w = verInd[wit];
+                    if(vtxColors[w]>=0) continue;
+                    double nbwt = WeightDeg[w];
+                    if(vwt<nbwt || (vwt==nbwt && WeightRnd[v]>WeightRnd[w])){
+                        bDomain=false;
+                        break;
+                    }
+                }
+                if(bDomain) {
+                    candi.push_back(v);
+                }
+                else
+                    QQ[tid].push_back(v);
+            } //end of omp for
+
+            for(INT v : candi){
+                MASK.assign(MaxDegreeP1, -1);
+                for(auto wit=verPtr[v],witEnd=verPtr[v+1]; wit!=witEnd; wit++){
+                    auto w = verInd[wit];
+                    int nbcolor=vtxColors[w];
+                    if( nbcolor>=0 ){
+                        MASK[nbcolor]=w;
+                    }
+                }
+                INT c;
+                for(c=0; c<MaxDegreeP1; c++)
+                    if(MASK[c]==-1) break;
+                vtxColors[v]=c;
+            }
+        } //end of omp block
+        tim_MIS += omp_get_wtime();
+        tim_ReG -= omp_get_wtime();
+
+        //phase 2: rebuild the graph
+        QTail=0;
+        for(int tid=0; tid<nT; tid++){
+            for(auto v : QQ[tid])
+                Q[QTail++]=v;
+            QQ[tid].clear();
+        }
+
+        tim_ReG += omp_get_wtime();
+        nLoops++;
+    }while(QTail!=0);
+
+    tim_MxC = -omp_get_wtime();
+    colors=0;
+    #pragma omp parallel for reduction(max:colors)
+    for(INT i=0; i<N; i++){
+        auto c = vtxColors[i];
+        if(c>colors) colors=c;
+    }
+    colors++;
+    tim_MxC += omp_get_wtime();
+
+    tim_Tot = tim_Wgt_Rnd+tim_Wgt_LF+tim_MIS+ tim_ReG+tim_MxC;
+
+    printf("@AJPLF_nT_c_T_TWgtRnd_TWgtLF_TMISC_TReG_TMxC_nLoops\t");
+    printf("%d\t",  nT);
+    printf("%d\t",  colors);    
+    printf("%lf\t", tim_Tot);
+    printf("%lf\t", tim_Wgt_Rnd);
+    printf("%lf\t", tim_Wgt_LF);
+    printf("%lf\t", tim_MIS);
+    printf("%lf\t", tim_ReG);
+    printf("%lf\t", tim_MxC);
+    printf("%d\n", nLoops);
+    return _TRUE;
+}
+
+// ============================================================================
+// based on Allwright's SL JP algorithm [3]
+// ============================================================================
+int SMPGCInterface::D1_OMP_JP_SL(int nT, INT&colors, vector<INT>&vtxColors) {
+    if(nT<=0) { printf("Warning, number of threads changed from %d to 1\n",nT); nT=1; }
+    omp_set_num_threads(nT);
+    
+    double tim_Wgt=0;    //run time
+    double tim_MISReG=0;    //run time
+    double tim_MxC=0;    //run time
+    double tim_Tot=0;               //run time
+    INT    nLoops = 0;                         //Number of rounds 
+    
+    const INT N = nodes(); 
+   
+    INT const * const verPtr  = CSRiaPtr();      //ia of csr
+    INT const * const verInd  = CSRjaPtr();      //ja of csr
+    
+    const INT MaxDegreeP1 = maxDeg()+1; //maxDegree
+    
+    colors=0;
+    vtxColors.clear(); vtxColors.resize(N, -1);
+    
+    vector<INT> MEM_Q;  MEM_Q.resize(N,-1);
+    INT MEM_QTail=0;
+    vector<INT> MEM_Q2;  MEM_Q2.resize(N,-1);
+    INT MEM_QTail2=0;
+    #pragma omp parallel for
+    for(INT i=0; i<N; i++){
+        MEM_Q[i]  = ordered_vertex()[i];
+    }
+    MEM_QTail = N;
+    
+    vector<vector<INT>>  MEM_QQ; MEM_QQ.resize(nT);
+    #pragma omp parallel for
+    for(INT i=0;i<nT; i++){
+        MEM_QQ[i].resize(N/nT+1+16);
+    }
+
+    // weight 
+    vector<double> WeightRnd; WeightRnd.resize(N,-1);
+    vector<INT> WeightDeg; WeightDeg.resize(N,-1);  //? false shareing potential v.s. cache line benefit
+
+tim_Wgt =-omp_get_wtime();
+    std::default_random_engine generator(std::chrono::system_clock::now().time_since_epoch().count());
+    std::uniform_real_distribution<double> distribution(0.0,1.0);
+    for(INT i=0; i<N; i++)
+        WeightRnd[i] = distribution(generator);
+  
+    vector<INT> groupID(N);
+    vector<INT> elementID(N);
+    vector<vector<INT>> vv_deg2vs(MaxDegreeP1);
+    {
+        for(INT v=0; v<N; v++){
+            INT deg = verPtr[v+1]-verPtr[v];
+            groupID[v]=deg;
+            elementID[v]=vv_deg2vs[deg].size();
+            vv_deg2vs[deg].push_back(v);   
+        }
+        
+        //INT mxDeg = MaxDegreeP1-1;
+        //int iMin = 0;
+        for(INT i=0; i<N; i++){
+
+        }
+    }
+    
+    
+    //get SL by parallel
+#pragma omp parallel
+    {
+        int tid = omp_get_thread_num();
+        INT  myQTail = MEM_QTail;
+        vector<INT> candi;
+        INT * QQ = &MEM_QQ[tid][0];
+        INT QQsize = 0;
+        INT k=0;   //SL degree
+        while(myQTail!=0){
+            candi.clear();
+            QQsize=0;
+#pragma omp for nowait
+            for(INT it=0; it<myQTail; it++){
+                INT v = MEM_Q[it];
+                INT jt=verPtr[v], jtEnd = verPtr[v+1];
+                INT deg = jtEnd-jt;
+
+                for(; jt<jtEnd && deg>k; jt++)
+                    if(WeightDeg[verInd[jt]]!=-1) 
+                        deg--;
+                
+                if(deg <= k) 
+                    candi.push_back(v);
+                else
+                    QQ[QQsize++]=v;
+            }//end of omp for 
+
+            for(auto v : candi)
+                WeightDeg[v] = k;  //?false sharing potential
+            
+            INT whereInQ =__sync_fetch_and_add(&MEM_QTail2, QQsize);
+            
+            // Q += QQ
+            for(INT i=0; i<QQsize; i++) {
+                MEM_Q2[whereInQ++]=QQ[i];
+            }
+#pragma omp barrier
+#pragma omp single
+            {
+                MEM_Q.swap(MEM_Q2);
+                MEM_QTail = MEM_QTail2;
+                MEM_QTail2=0;
+            }
+            myQTail = MEM_QTail;
+            k++;
+        } //end of while
+    }// end of omp parallel to get SL weight
+
+    
+tim_Wgt +=omp_get_wtime();
+    
+
+#pragma omp parallel for
+    for(INT i=0; i<N; i++){
+        MEM_Q[i]  = ordered_vertex()[i];
+    }
+    MEM_QTail = N;
+
+
+    colors=0;
+    do{
+        //phase 0: find maximal indenpenent set, and color it
+        tim_MISReG -= omp_get_wtime();
+#pragma omp parallel
+        {
+            int tid = omp_get_thread_num();
+            vector<INT> candi;
+            INT *QQ = &MEM_QQ[tid][0];
+            INT QQsize = 0;
+#pragma omp for nowait
+            for(INT vit=0; vit<MEM_QTail; vit++){
+                INT v = MEM_Q[vit];
+                double vwt = WeightDeg[v];
+                bool bDomain=true;
+                for(INT k=verPtr[v],kEnd=verPtr[v+1]; k!=kEnd; k++){
+                    INT nb = verInd[k];
+                    if(vtxColors[nb]>=0) continue;
+                    double nbwt = WeightDeg[nb];
+                    if(vwt<nbwt || (vwt==nbwt && WeightRnd[v]>WeightRnd[nb])){
+                        bDomain=false;
+                        break;
+                    }
+                }
+                if(bDomain) {
+                    candi.push_back(v);
+                }
+                else
+                    MEM_QQ[tid][QQsize++]=v; //.push_back(v);
+            } //end of omp for
+            
+            // safely coloring candidate vertex
+            for(INT v : candi){
+                vector<INT> MASK(MaxDegreeP1,-1);
+                for(INT k=verPtr[v],kEnd=verPtr[v+1]; k!=kEnd; k++){
+                    INT nb = verInd[k];
+                    INT nbcolor=vtxColors[nb];
+                    if( nbcolor>=0 ){
+                        MASK[nbcolor]=nb;
+                    }
+                }
+                INT c;
+                for(c=0; c<MaxDegreeP1; c++)
+                    if(MASK[c]==-1) break;
+                vtxColors[v]=c;
+            }
+        
+        //phase 2: rebuild the graph
+        INT whereInQ =__sync_fetch_and_add(&MEM_QTail2, QQsize);
+        for(INT i=0; i<QQsize; i++) {
+            MEM_Q2[whereInQ++]=QQ[i];
+        }
+#pragma omp barrier
+#pragma omp single
+        {
+            MEM_Q.swap(MEM_Q2);
+            MEM_QTail=MEM_QTail2;
+            MEM_QTail2=0;
+        }
+
+      }// end of omp parallel
+      tim_MISReG += omp_get_wtime();
+        nLoops++;
+    }while(MEM_QTail!=0);
+
+
+    tim_MxC = - omp_get_wtime();
+    colors=0;
+    #pragma omp parallel for reduction(max:colors)
+    for(int i=0; i<N; i++){
+        auto c = vtxColors[i];
+        if(c>colors) colors=c;
+    }
+    colors++;
+    tim_MxC += omp_get_wtime();
+
+    tim_Tot = tim_Wgt+tim_MISReG+tim_MxC;
+
+    printf("@AJPSL_np_c_T_TWgt_TMISReG_TMxC_nLoop\t");
+    printf("%d\t",  nT);    
+    printf("%d\t",  colors);    
+    printf("%lf\t", tim_Tot);
+    printf("%lf\t", tim_Wgt);
+    printf("%lf\t", tim_MISReG);
+    printf("%lf\t", tim_MxC);
+    printf("%d\n",nLoops);
+    return _TRUE;
+}
+
+
+
 
 
 /*

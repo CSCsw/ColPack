@@ -181,7 +181,7 @@ int SMPGCColoring::cnt_d1conflict(const vector<INT>& vtxColorConst, bool bVerbos
 // ----------------------------------------------------------------------------
 // uncolored vertex will not conflict with any other vertex
 // ============================================================================
-int SMPGCColoring::cnt_d2conflict(const vector<int>&vtxColorConst, bool bVerbose) {
+int SMPGCColoring::cnt_d2conflict(const vector<int>&vtxColorConst, bool bVerbose=false) {
     //do it serial
     if(0)
     {

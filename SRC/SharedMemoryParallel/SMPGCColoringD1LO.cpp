@@ -14,19 +14,20 @@ using namespace ColPack;
 // ============================================================================
 // based on Gebremedhin and Manne's GM algorithm [1]
 // ============================================================================
-int SMPGCColoring::D1_OMP_GM3P(int nT, int&colors, vector<int>&vtxColors) {
+int SMPGCColoring::D1_OMP_GM3P_LO(int nT, int&colors, vector<int>&vtxColors, const int local_order) {
     if(nT<=0) { printf("Warning, number of threads changed from %d to 1\n",nT); nT=1; }
     omp_set_num_threads(nT);
     
-    double tim_partition =.0;
-    double tim_color     =.0;                     // run time
-    double tim_detect    =.0;                     // run time
-    double tim_recolor   =.0;                     // run time
-    double tim_total     =.0;                          // run time
-    double tim_maxc      =.0; 
+    //double tim_local_order=.0;
+    double tim_partition  =.0;
+    double tim_color      =.0;                     // run time
+    double tim_detect     =.0;                     // run time
+    double tim_recolor    =.0;                     // run time
+    double tim_total      =.0;                          // run time
+    double tim_maxc       =.0; 
     
-    int    n_conflicts   =0;                     // Number of conflicts 
-     
+    int    n_conflicts = 0;                     // Number of conflicts 
+
     const int N               = num_nodes();   //number of vertex
     const int BufSize         = max_degree()+1;
     const vector<int>& vtxPtr = get_CSR_ia();
@@ -40,7 +41,6 @@ int SMPGCColoring::D1_OMP_GM3P(int nT, int&colors, vector<int>&vtxColors) {
     for(int i=0; i<nT; i++)
         QQ[i].reserve(N/nT+1+16); //1-odd/even, 16-bus width
     
-
     // pre-partition the graph
     tim_partition =- omp_get_wtime();
     {
@@ -58,6 +58,20 @@ int SMPGCColoring::D1_OMP_GM3P(int nT, int&colors, vector<int>&vtxColors) {
     {
         const int tid = omp_get_thread_num();
         const vector<int>& Q = QQ[tid];
+        switch(local_order){
+            case ORDER_LARGEST_FIRST:
+                local_largest_degree_first_ordering(Q); break;
+            case ORDER_SMALLEST_LAST:
+                local_smallest_degree_last_ordering(Q); break;
+            case ORDER_NATURAL:
+                local_natural_ordering(Q); break;
+            case ORDER_RANDOM:
+                local_random_ordering(Q); break;
+            default:
+                printf("Error! unknown local order \"%d\".\n", local_order);
+                exit(1);
+        }
+
         vector<int> Mask; Mask.assign(BufSize,-1);
         for(const auto v : Q){
             const auto vc = vtxColors[v];
@@ -127,12 +141,27 @@ int SMPGCColoring::D1_OMP_GM3P(int nT, int&colors, vector<int>&vtxColors) {
     colors++; //number of colors, 
     tim_maxc += omp_get_wtime();
 
-    tim_total = tim_color+tim_detect+tim_recolor+tim_maxc;
+    tim_total = tim_local_order+tim_color+tim_detect+tim_recolor+tim_maxc;
 
-    printf("@GM3P_nT_c_T_Tcolor_Tdetect_Trecolor_TmaxC_nCnf_Tpart");
+    string order_tag="unkonwn";
+    switch(local_order){
+        case ORDER_LARGEST_FIRST:
+            order_tag="LF"; break;
+        case ORDER_SMALLEST_LAST:
+            order_tag="SL"; break;
+        case ORDER_NATURAL:
+            order_tag="NT"; break;
+        case ORDER_RANDOM:
+            order_tag="RD"; break;
+        default:
+            printf("unkonw local order %d\n", local_order);
+    }
+
+    printf("@GM3PLO_%s_nT_c_T_T(lo+color)_Tdetect_Trecolor_TmaxC_nCnf_Tpart", order_tag.c_str());
     printf("\t%d",  nT);    
     printf("\t%d",  colors);    
     printf("\t%lf", tim_total);
+    //printf("\t%lf", tim_local_order);
     printf("\t%lf", tim_color);
     printf("\t%lf", tim_detect);
     printf("\t%lf", tim_recolor);
@@ -153,21 +182,21 @@ int SMPGCColoring::D1_OMP_GM3P(int nT, int&colors, vector<int>&vtxColors) {
 // ============================================================================
 // based on Catalyurek et al 's IP algorithm [2]
 // ============================================================================
-int SMPGCColoring::D1_OMP_GMMP(int nT, int&colors, vector<int>&vtxColors) {
+int SMPGCColoring::D1_OMP_GMMP_LO(int nT, int&colors, vector<int>&vtxColors, const int local_order) {
     if(nT<=0) { printf("Warning, number of threads changed from %d to 1\n",nT); nT=1; }
     omp_set_num_threads(nT); 
 
-    double tim_partition =.0;
-    double tim_total     =.0;
-    double tim_color     =.0;
-    double tim_detect    =.0;
-    double tim_maxc      =.0;                     // run time
-    int    n_loops       = 0;                     // number of iteration 
-    int    n_conflicts   = 0;                      // number of conflicts 
-    int    uncolored_nodes=0;
-    
-    const int N   = num_nodes();                    // number of vertex
-    const int BufSize = max_degree()+1;         // maxDegree
+    //double tim_local_order=.0;
+    double tim_partition  =.0;
+    double tim_total      =.0;
+    double tim_color      =.0;
+    double tim_detect     =.0;
+    double tim_maxc       =.0;                     // run time
+    int    n_loops        = 0;                     // number of iteration 
+    int    n_conflicts    = 0;                      // number of conflicts 
+    int    uncolored_nodes= 0;
+    const int N                = num_nodes();                    // number of vertex
+    const int BufSize          = max_degree()+1;         // maxDegree
     const vector<int>& vtxPtr  = get_CSR_ia();     // ia of csr
     const vector<int>& vtxVal  = get_CSR_ja();     // ja of csr
     const vector<int>& const_ordered_vertex = global_ordered_vertex(); 
@@ -190,6 +219,7 @@ int SMPGCColoring::D1_OMP_GMMP(int nT, int&colors, vector<int>&vtxColors) {
     }
     tim_partition += omp_get_wtime();
 
+
     uncolored_nodes=N;
     while(uncolored_nodes!=0){
         // phase psedue color
@@ -198,6 +228,20 @@ int SMPGCColoring::D1_OMP_GMMP(int nT, int&colors, vector<int>&vtxColors) {
         {
             const int tid = omp_get_thread_num();
             const vector<int>& Q = QQ[tid];
+            // phase local order
+            switch(local_order){
+                case ORDER_LARGEST_FIRST:
+                    local_largest_degree_first_ordering(Q); break;
+                case ORDER_SMALLEST_LAST:
+                    local_smallest_degree_last_ordering(Q); break;
+                case ORDER_NATURAL:
+                    local_natural_ordering(Q); break;
+                case ORDER_RANDOM:
+                    local_random_ordering(Q); break;
+                default:
+                    printf("Error! unknown local order \"%d\".\n", local_order);
+                    exit(1);
+            }
             vector<int> Mark; Mark.assign(BufSize);
             for(const auto v : Q){
                 for(int iw = vtxPtr[v], iw!=vtxPtr[v+1]; iw++) {
@@ -252,10 +296,25 @@ int SMPGCColoring::D1_OMP_GMMP(int nT, int&colors, vector<int>&vtxColors) {
 
     tim_total = tim_color+tim_detect+tim_maxc;
 
-    printf("@GMMP_nT_c_T_TColor_TDetect_TMaxC_nCnf_nLoop");
+    string order_tag="unkonwn";
+    switch(local_order){
+        case ORDER_LARGEST_FIRST:
+            order_tag="LF"; break;
+        case ORDER_SMALLEST_LAST:
+            order_tag="SL"; break;
+        case ORDER_NATURAL:
+            order_tag="NT"; break;
+        case ORDER_RANDOM:
+            order_tag="RD"; break;
+        default:
+            printf("unkonw local order %d\n", local_order);
+    }
+
+    printf("@GMMPLO_%s_nT_c_T_T(Lo+Color)_TDetect_TMaxC_nCnf_nLoop", order_tag.c_str());
     printf("\t%d",  nT);    
     printf("\t%d",  colors);    
     printf("\t%lf", tim_total);
+    //printf("\t%lf", tim_local_order);
     printf("\t%lf", tim_color);
     printf("\t%lf", tim_detect);
     printf("\t%lf", tim_maxc);
@@ -273,7 +332,7 @@ int SMPGCColoring::D1_OMP_GMMP(int nT, int&colors, vector<int>&vtxColors) {
 // ============================================================================
 // based on Luby's algorithm [3]
 // ============================================================================
-int SMPGCiColoring::D1_OMP_LB(int nT, int&colors, vector<int>&vtxColors) {
+int SMPGCiColoring::D1_OMP_LB(int nT, int&colors, vector<int>&vtxColors, const int local_order) {
     if(nT<=0) { printf("Warning, number of threads changed from %d to 1\n",nT); nT=1; }
     omp_set_num_threads(nT);
    
@@ -329,6 +388,21 @@ int SMPGCiColoring::D1_OMP_LB(int nT, int&colors, vector<int>&vtxColors) {
         {
             const int tid = omp_get_thread_num();
             vector<int>& Q = QQ[tid];
+            // phase local order 
+            switch(local_order){
+                case ORDER_LARGEST_FIRST:
+                    local_largest_degree_first_ordering(Q); break;
+                case ORDER_SMALLEST_LAST:
+                    local_smallest_degree_last_ordering(Q); break;
+                case ORDER_NATURAL:
+                    local_natural_ordering(Q); break;
+                case ORDER_RANDOM:
+                    local_random_ordering(Q); break;
+                default:
+                    printf("Error! unknown local order \"%d\".\n", local_order);
+                    exit(1);
+            }
+
             vector<int> candi;
             for(auto i=0; i<Q.size(); i++){
                 const auto v = Q[i];
@@ -362,7 +436,22 @@ int SMPGCiColoring::D1_OMP_LB(int nT, int&colors, vector<int>&vtxColors) {
     tim_MIS += omp_get_witme();
 
     tim_Tot = tim_Wgt+tim_MIS;
-    printf("@LB_nT_c_T_Twt_TMis_nConf_nLoop_Tpart");
+
+    string order_tag="unkonwn";
+    switch(local_order){
+        case ORDER_LARGEST_FIRST:
+            order_tag="LF"; break;
+        case ORDER_SMALLEST_LAST:
+            order_tag="SL"; break;
+        case ORDER_NATURAL:
+            order_tag="NT"; break;
+        case ORDER_RANDOM:
+            order_tag="RD"; break;
+        default:
+            printf("unkonw local order %d\n", local_order);
+    }
+
+    printf("@LBLO_%s_nT_c_T_Twt_T(lo+Mis)_nConf_nLoop_Tpart", order_tag.c_str());
     printf("\t%d",  nT);    
     printf("\t%d",  colors);    
     printf("\t%lf", tim_Tot);
@@ -403,7 +492,7 @@ int SMPGCInterface::D1_OMP_JP(int nT, int&colors, vector<int>&vtxColors) {
     const vector<int>& vtxPtr = get_CSR_ia();
     const vector<int>& vtxVal = get_CSR_ja();
     const vector<int>& const_ordered_vertex = global_ordered_vertex(); 
-    
+
     colors=0;
     vtxColors.assign(N, -1);
     
@@ -441,6 +530,21 @@ int SMPGCInterface::D1_OMP_JP(int nT, int&colors, vector<int>&vtxColors) {
         {
             const int tid = omp_get_thread_num();
             vector<int>& Q = QQ[tid];
+            // phase local order 
+            switch(local_order){
+                case ORDER_LARGEST_FIRST:
+                    local_largest_degree_first_ordering(Q); break;
+                case ORDER_SMALLEST_LAST:
+                    local_smallest_degree_last_ordering(Q); break;
+                case ORDER_NATURAL:
+                    local_natural_ordering(Q); break;
+                case ORDER_RANDOM:
+                    local_random_ordering(Q); break;
+                default:
+                    printf("Error! unknown local order \"%d\".\n", local_order);
+                    exit(1);
+            }
+
             vector<int> candi;
             // phase find maximal indenpenent set, and color it
             for(auto i=0; i<Q.size(); i++){
@@ -462,6 +566,7 @@ int SMPGCInterface::D1_OMP_JP(int nT, int&colors, vector<int>&vtxColors) {
                 if(b_visdomain) cand.push_back(v);
                 else            Q[uncolored_nodes++]=v;
             }
+            
             Q.resize(uncolored_nodes);
             // phase greedy coloring 
             #pragma omp barrier
@@ -480,11 +585,13 @@ int SMPGCInterface::D1_OMP_JP(int nT, int&colors, vector<int>&vtxColors) {
                 vtxColors[v]=c;
             }
         } //end omp parallel
+
         n_conflicts+=uncolored_nodes;
         n_loops++;
     } //end while 
     tim_MIS += omp_get_wtime();
     
+
     tim_MxC = -omp_get_wtime();
     #pragma omp parallel for reduction(max:colors)
     for(int i=0; i<N; i++){
@@ -495,7 +602,22 @@ int SMPGCInterface::D1_OMP_JP(int nT, int&colors, vector<int>&vtxColors) {
     tim_MxC += omp_get_wtime();
 
     tim_Tot = tim_Wgt + tim_MIS + tim_MxC;
-    printf("@JP_nT_c_T_TWgt_TMISC_TReG_TMxC_nLoop_nPtt");
+
+    string order_tag="unkonwn";
+    switch(local_order){
+        case ORDER_LARGEST_FIRST:
+            order_tag="LF"; break;
+        case ORDER_SMALLEST_LAST:
+            order_tag="SL"; break;
+        case ORDER_NATURAL:
+            order_tag="NT"; break;
+        case ORDER_RANDOM:
+            order_tag="RD"; break;
+        default:
+            printf("unkonw local order %d\n", local_order);
+    }
+
+    printf("@JPLo_%s_nT_c_T_TWgt_T(lo+mis)_TMxC_nLoop_nPtt",order_tag.c_str());
     printf("\t%d",  nT);    
     printf("\t%d",  colors);    
     printf("\t%lf", tim_Tot);
@@ -514,7 +636,8 @@ int SMPGCInterface::D1_OMP_JP(int nT, int&colors, vector<int>&vtxColors) {
 
 
 
-int SMPGCColoring::D1_OMP_JP2S(int nT, int& colors, vector<int>&vtxColors) {
+
+int SMPGCColoring::D1_OMP_JP2S_LO(int nT, int& colors, vector<int>&vtxColors, const int local_order) {
     if(nT<=0) { printf("Warning, number of threads changed from %d to 1\n",nT); nT=1; }
     omp_set_num_threads(nT);
     
@@ -565,6 +688,21 @@ int SMPGCColoring::D1_OMP_JP2S(int nT, int& colors, vector<int>&vtxColors) {
             const int CAPACITY = 2*NUM_HASH;
             const int Color_Base = n_loops*CAPACITY;
             vector<int>& Q = QQ[tid];
+            // phase local order
+            switch(local_order){
+                case ORDER_LARGEST_FIRST:
+                    local_largest_degree_first_ordering(Q); break;
+                case ORDER_SMALLEST_LAST:
+                    local_smallest_degree_last_ordering(Q); break;
+                case ORDER_NATURAL:
+                    local_natural_ordering(Q); break;
+                case ORDER_RANDOM:
+                    local_random_ordering(Q); break;
+                default:
+                    printf("Error! unknown local order \"%d\".\n", local_order);
+                    exit(1);
+            }
+
             // phase find maximal indenpenent set, and color it
             for(auto i=0; i<Q.size(); i++){
                 const auto v = Q[i];
@@ -617,7 +755,22 @@ int SMPGCColoring::D1_OMP_JP2S(int nT, int& colors, vector<int>&vtxColors) {
     tim_MxC += omp_get_wtime();
 
     tim_Tot = tim_Wgt + tim_MIS + tim_MxC;
-    printf("@JP2S_nT_c_T_TWgt_TMIS_TMxC_nL_nC_Tptt");
+    
+    string order_tag="unkonwn";
+    switch(local_order){
+        case ORDER_LARGEST_FIRST:
+            order_tag="LF"; break;
+        case ORDER_SMALLEST_LAST:
+            order_tag="SL"; break;
+        case ORDER_NATURAL:
+            order_tag="NT"; break;
+        case ORDER_RANDOM:
+            order_tag="RD"; break;
+        default:
+            printf("unkonw local order %d\n", local_order);
+    }
+    
+    printf("@JP2SLO_%s_nT_c_T_TWgt_TMIS_TMxC_nL_nC_Tptt", order_tag.c_str());
     printf("\t%d",  nT);    
     printf("\t%d",  colors);    
     printf("\t%lf", tim_Tot);
@@ -633,6 +786,5 @@ int SMPGCColoring::D1_OMP_JP2S(int nT, int& colors, vector<int>&vtxColors) {
     printf("\n");
     return true;
 }
-
 
 

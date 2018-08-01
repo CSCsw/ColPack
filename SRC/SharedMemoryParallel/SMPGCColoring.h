@@ -63,28 +63,31 @@ public: // API
 
     int D1_OMP_GM3P(int nT, int&color, vector<int>&vtxColors);
     int D1_OMP_GMMP(int nT, int&color, vector<int>&vtxColors);
-    int D1_OMP_JP(int nT, int&color, vector<int>&vtxColors);
+    int D1_OMP_LB  (int nT, int&color, vector<int>&vtxColors);
+    int D1_OMP_JP  (int nT, int&color, vector<int>&vtxColors);
     int D1_OMP_JP2S(int nT, int&color, vector<int>&vtxColors);
-    int D1_OMP_LB(int nT, int&color, vector<int>&vtxColors);
 
-    int D1_OMP_GM3P_LO(int nT, int&color, vector<int>&vtxColors, const int local_ordering);
-    int D1_OMP_GMMP_LO(int nT, int&color, vector<int>&vtxColors, const int local_ordering);
-    int D1_OMP_JP_LO  (int nT, int&color, vector<int>&vtxColors,   const int local_ordering);
-    
-    int D1_OMP_JP_hyber(int nT, int&color, vector<int>&vtxColors, const int option, const int swtich_iter);
-    int D1_OMP_JP2S_hyber(int nT, int&color, vector<int>&vtxColors, const int option, const int switch_iter);
+    int D1_OMP_GM3P_LO(int nT, int&color, vector<int>&vtxColors, const int local_order);
+    int D1_OMP_GMMP_LO(int nT, int&color, vector<int>&vtxColors, const int local_order);
+    int D1_OMP_JP_LO  (int nT, int&color, vector<int>&vtxColors, const int local_order);
+    int D1_OMP_LB_LO  (int nT, int&color, vector<int>&vtxColors, const int local_order);
+    int D1_OMP_JP2S_LO(int nT, int&color, vector<int>&vtxColors, const int local_order);
 
     // Algorithm for distance two coloring
     int D2_serial(int &color, vector<int>&vtxColors);
 
-    int D2_OMP_GM3P(int nT, int&color, vector<int>&vtxColors);
-    int D2_OMP_GMMP(int nT, int&color, vector<int>&vtxColors);
-    int D2_OMP_GM3P_LO(int nT, int&color, vector<int>&vtxColors, const int local_ordering);
-    int D2_OMP_GMMP_LO(int nT, int&color, vector<int>&vtxColors, const int local_ordering);
+    int D2_OMP_GM3P   (int nT, int&color, vector<int>&vtxColors);
+    int D2_OMP_GMMP   (int nT, int&color, vector<int>&vtxColors);
+    int D2_OMP_GM3P_LO(int nT, int&color, vector<int>&vtxColors, const int local_order);
+    int D2_OMP_GMMP_LO(int nT, int&color, vector<int>&vtxColors, const int local_order);
+    
+    // Algorithm for Hybird 
+    int D1_OMP_hybird_JP  (int nT, int&color, vector<int>&vtxColors, const int option, const int swtich_iter);
+    int D1_OMP_hybird_JP2S(int nT, int&color, vector<int>&vtxColors, const int option, const int switch_iter);
+    
     
     // Some experimental funtions
     int D1_OMP_GMMP_LO_once(int nT, int&color, vector<int>&vtxColors, const int local_ordering);
-
     int D1_OMP_JP2S_noRepartition(int nT, int&color, vector<int>&vtxColors);
     int D1_OMP_JP2Shash(int nT, int&color, vector<int>&vtxColors);
     int D1_OMP_JP2Shashsingle(int nT, int&color, vector<int>&vtxColors);
@@ -98,13 +101,13 @@ public: // API
 private:
     inline void hyberJP_implement_GM3P(vector<int>&Q, const int &QTail, vector<vector<int>>&QQ, const int&nT, int const * const &verPtr, int const * const &verInd, int& colors, vector<int>&vtxColors); 
     inline void hyberJP_implement_GMMP(vector<int>&Q, const int &QTail, vector<int>&conflictQ,                int const * const &verPtr, int const * const &verInd, int& colors, vector<int>&vtxColors); 
-    void hyberJP_implement_greedy_serial(vector<int>&Q, const int &QTail,                              int const * const &verPtr, int const * const &verInd, int& colors, vector<int>&vtxColors); 
+    inline void hyberJP_implement_greedy_serial(vector<int>&Q, const int &QTail,                              int const * const &verPtr, int const * const &verInd, int& colors, vector<int>&vtxColors); 
     inline void hyberJP_implement_stream(vector<int>&Q, const int &QTail, vector<vector<int>>&QQ, const int&nT, int const * const &verPtr, int const * const &verInd, int& colors, vector<int>&vtxColors); 
 
 
 public: // Utilites
-    int cnt_d1conflict(const vector<int>& vc);
-    int cnt_d2conflict(const vector<int>& vc);
+    int cnt_d1conflict(const vector<int>& vc, bool bVerbose);
+    int cnt_d2conflict(const vector<int>& vc, bool bVerbose);
 
 protected:
     int         m_total_num_colors;

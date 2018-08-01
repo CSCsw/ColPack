@@ -51,8 +51,11 @@ class SMPGC{
 
 public:
     static const int RAND_SEED ;
-    static const int NUM_HASH  ;
-    
+
+    static const int HASH_SEED ;
+    static const int HASH_SHIFT;
+    static const int HASH_NUM_HASH;
+
     static const string FORMAT_MM;
 
     static const int ORDER_NATURAL;
