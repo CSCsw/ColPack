@@ -19,9 +19,9 @@ const int SMPGC::ORDER_RANDOM        = 2;
 const int SMPGC::ORDER_LARGEST_FIRST = 3;
 const int SMPGC::ORDER_SMALLEST_LAST = 4;
 
-const int SMPGC::HYBIRD_GM3P = 1;
-const int SMPGC::HYBIRD_GMMP = 2;
-const int SMPGC::HYBIRD_SERIAL = 3;
-const int SMPGC::HYBIRD_STREAM = 4;
+const int SMPGC::HYBRRD_GM3P = 1;
+const int SMPGC::HYBRRD_GMMP = 2;
+const int SMPGC::HYBRRD_SERIAL = 3;
+const int SMPGC::HYBRRD_STREAM = 4;
 
 

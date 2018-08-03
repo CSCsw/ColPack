@@ -63,10 +63,10 @@ public:
     static const int ORDER_LARGEST_FIRST;
     static const int ORDER_SMALLEST_LAST;
 
-    static const int JP_HYBER_IMPLEMENT_GM3P ;
-    static const int JP_HYBER_IMPLEMENT_GMMP ;
-    static const int JP_HYBER_IMPLEMENT_GREEDY ;
-    static const int JP_HYBER_IMPLEMENT_STREAM ;
+    static const int HYBRID_GM3P ;
+    static const int HYBRID_GMMP ;
+    static const int HYBRID_GREEDY ;
+    static const int HYBRID_STREAM ;
 
 
 public:
