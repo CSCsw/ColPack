@@ -14,7 +14,7 @@ using namespace ColPack;
 // ============================================================================
 // based on Gebremedhin and Manne's GM algorithm [1]
 // ============================================================================
-int SMPGCColoring::D1_OMP_GM3P_LO(int nT, int&colors, vector<int>&vtxColors, const int local_order) {
+int SMPGCColoring::D1_OMP_GM3P(int nT, int&colors, vector<int>&vtxColors, const int local_order=ORDER_NONE) {
     if(nT<=0) { printf("Warning, number of threads changed from %d to 1\n",nT); nT=1; }
     omp_set_num_threads(nT);
     
@@ -58,7 +58,10 @@ int SMPGCColoring::D1_OMP_GM3P_LO(int nT, int&colors, vector<int>&vtxColors, con
     {
         const int tid = omp_get_thread_num();
         const vector<int>& Q = QQ[tid];
+        
         switch(local_order){
+            case ORDER_NONE:
+                break;
             case ORDER_LARGEST_FIRST:
                 local_largest_degree_first_ordering(Q); break;
             case ORDER_SMALLEST_LAST:
@@ -143,8 +146,10 @@ int SMPGCColoring::D1_OMP_GM3P_LO(int nT, int&colors, vector<int>&vtxColors, con
 
     tim_total = tim_local_order+tim_color+tim_detect+tim_recolor+tim_maxc;
 
-    string order_tag="unkonwn";
+    string order_tag="unknown";
     switch(local_order){
+        case ORDER_NONE:
+            order_tag="NoOrder"; break;
         case ORDER_LARGEST_FIRST:
             order_tag="LF"; break;
         case ORDER_SMALLEST_LAST:
@@ -157,7 +162,7 @@ int SMPGCColoring::D1_OMP_GM3P_LO(int nT, int&colors, vector<int>&vtxColors, con
             printf("unkonw local order %d\n", local_order);
     }
 
-    printf("@GM3PLO_%s_nT_c_T_T(lo+color)_Tdetect_Trecolor_TmaxC_nCnf_Tpart", order_tag.c_str());
+    printf("@GM3P%s_nT_c_T_T(lo+color)_Tdetect_Trecolor_TmaxC_nCnf_Tpart", order_tag.c_str());
     printf("\t%d",  nT);    
     printf("\t%d",  colors);    
     printf("\t%lf", tim_total);
@@ -182,7 +187,7 @@ int SMPGCColoring::D1_OMP_GM3P_LO(int nT, int&colors, vector<int>&vtxColors, con
 // ============================================================================
 // based on Catalyurek et al 's IP algorithm [2]
 // ============================================================================
-int SMPGCColoring::D1_OMP_GMMP_LO(int nT, int&colors, vector<int>&vtxColors, const int local_order) {
+int SMPGCColoring::D1_OMP_GMMP(int nT, int&colors, vector<int>&vtxColors, const int local_order=ORDER_NONE) {
     if(nT<=0) { printf("Warning, number of threads changed from %d to 1\n",nT); nT=1; }
     omp_set_num_threads(nT); 
 
@@ -230,6 +235,8 @@ int SMPGCColoring::D1_OMP_GMMP_LO(int nT, int&colors, vector<int>&vtxColors, con
             const vector<int>& Q = QQ[tid];
             // phase local order
             switch(local_order){
+                case ORDER_NONE:
+                    break;
                 case ORDER_LARGEST_FIRST:
                     local_largest_degree_first_ordering(Q); break;
                 case ORDER_SMALLEST_LAST:
@@ -242,7 +249,7 @@ int SMPGCColoring::D1_OMP_GMMP_LO(int nT, int&colors, vector<int>&vtxColors, con
                     printf("Error! unknown local order \"%d\".\n", local_order);
                     exit(1);
             }
-            vector<int> Mark; Mark.assign(BufSize);
+            vector<int> Mark; Mark.assign(BufSize,-1);
             for(const auto v : Q){
                 for(int iw = vtxPtr[v], iw!=vtxPtr[v+1]; iw++) {
                     const auto w = vtxVal[iw];
@@ -298,6 +305,8 @@ int SMPGCColoring::D1_OMP_GMMP_LO(int nT, int&colors, vector<int>&vtxColors, con
 
     string order_tag="unkonwn";
     switch(local_order){
+        case ORDER_NONE:
+            order_tag="NoOrder"; break;
         case ORDER_LARGEST_FIRST:
             order_tag="LF"; break;
         case ORDER_SMALLEST_LAST:
@@ -310,7 +319,7 @@ int SMPGCColoring::D1_OMP_GMMP_LO(int nT, int&colors, vector<int>&vtxColors, con
             printf("unkonw local order %d\n", local_order);
     }
 
-    printf("@GMMPLO_%s_nT_c_T_T(Lo+Color)_TDetect_TMaxC_nCnf_nLoop", order_tag.c_str());
+    printf("@GMMP%s_nT_c_T_T(Lo+Color)_TDetect_TMaxC_nCnf_nLoop", order_tag.c_str());
     printf("\t%d",  nT);    
     printf("\t%d",  colors);    
     printf("\t%lf", tim_total);
@@ -332,7 +341,7 @@ int SMPGCColoring::D1_OMP_GMMP_LO(int nT, int&colors, vector<int>&vtxColors, con
 // ============================================================================
 // based on Luby's algorithm [3]
 // ============================================================================
-int SMPGCiColoring::D1_OMP_LB_LO(int nT, int&colors, vector<int>&vtxColors, const int local_order) {
+int SMPGCiColoring::D1_OMP_LB_LO(int nT, int&colors, vector<int>&vtxColors, const int local_order=ORDER_NONE) {
     if(nT<=0) { printf("Warning, number of threads changed from %d to 1\n",nT); nT=1; }
     omp_set_num_threads(nT);
    
@@ -390,6 +399,8 @@ int SMPGCiColoring::D1_OMP_LB_LO(int nT, int&colors, vector<int>&vtxColors, cons
             vector<int>& Q = QQ[tid];
             // phase local order 
             switch(local_order){
+                case ORDER_NONE:
+                    break;
                 case ORDER_LARGEST_FIRST:
                     local_largest_degree_first_ordering(Q); break;
                 case ORDER_SMALLEST_LAST:
@@ -439,6 +450,8 @@ int SMPGCiColoring::D1_OMP_LB_LO(int nT, int&colors, vector<int>&vtxColors, cons
 
     string order_tag="unkonwn";
     switch(local_order){
+        case ORDER_NON:
+            order_tag="NoOrder"; break;
         case ORDER_LARGEST_FIRST:
             order_tag="LF"; break;
         case ORDER_SMALLEST_LAST:
@@ -451,7 +464,7 @@ int SMPGCiColoring::D1_OMP_LB_LO(int nT, int&colors, vector<int>&vtxColors, cons
             printf("unkonw local order %d\n", local_order);
     }
 
-    printf("@LBLO_%s_nT_c_T_Twt_T(lo+Mis)_nConf_nLoop_Tpart", order_tag.c_str());
+    printf("@LB%s_nT_c_T_Twt_T(lo+Mis)_nConf_nLoop_Tpart", order_tag.c_str());
     printf("\t%d",  nT);    
     printf("\t%d",  colors);    
     printf("\t%lf", tim_Tot);
@@ -473,7 +486,7 @@ int SMPGCiColoring::D1_OMP_LB_LO(int nT, int&colors, vector<int>&vtxColors, cons
 // ============================================================================
 // based on Jone Plassmann's JP algorithm [3]
 // ============================================================================
-int SMPGCColoring::D1_OMP_JP_LO(int nT, int&colors, vector<int>&vtxColors, const int local_order) {
+int SMPGCColoring::D1_OMP_JP(int nT, int&colors, vector<int>&vtxColors, const int local_order=ORDER_NONE) {
     if(nT<=0) { printf("Warning, number of threads changed from %d to 1\n",nT); nT=1; }
     omp_set_num_threads(nT);
 
@@ -532,6 +545,8 @@ int SMPGCColoring::D1_OMP_JP_LO(int nT, int&colors, vector<int>&vtxColors, const
             vector<int>& Q = QQ[tid];
             // phase local order 
             switch(local_order){
+                case ORDER_NONE:
+                    break;
                 case ORDER_LARGEST_FIRST:
                     local_largest_degree_first_ordering(Q); break;
                 case ORDER_SMALLEST_LAST:
@@ -605,6 +620,8 @@ int SMPGCColoring::D1_OMP_JP_LO(int nT, int&colors, vector<int>&vtxColors, const
 
     string order_tag="unkonwn";
     switch(local_order){
+        case ORDER_NONE:
+            order_tag="NoOrder"; break;
         case ORDER_LARGEST_FIRST:
             order_tag="LF"; break;
         case ORDER_SMALLEST_LAST:
@@ -617,7 +634,7 @@ int SMPGCColoring::D1_OMP_JP_LO(int nT, int&colors, vector<int>&vtxColors, const
             printf("unkonw local order %d\n", local_order);
     }
 
-    printf("@JPLO_%s_nT_c_T_TWgt_T(lo+mis)_TMxC_nLoop_nPtt",order_tag.c_str());
+    printf("@JP%s_nT_c_T_TWgt_T(lo+mis)_TMxC_nLoop_nPtt",order_tag.c_str());
     printf("\t%d",  nT);    
     printf("\t%d",  colors);    
     printf("\t%lf", tim_Tot);
@@ -637,7 +654,7 @@ int SMPGCColoring::D1_OMP_JP_LO(int nT, int&colors, vector<int>&vtxColors, const
 
 
 
-int SMPGCColoring::D1_OMP_JP2S_LO(int nT, int& colors, vector<int>&vtxColors, const int local_order) {
+int SMPGCColoring::D1_OMP_JP2S(int nT, int& colors, vector<int>&vtxColors, const int local_order=ORDER_NONE) {
     if(nT<=0) { printf("Warning, number of threads changed from %d to 1\n",nT); nT=1; }
     omp_set_num_threads(nT);
     
@@ -690,6 +707,8 @@ int SMPGCColoring::D1_OMP_JP2S_LO(int nT, int& colors, vector<int>&vtxColors, co
             vector<int>& Q = QQ[tid];
             // phase local order
             switch(local_order){
+                case ORDER_NONE:
+                    break;
                 case ORDER_LARGEST_FIRST:
                     local_largest_degree_first_ordering(Q); break;
                 case ORDER_SMALLEST_LAST:
@@ -758,6 +777,8 @@ int SMPGCColoring::D1_OMP_JP2S_LO(int nT, int& colors, vector<int>&vtxColors, co
     
     string order_tag="unkonwn";
     switch(local_order){
+        case ORDER_NONE:
+            order_tag="NoOrder"; break;
         case ORDER_LARGEST_FIRST:
             order_tag="LF"; break;
         case ORDER_SMALLEST_LAST:
@@ -770,7 +791,7 @@ int SMPGCColoring::D1_OMP_JP2S_LO(int nT, int& colors, vector<int>&vtxColors, co
             printf("unkonw local order %d\n", local_order);
     }
     
-    printf("@JP2SLO_%s_nT_c_T_TWgt_TMIS_TMxC_nL_nC_Tptt", order_tag.c_str());
+    printf("@JP2S%s_nT_c_T_TWgt_TMIS_TMxC_nL_nC_Tptt", order_tag.c_str());
     printf("\t%d",  nT);    
     printf("\t%d",  colors);    
     printf("\t%lf", tim_Tot);

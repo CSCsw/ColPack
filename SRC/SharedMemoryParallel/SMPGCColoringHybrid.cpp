@@ -12,7 +12,7 @@ using namespace std;
 using namespace ColPack;
 
 
-int SMPGCColoring::D1_OMP_HYBRID_JP_LO(int nT, int&colors, vector<int>& vtxColors, const int loocal_order, const int option, const int swithch_iter=0){
+int SMPGCColoring::D1_OMP_HBLO_JP(int nT, int&colors, vector<int>& vtxColors, const int loocal_order, const int option, const int swithch_iter=0){
     if(nT<=0) { printf("Warning, number of threads changed from %d to 1\n",nT); nT=1; }
     omp_set_num_threads(nT);
 
@@ -202,7 +202,7 @@ int SMPGCColoring::D1_OMP_HYBRID_JP_LO(int nT, int&colors, vector<int>& vtxColor
 }
 
 
-int SMPGCColoring::D1_OMP_HYBRID_JP2S_LO(int nT, int&colors, vector<int>& vtxColors, const int local_order, const int option, const int swithch_iter=0){
+int SMPGCColoring::D1_OMP_HBLO_JP2S(int nT, int&colors, vector<int>& vtxColors, const int local_order, const int option, const int swithch_iter=0){
     if(nT<=0) { printf("Warning, number of threads changed from %d to 1\n",nT); nT=1; }
     omp_set_num_threads(nT);
     
@@ -385,9 +385,12 @@ int SMPGCColoring::D1_OMP_HYBRID_JP2S_LO(int nT, int&colors, vector<int>& vtxCol
 
 
 
-void SMPGCColoring::hybrid_GM3P(const int nT, vector<int>&vtxColors, vector<vector<int>>&Q, int& uncolored_nodes, const int local_order){
-        // phase pseudo color
-    tim_color =- omp_get_wtime();
+void SMPGCColoring::hybrid_GM3P(const int nT, vector<int>&vtxColors, vector<vector<int>>&Q, const int local_order=-1){
+    const int N               = num_nodes();   //number of vertex
+    const int BufSize         = max_degree()+1;
+    const vector<int>& vtxPtr = get_CSR_ia();
+    const vector<int>& vtxVal = get_CSR_ja();
+    // phase pseudo color
     #pragma omp parallel
     {
         const int tid = omp_get_thread_num();
@@ -401,6 +404,8 @@ void SMPGCColoring::hybrid_GM3P(const int nT, vector<int>&vtxColors, vector<vect
                 local_natural_ordering(Q); break;
             case ORDER_RANDOM:
                 local_random_ordering(Q); break;
+            case -1:
+                break;
             default:
                 printf("Error! unknown local order \"%d\".\n", local_order);
                 exit(1);
@@ -420,16 +425,10 @@ void SMPGCColoring::hybrid_GM3P(const int nT, vector<int>&vtxColors, vector<vect
                     break;
             vtxColors[v] = c;
         }
-    } //end omp parallel
-    tim_color  += omp_get_wtime();    
-
-    // phase conflicts detection
-    tim_detect =- omp_get_wtime();
-    #pragma omp parallel
-    {
+        
+        #pragma omp barrier
+        // phase conflicts detection
         int qsize = 0;
-        const int tid=omp_get_thread_num();
-        vector<int>& Q = QQ[tid];
         for(int iv=0; iv<(signed)Q.size(); iv++) {
             const auto v  = Q[iv];
             const auto vc = vtxColors[v];
@@ -444,17 +443,15 @@ void SMPGCColoring::hybrid_GM3P(const int nT, vector<int>&vtxColors, vector<vect
         }
         Q.resize(qsize);
     } //end omp parallel
-    tim_detect  += omp_get_wtime();
     
     // phase serial coloring remain part
-    tim_recolor =- omp_get_wtime();
     {
         vector<bool> Mark; Mark.assign(BufSize, -1);
         for(int tid=0; tid<nT; tid++){
             for(const auto v : QQ[tid]){
                 for(auto iw=vtxPtr[v]; iw!=vtxPtr[v+1]; iw++) {
                     const auto wc = vtxColors[vtxVal[iw]];
-                    if(wc>0) Mark[wc]=v;
+                    if(wc>=0) Mark[wc]=v;
                 }
                 int c=0;
                 for(; c!=BufSize; c++)
@@ -464,24 +461,114 @@ void SMPGCColoring::hybrid_GM3P(const int nT, vector<int>&vtxColors, vector<vect
             }
         }
     }
-    tim_recolor += omp_get_wtime();
-
     return;
 }
 
 
-void SMPGCColoring::hybrid_GM3P(const int nT, vector<int>&vtxColors, vector<vector<int>>&Q, int& uncolored_nodes, const int local_order){
+void SMPGCColoring::hybrid_GMMP(const int nT, vector<int>&vtxColors, vector<vector<int>>&Q, const int local_order){
     
+    const int N                = num_nodes();                    // number of vertex
+    const int BufSize          = max_degree()+1;         // maxDegree
+    const vector<int>& vtxPtr  = get_CSR_ia();     // ia of csr
+    const vector<int>& vtxVal  = get_CSR_ja();     // ja of csr
+   
+    int uncolored_nodes=1;
+    while(uncolored_nodes!=0){
+
+        uncolored_nodes=0;
+        #pragma omp parallel reduction(+: uncolored_nodes)
+        {
+            const int tid = omp_get_thread_num();
+            const vector<int>& Q = QQ[tid];
+            // phase local order
+            switch(local_order){
+                case ORDER_LARGEST_FIRST:
+                    local_largest_degree_first_ordering(Q); break;
+                case ORDER_SMALLEST_LAST:
+                    local_smallest_degree_last_ordering(Q); break;
+                case ORDER_NATURAL:
+                    local_natural_ordering(Q); break;
+                case ORDER_RANDOM:
+                    local_random_ordering(Q); break;
+                case -1:
+                    break;
+                default:
+                    printf("Error! unknown local order \"%d\".\n", local_order);
+                    exit(1);
+            }
+            // phase psedue color
+            vector<int> Mark; Mark.assign(BufSize,-1);
+            for(const auto v : Q){
+                for(int iw = vtxPtr[v], iw!=vtxPtr[v+1]; iw++) {
+                    const auto w = vtxVal[iw];
+                    const auto wc= vtxColors[w];
+                    if(wc>=0) 
+                        Mark[wc]=v;
+                }
+                int c=0;
+                for(; c!=BufSize; c++)
+                    if(Mark[c]!=v)
+                        break;
+                vtxColors[v] = c;
+            } 
+            // phase Detect Conflicts:
+            uncolored_nodes=0;
+            #pragma omp barrier
+            for(auto i=0; i<Q.size(); i++){
+                const auto v = Q[i];
+                const auto vc= vtxColors[v];
+                for(int iw=vtxPtr[v]; iw!=vtxPtr[v+1]; iw++) {
+                    const auto w = vtxVal[iw];
+                    if(v<w && vc==vtxColors[w]){
+                        Q[uncolored_nodes++]=v;
+                        vtxColors[v] = -1;
+                        break;
+                    }
+                }
+            }
+            Q.resize(uncolored_nodes);
+        } //end omp parallel 
+    } //end while
     return;
 }
 
-void SMPGCColoring::hybrid_GM3P(const int nT, vector<int>&vtxColors, vector<vector<int>>&Q, int& uncolored_nodes, const int local_order){
-    
-    return;
-}
 
-void SMPGCColoring::hybrid_Serial(const int nT, vector<int>&vtxColors, vector<vector<int>>&Q, int& uncolored_nodes, const int local_order){
+void SMPGCColoring::hybrid_Serial(const int nT, vector<int>&vtxColors, vector<vector<int>>&Q, const int local_order){
+    const int N                = num_nodes();                    // number of vertex
+    const int BufSize          = max_degree()+1;         // maxDegree
+    const vector<int>& vtxPtr  = get_CSR_ia();     // ia of csr
+    const vector<int>& vtxVal  = get_CSR_ja();     // ja of csr
     
+    switch(local_order){
+        case ORDER_LARGEST_FIRST:
+            local_largest_degree_first_ordering(Q); break;
+        case ORDER_SMALLEST_LAST:
+            local_smallest_degree_last_ordering(Q); break;
+        case ORDER_NATURAL:
+            local_natural_ordering(Q); break;
+        case ORDER_RANDOM:
+            local_random_ordering(Q); break;
+        case -1:
+            break;
+        default:
+            printf("Error! unknown local order \"%d\".\n", local_order);
+            exit(1);
+    }
+
+    vector<bool> Mark; Mark.assign(BufSize, -1);
+    for(int tid=0; tid<nT; tid++){
+        for(const auto v : QQ[tid]){
+            for(auto iw=vtxPtr[v]; iw!=vtxPtr[v+1]; iw++) {
+                const auto wc = vtxColors[vtxVal[iw]];
+                if(wc>=0) Mark[wc]=v;
+            }
+            int c=0;
+            for(; c!=BufSize; c++)
+                if( Mark[c]==v)
+                    break;
+            vtxColors[v]=c;
+        }
+    }
     return;
 }
 

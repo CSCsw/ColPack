@@ -58,6 +58,7 @@ public:
 
     static const string FORMAT_MM;
 
+    static const int ORDER_NONE;
     static const int ORDER_NATURAL;
     static const int ORDER_RANDOM;
     static const int ORDER_LARGEST_FIRST;

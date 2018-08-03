@@ -67,24 +67,26 @@ public: // API
     int D1_OMP_JP  (int nT, int&color, vector<int>&vtxColors);
     int D1_OMP_JP2S(int nT, int&color, vector<int>&vtxColors);
 
-    int D1_OMP_GM3P_LO(int nT, int&color, vector<int>&vtxColors, const int local_order);
-    int D1_OMP_GMMP_LO(int nT, int&color, vector<int>&vtxColors, const int local_order);
-    int D1_OMP_JP_LO  (int nT, int&color, vector<int>&vtxColors, const int local_order);
-    int D1_OMP_LB_LO  (int nT, int&color, vector<int>&vtxColors, const int local_order);
-    int D1_OMP_JP2S_LO(int nT, int&color, vector<int>&vtxColors, const int local_order);
+    int D1_OMP_LO_GM3P(int nT, int&color, vector<int>&vtxColors, const int local_order);
+    int D1_OMP_LO_GMMP(int nT, int&color, vector<int>&vtxColors, const int local_order);
+    int D1_OMP_LO_JP  (int nT, int&color, vector<int>&vtxColors, const int local_order);
+    int D1_OMP_LO_LB  (int nT, int&color, vector<int>&vtxColors, const int local_order);
+    int D1_OMP_LO_JP2S(int nT, int&color, vector<int>&vtxColors, const int local_order);
 
     // Algorithm for distance two coloring
     int D2_serial(int &color, vector<int>&vtxColors);
 
     int D2_OMP_GM3P   (int nT, int&color, vector<int>&vtxColors);
     int D2_OMP_GMMP   (int nT, int&color, vector<int>&vtxColors);
-    int D2_OMP_GM3P_LO(int nT, int&color, vector<int>&vtxColors, const int local_order);
-    int D2_OMP_GMMP_LO(int nT, int&color, vector<int>&vtxColors, const int local_order);
+    int D2_OMP_LO_GM3P(int nT, int&color, vector<int>&vtxColors, const int local_order);
+    int D2_OMP_LO_GMMP(int nT, int&color, vector<int>&vtxColors, const int local_order);
     
     // Algorithm for Hybird 
-    int D1_OMP_hybrid_JP  (int nT, int&color, vector<int>&vtxColors, const int option, const int swtich_iter);
-    int D1_OMP_hybrid_JP2S(int nT, int&color, vector<int>&vtxColors, const int option, const int switch_iter);
-    
+    int D1_OMP_HBLO_JP  (int nT, int&color, vector<int>&vtxColors, const int option, const int swtich_iter);
+    int D1_OMP_HBLO_JP2S(int nT, int&color, vector<int>&vtxColors, const int option, const int switch_iter);
+    inline void hybrid_GM3P(const int nT, vector<int>&vtxColors, vector<vector<int>>&Q, const int local_order); 
+    inline void hybrid_GMMP(const int nT, vector<int>&vtxColors, vector<vector<int>>&Q, const int local_order); 
+    inline void hybrid_Serial(const int nT, vector<int>&vtxColors, vector<vector<int>>&Q, const int local_order); 
     
     // Some experimental funtions
     int D1_OMP_GMMP_LO_once(int nT, int&color, vector<int>&vtxColors, const int local_ordering);
