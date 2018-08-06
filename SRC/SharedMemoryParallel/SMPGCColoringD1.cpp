@@ -341,7 +341,7 @@ int SMPGCColoring::D1_OMP_GMMP(int nT, int&colors, vector<int>&vtxColors, const 
 // ============================================================================
 // based on Luby's algorithm [3]
 // ============================================================================
-int SMPGCiColoring::D1_OMP_LB_LO(int nT, int&colors, vector<int>&vtxColors, const int local_order=ORDER_NONE) {
+int SMPGCiColoring::D1_OMP_LB(int nT, int&colors, vector<int>&vtxColors, const int local_order=ORDER_NONE) {
     if(nT<=0) { printf("Warning, number of threads changed from %d to 1\n",nT); nT=1; }
     omp_set_num_threads(nT);
    
@@ -654,7 +654,7 @@ int SMPGCColoring::D1_OMP_JP(int nT, int&colors, vector<int>&vtxColors, const in
 
 
 
-int SMPGCColoring::D1_OMP_JP2S(int nT, int& colors, vector<int>&vtxColors, const int local_order=ORDER_NONE) {
+int SMPGCColoring::D1_OMP_MTJP(int nT, int& colors, vector<int>&vtxColors, const int local_order=ORDER_NONE) {
     if(nT<=0) { printf("Warning, number of threads changed from %d to 1\n",nT); nT=1; }
     omp_set_num_threads(nT);
     
@@ -791,7 +791,7 @@ int SMPGCColoring::D1_OMP_JP2S(int nT, int& colors, vector<int>&vtxColors, const
             printf("unkonw local order %d\n", local_order);
     }
     
-    printf("@JP2S%s_nT_c_T_TWgt_TMIS_TMxC_nL_nC_Tptt", order_tag.c_str());
+    printf("@MTJP%s_nT_c_T_TWgt_TMIS_TMxC_nL_nC_Tptt", order_tag.c_str());
     printf("\t%d",  nT);    
     printf("\t%d",  colors);    
     printf("\t%lf", tim_Tot);

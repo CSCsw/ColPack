@@ -12,7 +12,7 @@ using namespace std;
 using namespace ColPack;
 
 
-int SMPGCColoring::D1_OMP_HBLO_JP(int nT, int&colors, vector<int>& vtxColors, const int loocal_order, const int option, const int swithch_iter=0){
+int SMPGCColoring::D1_OMP_HBJP(int nT, int&colors, vector<int>& vtxColors, const int loocal_order, const int option, const int swithch_iter=0){
     if(nT<=0) { printf("Warning, number of threads changed from %d to 1\n",nT); nT=1; }
     omp_set_num_threads(nT);
 
@@ -71,6 +71,8 @@ int SMPGCColoring::D1_OMP_HBLO_JP(int nT, int&colors, vector<int>& vtxColors, co
             vector<int>& Q = QQ[tid];
             // phase local order 
             switch(local_order){
+                case ORDER_NONE:
+                    break;
                 case ORDER_LARGEST_FIRST:
                     local_largest_degree_first_ordering(Q); break;
                 case ORDER_SMALLEST_LAST:
@@ -133,12 +135,9 @@ int SMPGCColoring::D1_OMP_HBLO_JP(int nT, int&colors, vector<int>& vtxColors, co
     tim_alg2 =- omp_get_wtime();
     switch(option)
     {
-        case HYBRID_GM3P:      hybrid_GM3P  (nT, vtxColors, QQ, -1         ); break;
-        case HYBRID_GMMP:      hybrid_GMMP  (nT, vtxColors, QQ, -1         ); break;
-        case HYBRID_SERIAL:    hybrid_SERIAL(nT, vtxColors, QQ, -1         ); break;
-        case HYBRID_LO_GM3P:   hybrid_GM3P  (nT, vtxColors, QQ, local_order); break;
-        case HYBRID_LO_GMMP:   hybrid_GMMP  (nT, vtxColors, QQ, local_order); break;
-        case HYBRID_LO_SERIAL: hybrid_SERIAL(nT, vtxColors, QQ, local_order); break;
+        case HB_GM3P:      hybrid_GM3P  (nT, vtxColors, QQ, local_order); break;
+        case HB_GMMP:      hybrid_GMMP  (nT, vtxColors, QQ, local_order); break;
+        case HB_SERIAL:    hybrid_SERIAL(nT, vtxColors, QQ, local_order); break;
         case HYBRID_STREAM:
         default:
             printf("Error %d option for hybrid alg is not support!", option);
@@ -160,12 +159,9 @@ int SMPGCColoring::D1_OMP_HBLO_JP(int nT, int&colors, vector<int>& vtxColors, co
 
     string alg_tag="unknown";
     switch(option){
-        case HYBRID_GM3P:       alg_tag="GM3P";    break;
-        case HYBRID_GMMP:       alg_tag="GMMP";    break;
-        case HYBRID_SERIAL:     alg_tag="Serial";  break;
-        case HYBRID_LO_GM3P:    alg_tag="GM3PLO";  break;
-        case HYBRID_LO_GMMP:    alg_tag="GMMPLO";  break;
-        case HYBRID_LO_SERIAL:  alg_tag="SerialLO";break;
+        case HB_GM3P:       alg_tag="GM3P";    break;
+        case HB_GMMP:       alg_tag="GMMP";    break;
+        case HB_SERIAL:     alg_tag="Serial";  break;
         case HYBRID_STREAM:
         default:               printf("Error %d option for hybrid alg is not support!", option);
     }
@@ -173,19 +169,16 @@ int SMPGCColoring::D1_OMP_HBLO_JP(int nT, int&colors, vector<int>& vtxColors, co
     
     string order_tag="unkonwn";
     switch(local_order){
-        case ORDER_LARGEST_FIRST:
-            order_tag="LF"; break;
-        case ORDER_SMALLEST_LAST:
-            order_tag="SL"; break;
-        case ORDER_NATURAL:
-            order_tag="NT"; break;
-        case ORDER_RANDOM:
-            order_tag="RD"; break;
+        case ORDER_NONE:          order_tag="NONE"; break;
+        case ORDER_LARGEST_FIRST: order_tag="LF"; break;
+        case ORDER_SMALLEST_LAST: order_tag="SL"; break;
+        case ORDER_NATURAL:       order_tag="NT"; break;
+        case ORDER_RANDOM:        order_tag="RD"; break;
         default:
             printf("unkonw local order %d\n", local_order);
     }
 
-    printf("@Hybird_JPlO(%s)_%s_nT_c_T_Talg1_Talg2_TMxC_switIter_timPTT",order_tag.c_str(), alg_tag.c_str());
+    printf("@HBJP_%s_(%s)_nT_c_T_Talg1_Talg2_TMxC_switIter_timPTT",alg_tag.c_str(), order_tag.c_str());
     printf("\t%d",  nT);    
     printf("\t%d",  colors);    
     printf("\t%lf", tim_Tot);
@@ -202,7 +195,7 @@ int SMPGCColoring::D1_OMP_HBLO_JP(int nT, int&colors, vector<int>& vtxColors, co
 }
 
 
-int SMPGCColoring::D1_OMP_HBLO_JP2S(int nT, int&colors, vector<int>& vtxColors, const int local_order, const int option, const int swithch_iter=0){
+int SMPGCColoring::D1_OMP_HBMTJP(int nT, int&colors, vector<int>& vtxColors, const int local_order, const int option, const int swithch_iter=0){
     if(nT<=0) { printf("Warning, number of threads changed from %d to 1\n",nT); nT=1; }
     omp_set_num_threads(nT);
     
@@ -258,6 +251,8 @@ int SMPGCColoring::D1_OMP_HBLO_JP2S(int nT, int&colors, vector<int>& vtxColors, 
             vector<int>& Q = QQ[tid];
             // phase local order
             switch(local_order){
+                case ORDER_NONE:
+                    break;
                 case ORDER_LARGEST_FIRST:
                     local_largest_degree_first_ordering(Q); break;
                 case ORDER_SMALLEST_LAST:
@@ -315,12 +310,9 @@ int SMPGCColoring::D1_OMP_HBLO_JP2S(int nT, int&colors, vector<int>& vtxColors, 
     tim_Alg2 =- omp_get_wtime();
     switch(option)
     {
-        case HYBRID_GM3P:      hybrid_GM3P  (nT, vtxColors, QQ, -1         ); break;
-        case HYBRID_GMMP:      hybrid_GMMP  (nT, vtxColors, QQ, -1         ); break;
-        case HYBRID_SERIAL:    hybrid_SERIAL(nT, vtxColors, QQ, -1         ); break;
-        case HYBRID_LO_GM3P:   hybrid_GM3P  (nT, vtxColors, QQ, local_order); break;
-        case HYBRID_LO_GMMP:   hybrid_GMMP  (nT, vtxColors, QQ, local_order); break;
-        case HYBRID_LO_SERIAL: hybrid_SERIAL(nT, vtxColors, QQ, local_order); break;
+        case HB_GM3P:      hybrid_GM3P  (nT, vtxColors, QQ, local_order ); break;
+        case HB_GMMP:      hybrid_GMMP  (nT, vtxColors, QQ, local_order ); break;
+        case HB_SERIAL:    hybrid_SERIAL(nT, vtxColors, QQ, local_order ); break;
         case HYBRID_STREAM:
         default:
             printf("Error %d option for hybrid alg is not support!", option);
@@ -342,18 +334,17 @@ int SMPGCColoring::D1_OMP_HBLO_JP2S(int nT, int&colors, vector<int>& vtxColors, 
 
     string alg_tag="unknown";
     switch(option){
-        case HYBRID_GM3P:       alg_tag="GM3P";    break;
-        case HYBRID_GMMP:       alg_tag="GMMP";    break;
-        case HYBRID_SERIAL:     alg_tag="Serial";  break;
-        case HYBRID_LO_GM3P:    alg_tag="GM3PLO";  break;
-        case HYBRID_LO_GMMP:    alg_tag="GMMPLO";  break;
-        case HYBRID_LO_SERIAL:  alg_tag="SerialLO";break;
+        case HB_GM3P:       alg_tag="GM3P";    break;
+        case HB_GMMP:       alg_tag="GMMP";    break;
+        case HB_SERIAL:     alg_tag="Serial";  break;
         case HYBRID_STREAM:
         default:               printf("Error %d option for hybrid alg is not support!", option);
     }
    
     string order_tag="unkonwn";
     switch(local_order){
+        case ORDER_NONE:
+            order_tag="NONE"; break;
         case ORDER_LARGEST_FIRST:
             order_tag="LF"; break;
         case ORDER_SMALLEST_LAST:
@@ -366,7 +357,7 @@ int SMPGCColoring::D1_OMP_HBLO_JP2S(int nT, int&colors, vector<int>& vtxColors, 
             printf("unkonw local order %d\n", local_order);
     }
     
-    printf("@Hybrid_JP2SLO(%s)_%s_nT_c_T_TA1_TA2_TMxC_nSwitchIter_Tptt", order_tag.c_str(), alg_tag.c_str());
+    printf("@HBMTJP_%s_(%s)_nT_c_T_TA1_TA2_TMxC_nSwitchIter_Tptt", alg_tag.c_str(), order_tag.c_str());
     printf("\t%d",  nT);    
     printf("\t%d",  colors);    
     printf("\t%lf", tim_Tot);
@@ -385,7 +376,7 @@ int SMPGCColoring::D1_OMP_HBLO_JP2S(int nT, int&colors, vector<int>& vtxColors, 
 
 
 
-void SMPGCColoring::hybrid_GM3P(const int nT, vector<int>&vtxColors, vector<vector<int>>&Q, const int local_order=-1){
+void SMPGCColoring::hybrid_GM3P(const int nT, vector<int>&vtxColors, vector<vector<int>>&Q, const int local_order=ORDER_NONE){
     const int N               = num_nodes();   //number of vertex
     const int BufSize         = max_degree()+1;
     const vector<int>& vtxPtr = get_CSR_ia();
@@ -396,6 +387,8 @@ void SMPGCColoring::hybrid_GM3P(const int nT, vector<int>&vtxColors, vector<vect
         const int tid = omp_get_thread_num();
         const vector<int>& Q = QQ[tid];
         switch(local_order){
+            case ORDER_NONE:
+                break;
             case ORDER_LARGEST_FIRST:
                 local_largest_degree_first_ordering(Q); break;
             case ORDER_SMALLEST_LAST:
@@ -404,8 +397,6 @@ void SMPGCColoring::hybrid_GM3P(const int nT, vector<int>&vtxColors, vector<vect
                 local_natural_ordering(Q); break;
             case ORDER_RANDOM:
                 local_random_ordering(Q); break;
-            case -1:
-                break;
             default:
                 printf("Error! unknown local order \"%d\".\n", local_order);
                 exit(1);
@@ -465,7 +456,7 @@ void SMPGCColoring::hybrid_GM3P(const int nT, vector<int>&vtxColors, vector<vect
 }
 
 
-void SMPGCColoring::hybrid_GMMP(const int nT, vector<int>&vtxColors, vector<vector<int>>&Q, const int local_order){
+void SMPGCColoring::hybrid_GMMP(const int nT, vector<int>&vtxColors, vector<vector<int>>&Q, const int local_order=ORDER_NONE){
     
     const int N                = num_nodes();                    // number of vertex
     const int BufSize          = max_degree()+1;         // maxDegree
@@ -482,6 +473,8 @@ void SMPGCColoring::hybrid_GMMP(const int nT, vector<int>&vtxColors, vector<vect
             const vector<int>& Q = QQ[tid];
             // phase local order
             switch(local_order){
+                case ORDER_NONE:
+                    break;
                 case ORDER_LARGEST_FIRST:
                     local_largest_degree_first_ordering(Q); break;
                 case ORDER_SMALLEST_LAST:
@@ -490,8 +483,6 @@ void SMPGCColoring::hybrid_GMMP(const int nT, vector<int>&vtxColors, vector<vect
                     local_natural_ordering(Q); break;
                 case ORDER_RANDOM:
                     local_random_ordering(Q); break;
-                case -1:
-                    break;
                 default:
                     printf("Error! unknown local order \"%d\".\n", local_order);
                     exit(1);
@@ -533,13 +524,15 @@ void SMPGCColoring::hybrid_GMMP(const int nT, vector<int>&vtxColors, vector<vect
 }
 
 
-void SMPGCColoring::hybrid_Serial(const int nT, vector<int>&vtxColors, vector<vector<int>>&Q, const int local_order){
+void SMPGCColoring::hybrid_Serial(const int nT, vector<int>&vtxColors, vector<vector<int>>&Q, const int local_order=ORDER_NONE){
     const int N                = num_nodes();                    // number of vertex
     const int BufSize          = max_degree()+1;         // maxDegree
     const vector<int>& vtxPtr  = get_CSR_ia();     // ia of csr
     const vector<int>& vtxVal  = get_CSR_ja();     // ja of csr
     
     switch(local_order){
+        case ORDER_NONE:
+            break;
         case ORDER_LARGEST_FIRST:
             local_largest_degree_first_ordering(Q); break;
         case ORDER_SMALLEST_LAST:

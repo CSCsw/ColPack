@@ -17,188 +17,204 @@ using namespace ColPack;
 // ============================================================================
 // distance two coloring GM 3 phase
 // ============================================================================
-int SMPGCInterface::D2_OMP_GM3P(int nT, INT &colors, vector<INT>& vtxColor) {
+int SMPGCColoring::D2_OMP_GM3P(int nT, int &colors, vector<int>& vtxColors, const int local_order=ORDER_NONE) {
     if(nT<=0) { printf("Warning, number of threads changed from %d to 1\n",nT); nT=1; }
     omp_set_num_threads(nT);
 
-    double ttmp = 0;
-    ttmp =- omp_get_wtime();
-
-    double tim_Tot=0;                          // run time
-    double tim_Color  = 0;                     // run time
-    double tim_Detect = 0;                     // run time
-    double tim_Recolor= 0;                     // run time
-    double tim_MxC    = 0;                     // run time
-    INT    nConflicts = 0;                     // Number of conflicts 
+    double tim_partition=.0;
+    double tim_total    =.0;                          // run time
+    double tim_color    =.0;                     // run time
+    double tim_detect   =.0;                     // run time
+    double tim_recolor  =.0;                     // run time
+    double tim_maxc     =.0;                     // run time
     
-    const INT N = nodes();                     //number of vertex
-    const INT MaxColorCapacity =min( maxDeg()*(maxDeg()-1)+1, N); //maxDegree
-    const vector<INT>& verPtr = CSRia();
-    const vector<INT>& verVal = CSRja();
-    const vector<INT>& orig_ordered_vertex = ordered_vertex(); 
+    int   n_conflicts = 0;                     // Number of conflicts 
+    
+    const int N = num_nodes();                     //number of vertex
+    const int BufSize = min( max_degree()*(max_degree()-1)+1, N); //maxDegree
+    const vector<int>& vtxPtr = get_CSR_ia();
+    const vector<int>& vtxVal = get_CSR_ja();
+    const vector<int>& const_ordered_vertex = global_ordered_vertex(); 
     
     colors=0;                       
-    vtxColor.assign(N, -1);
+    vtxColors.assign(N, -1);
 
-    ttmp += omp_get_wtime();
-    printf("dec %g ", ttmp);
-    ttmp =- omp_get_wtime();
-    
-    vector<vector<INT>> QQ(nT);
+    vector<vector<int>> QQ(nT);
+    tim_partition =- omp_get_wtime();
     {
-        vector<int> lens (nT, N/nT);
-        for(int i=0; i<N%nT; i++)
-            lens[i]++;
-        vector<int> begs(nT+1,0);
-        for(int i=1; i<=nT; i++)
-            begs[i]=begs[i-1]+lens[i-1];
+        vector<int> lens (nT, N/nT); for(int i=0; i<N%nT; i++) lens[i]++;
+        vector<int> disps(nT+1,0);   for(int i=1; i<=nT; i++)  disps[i]=disps[i-1]+lens[i-1];
         for(int i=0; i<nT; i++){
             QQ[i].reserve(N/nT+1+16);
-            QQ[i].assign(orig_ordered_vertex.begin()+begs[i], orig_ordered_vertex.begin()+begs[i+1]); 
+            QQ[i].assign(const_ordered_vertex.begin()+disps[i], const_ordered_vertex.begin()+disps[i+1]); 
         }
     }
-    ttmp += omp_get_wtime();
-    printf("ini %g ", ttmp);
-   
-    // Phase - Pseudo Coloring
-    tim_Color =- omp_get_wtime();
+    tim_partition += omp_get_wtime();
+
+    // phase - Pseudo Coloring
+    tim_color =- omp_get_wtime();
     #pragma omp parallel
     {
         const int tid = omp_get_thread_num();
-        vector<INT> &Q = QQ[tid];
-        vector<INT> Mask; Mask.assign(MaxColorCapacity, -1);
-        const INT Nloc = Q.size();
-        for(INT vit=0; vit<Nloc; vit++) {
+        vector<int> &Q = QQ[tid];
+        vector<int> Mask; Mask.assign(MaxColorCapacity, -1);
+        
+        switch(local_order){
+            case ORDER_NONE:
+                break;
+            case ORDER_LARGEST_FIRST:
+                local_largest_degree_first_ordering(Q); break;
+            case ORDER_SMALLEST_LAST:
+                local_smallest_degree_last_ordering(Q); break;
+            case ORDER_NATURAL:
+                local_natural_ordering(Q); break;
+            case ORDER_RANDOM:
+                local_random_ordering(Q); break;
+            default:
+                printf("Error! unknown local order \"%d\".\n", local_order);
+                exit(1);
+        }
+
+        for(const auto v : Q){
             const auto v=Q[vit];
-            //unordered_set<INT> d012_neighbors={v};
-            //Mask.assign(MaxColorCapacity, -1);
-            for(INT d1wit=verPtr[v]; d1wit!=verPtr[v+1]; d1wit++ ) {  // d1 neighbors
-                const auto d1w  = verVal[d1wit];
-                const auto d1wc = vtxColor[d1w];
-                if(d1wc!=-1) Mask[d1wc] = v;
-                //d012_neighbors.insert(d1w);
+            for(int iw=vtxPtr[v]; iw!=vtxPtr[v+1]; iw++) {  
+                const auto w  = vtxVal[iw];
+                const auto wc = vtxColors[w];
+                if(wc<0) continue;
+                Mask[wc] = v;
             }
-            for(INT d1wit=verPtr[v]; d1wit!=verPtr[v+1]; d1wit++) {
-                const auto d1w = verVal[d1wit];
-                for(INT d2wit=verPtr[d1w]; d2wit!=verPtr[d1w+1]; d2wit++) { // d2 neighbors
-                    const auto d2w  = verVal[d2wit];
-                    if(v==d2w) continue;
-                    //if(d012_neighbors.find(d2w)!=d012_neighbors.end()) continue;
-                    const auto d2wc = vtxColor[d2w];
-                    if(d2wc!=-1) Mask[d2wc] = v;
+            for(int iw=vtxPtr[v]; iw!=vtxPtr[v+1]; iw++) {
+                const auto w = vtxVal[iw];
+                for(int iu=vtxPtr[w]; iu!=vtxPtr[w+1]; iu++) { // d2 neighbors
+                    const auto u = vtxVal[iu];
+                    if(v==u) continue;
+                    const auto uc = vtxColors[u];
+                    if(uc<0) continue;
+                    Mask[uc] = v;
                 }
             }
-            
-            INT c;
-            for (c=0; c!=MaxColorCapacity; c++)
+            int c=0;
+            for (; c!=BufSize; c++)
                 if(Mask[c]!=v)
                     break;
-            vtxColor[v] = c;
+            vtxColors[v] = c;
         } //end for
     }//end of omp parallel
-    tim_Color  += omp_get_wtime();    
+    tim_color  += omp_get_wtime();    
 
     // Phase - Detect Conflicts
-    tim_Detect =- omp_get_wtime();
+    tim_detect =- omp_get_wtime();
     #pragma omp parallel
     {
+        int num_uncolored=0;
         const int tid=omp_get_thread_num();
-        vector<INT>& Q = QQ[tid];
-        INT num_leftover = 0;
-        const INT Nloc = Q.size();
-        for(INT vit=0; vit<Nloc; vit++){
-            const auto v  = Q[vit];
-            const auto vc = vtxColor[v];
-            //unordered_set<INT> d012_neighbors={v};
-            bool b_find_conflict=false;
-            for(INT d1wit=verPtr[v]; d1wit!=verPtr[v+1]; d1wit++) { // d1 neighbors
-                const auto d1w = verVal[d1wit];
-                if(v>=d1w) continue;   // check conflict is little brother's job
-                if(vc == vtxColor[d1w]) {
-                    Q[num_leftover++]=v;
-                    vtxColor[v]=-1;
-                    b_find_conflict=true;
+        vector<int>& Q = QQ[tid];
+        for(int iv=0; iv<(signed)Q.size(); iv++){
+            const auto v  = Q[vi];
+            const auto vc = vtxColors[v];
+            bool b_vis_conflict=false;
+            for(int iw=vtxPtr[v]; iw!=vtxPtr[v+1]; iw++) { // d1 neighbors
+                const auto w = vtxVal[iw];
+                if(v >= w) continue;   // check conflict is little brother's job
+                if(vc == vtxColors[w]) {
+                    Q[num_uncolored++]=v;
+                    vtxColors[v]=-1;
+                    b_vis_conflict=true;
                     break;
                 }
-                //d012_neighbors.insert(d1w);
             }
-            if(b_find_conflict) continue;
-            for(INT d1wit=verPtr[v]; d1wit!=verPtr[v+1]; d1wit++) {
-                const auto d1w = verVal[d1wit];
-                for(INT d2wit=verPtr[d1w]; d2wit!=verPtr[d1w+1]; d2wit++) { // d2 neighbors
-                    const auto d2w = verVal[d2wit];
-                    if(v>=d2w) continue; // check conflict is little brother's job
-                    //if(d012_neighbors.find(d2w)!=d012_neighbors.end()) continue;
-                    if(vc == vtxColor[d2w]) {
-                        Q[num_leftover++]=v;
+            for(int iw=vtxPtr[v]; b_vis_conflict==false && iw!=vtxPtr[v+1]; iw++) {
+                const auto w = vtxVal[iw];
+                for(int iu=vtxPtr[w]; iu!=vtxPtr[w+1]; iu++) { // d2 neighbors
+                    const auto u = vtxVal[iu];
+                    if(v >= u) continue; // check conflict is little brother's job
+                    if(vc == vtxColors[u]) {
+                        Q[num_uncolored++]=v;
                         vtxColor[v]=-1;
-                        b_find_conflict=true;
+                        b_vis_conflict=true;
                         break;
                     }
                 }
-                if(b_find_conflict) break;
-            } //end for d1wit
-        } //end for v
-        Q.resize(num_leftover);
-    } //end of omp parallel
-    tim_Detect  += omp_get_wtime();
+            } 
+        } //end for vertex v
+        Q.resize(num_uncolored);
+    } //end omp parallel 
+    tim_detect  += omp_get_wtime();
    
     // Phase - Resolve Conflicts
-    tim_Recolor =- omp_get_wtime();
-    vector<INT> Mark; Mark.assign(MaxColorCapacity,-1);
-    for(int tid=0;tid<nT; tid++){
-        nConflicts+=QQ[tid].size();
-        for(const auto v: QQ[tid]){
-            //Mark.assign(MaxColorCapacity, -1);
-            //unordered_set<INT> b012_neighbors={v};
-            for(auto d1wit=verPtr[v]; d1wit!=verPtr[v+1]; d1wit++) { // d1 neighbors
-                const auto d1w =verVal[d1wit];
-                const auto d1wc=vtxColor[d1w];
-                if(d1wc!=-1) Mark[d1wc]=v;
-                //b012_neighbors.insert(d1w);
-            }
-            for(auto d1wit=verPtr[v]; d1wit!=verPtr[v+1]; d1wit++) { 
-                const auto d1w = verVal[d1wit];
-                for(auto d2wit=verPtr[d1w]; d2wit!=verPtr[d1w+1]; d2wit++) { // d2 neighbors
-                    
-                    const auto d2w =verVal[d2wit];
-                    if(v==d2w) continue;
-                    //if(b012_neighbors.find(d2w)!=b012_neighbors.end()) continue;
-                    const auto d2wc=vtxColor[d2w];
-                    if(d2wc!=-1) Mark[d2wc]=v;
-                    //b012_neighbors.insert(d2w);
+    tim_recolor =- omp_get_wtime();
+    {
+        vector<int> Mark; Mark.assign(BufSize,-1);
+        for(int tid=0; tid<nT; tid++){
+            for(const auto v: QQ[tid]){
+                for(auto iw=vtxPtr[v]; iw!=vtxPtr[v+1]; iw++) { // d1 neighbors
+                    const auto wc=vtxColors[ vtxVal[iw] ];
+                    if(wc<0) continue;
+                        Mark[wc]=v;
                 }
-            }
-            INT c;
-            for (c=0; c!=MaxColorCapacity; c++)
+                for(auto iw=vtxPtr[v]; iw!=vtxPtr[v+1]; iw++) { 
+                    const auto w = vtxVal[iw];
+                    for(auto iu=vtxPtr[w]; iu!=vtxPtr[w+1]; iu++) { // d2 neighbors
+                        const auto u = vtxVal[iu];
+                        if(v==u) continue;
+                        const auto uc=vtxColors[u];
+                        if(uc<0) continue;
+                        Mark[uc]=v;
+                    }
+                }
+                int c=0;
+                for(; c!=BufSize; c++)
                 if(Mark[c]!=v)
                     break;
-            vtxColor[v] = c;
+                vtxColors[v] = c;
+            }
         }
     }
-    tim_Recolor += omp_get_wtime();
+    tim_recolor += omp_get_wtime();
 
     // get number of colors
-    tim_MxC = -omp_get_wtime();
+    tim_maxc = -omp_get_wtime();
     #pragma omp parallel for reduction(max:colors)
-    for(INT i=0; i<N; i++){
-        colors = max(colors, vtxColor[i]);
+    for(int i=0; i<N; i++){
+        colors = max(colors, vtxColors[i]);
     }
     colors++; //number of colors, 
-    tim_MxC += omp_get_wtime();
+    tim_mxc += omp_get_wtime();
 
-    tim_Tot = tim_Color+tim_Detect+tim_Recolor+tim_MxC;
+    tim_total = tim_color+tim_detect+tim_recolor+tim_maxc;
 
-    printf("@D2GM3P_nT_c_T_TColor_TDetect_TRecolor_TMxC_nCnf\t");
-    printf("%d\t",  nT);    
-    printf("%d\t",  colors);    
-    printf("%lf\t", tim_Tot);
-    printf("%lf\t", tim_Color);
-    printf("%lf\t", tim_Detect);
-    printf("%lf\t", tim_Recolor);
-    printf("%lf\t", tim_MxC);
-    printf("%d\n", nConflicts);
-    return _TRUE;   
+    string order_tag="unknown";
+    switch(local_order){
+        case ORDER_NONE:
+            order_tag="NoOrder"; break;
+        case ORDER_LARGEST_FIRST:
+            order_tag="LF"; break;
+        case ORDER_SMALLEST_LAST:
+            order_tag="SL"; break;
+        case ORDER_NATURAL:
+            order_tag="NT"; break;
+        case ORDER_RANDOM:
+            order_tag="RD"; break;
+        default:
+            printf("unkonw local order %d\n", local_order);
+    }
+
+    printf("@D2GM3P%s_nT_c_T_T(lo+Color)_TDetect_TRecolor_TMxC_nCnf_Tpart\t", order_tag.c_str());
+    printf("\t%d",  nT);    
+    printf("\t%d",  colors);    
+    printf("\t%lf", tim_total);
+    printf("\t%lf", tim_color);
+    printf("\t%lf", tim_detect);
+    printf("\t%lf", tim_recolor);
+    printf("\t%lf", tim_maxc);
+    for(int i=0; i<nT; i++) n_conflicts+=QQ[i].size();
+    printf("\t%d", n_conflicts);
+    printf("\t%lf", tim_partition);
+#ifdef SMPGC_VARIFY
+    printf("\t%s", (cnt_d2conflict(vtxColors)==0)?("Success"):("Failed"));
+#endif
+    printf("\n");
+    return true;   
 }
 
 
@@ -206,572 +222,178 @@ int SMPGCInterface::D2_OMP_GM3P(int nT, INT &colors, vector<INT>& vtxColor) {
 // ============================================================================
 // Distance Two Openmp Multiple Phase Coloring
 // ============================================================================
-int SMPGCInterface::D2_OMP_GMMP(int nT, INT &colors, vector<INT>&vtxColor){
+int SMPGCColoring::D2_OMP_GMMP(int nT, int &colors, vector<int>&vtxColors, const int local_order){
     if(nT<=0) { printf("Warning, number of threads changed from %d to 1\n",nT); nT=1; }
     omp_set_num_threads(nT);
    
-    double ttmp = 0;
-    ttmp = - omp_get_wtime();
-
-    double tim_Tot=0;                          // run time
-    double tim_Color  = 0;                     // run time
-    double tim_Detect = 0;                     // run time
-    double tim_Sumconf= 0;                     // run time
-    double tim_MxC    = 0;                     // run time
-    INT    nConflicts = 0;                     // Number of conflicts 
-    int    nLoops     = 0;
-
-    const INT N = nodes();                     //number of vertex
-    const INT MaxColorCapacity =min( maxDeg()*(maxDeg()-1)+1, N); //maxDegree
-    const vector<INT>& verPtr = CSRia();
-    const vector<INT>& verVal = CSRja();
-    const vector<INT>& orig_ordered_vertex = ordered_vertex(); 
+    double tim_partition  =.0;
+    double tim_total      =.0;                          // run time
+    double tim_color      =.0;                     // run time
+    double tim_detect     =.0;                     // run time
+    double tim_maxc       =.0;                     // run time
+    
+    int    n_loops        = 0;
+    int    n_conflicts    = 0;                     // Number of conflicts 
+    int    uncolored_nodes= 0;
+    
+    const int N = num_nodes();                     //number of vertex
+    const int BufSize = min( max_degree()*(max_degree()-1)+1, N); //maxDegree
+    const vector<int>& vtxPtr = get_CSR_ia();
+    const vector<int>& vtxVal = get_CSR_ja();
+    const vector<int>& const_ordered_vertex = global_ordered_vertex(); 
     
     colors=0;                       
-    vtxColor.assign(N, -1);
+    vtxColors.assign(N, -1);
 
-    ttmp += omp_get_wtime();
-    printf("dec %g ", ttmp);
-    ttmp = -omp_get_wtime();
-
-    vector<vector<INT>> QQ(nT);
+    vector<vector<int>> QQ(nT);
+    tim_partition =- omp_get_wtime();
     {
-        vector<int> lens (nT, N/nT);
-        for(int i=0; i<N%nT; i++)
-            lens[i]++;
-        vector<int> begs(nT+1,0);
-        for(int i=1; i<=nT; i++)
-            begs[i]=begs[i-1]+lens[i-1];
+        vector<int> lens (nT, N/nT); for(int i=0; i<N%nT; i++) lens[i]++;
+        vector<int> disps(nT+1,0);   for(int i=1; i<=nT; i++)  disps[i]=disps[i-1]+lens[i-1];
         for(int i=0; i<nT; i++){
             QQ[i].reserve(N/nT+1+16);
-            QQ[i].assign(orig_ordered_vertex.begin()+begs[i], orig_ordered_vertex.begin()+begs[i+1]); 
+            QQ[i].assign(const_ordered_vertex.begin()+disps[i], const_ordered_vertex.begin()+disps[i+1]); 
         }
     }
+    tim_partition += omp_get_wtime();
 
-    ttmp += omp_get_wtime();
-    printf("ini %g ", ttmp);
-    
-    INT num_un_colored_vertices=N;
-    while(num_un_colored_vertices!=0){
-        // Phase - Pseudo Coloring
-        tim_Color -= omp_get_wtime();
+
+    uncolored_nodes=N;
+    while(uncolord_nodes!=0){
+        // phase - Pseudo Coloring
+        tim_color -= omp_get_wtime();
         #pragma omp parallel
         {
             const int tid = omp_get_thread_num();
-            vector<INT> &Q = QQ[tid];
-            vector<INT> Mask; Mask.assign(MaxColorCapacity,-1);
-            const INT Nloc = Q.size();
-            for(INT vit=0; vit<Nloc; vit++) {
-                const auto v=Q[vit];
-                //unordered_set<INT> d012_neighbors={v};
-                //Mask.assign(MaxColorCapacity, -1);
-                for(INT d1wit=verPtr[v]; d1wit!=verPtr[v+1]; d1wit++ ) {  // d1 neighbors
-                    const auto d1w  = verVal[d1wit];
-                    const auto d1wc = vtxColor[d1w];
-                    if(d1wc!=-1) Mask[d1wc] = v;
-                    //d012_neighbors.insert(d1w);
+            const vector<int> &Q = QQ[tid];
+            vector<int> Mask; Mask.assign(MaxColorCapacity, -1);
+
+            switch(local_order){
+                case ORDER_NONE:
+                    break;
+                case ORDER_LARGEST_FIRST:
+                    local_largest_degree_first_ordering(Q); break;
+                case ORDER_SMALLEST_LAST:
+                    local_smallest_degree_last_ordering(Q); break;
+                case ORDER_NATURAL:
+                    local_natural_ordering(Q); break;
+                case ORDER_RANDOM:
+                    local_random_ordering(Q); break;
+                default:
+                    printf("Error! unknown local order \"%d\".\n", local_order);
+                    exit(1);
+            }
+
+            for(const auto v : Q) {
+                for(int iw=vtxPtr[v]; iw!=vtxPtr[v+1]; iw++ ) {  // d1 neighbors
+                    const auto wc = vtxColors[ vtxVal[iw] ];
+                    if(wc<0) continue;
+                    Mask[wc] = v;
                 }
-                for(INT d1wit=verPtr[v]; d1wit!=verPtr[v+1]; d1wit++) {
-                    const auto d1w = verVal[d1wit];
-                    for(INT d2wit=verPtr[d1w]; d2wit!=verPtr[d1w+1]; d2wit++) { // d2 neighbors
-                        const auto d2w  = verVal[d2wit];
-                        //if(d012_neighbors.find(d2w)!=d012_neighbors.end()) continue;
-                        const auto d2wc = vtxColor[d2w];
-                        if(d2wc!=-1) Mask[d2wc] = v;
+                for(int iw=vtxPtr[v]; iw!=vtxPtr[v+1]; iw++) {
+                    const auto w = vtxVal[iw];
+                    for(int iu=vtxPtr[w]; iu!=vtxPtr[w+1]; iu++) { // d2 neighbors
+                        const auto u = vtxVal[iu];
+                        if(v==u) continue;
+                        const auto uc = vtxColors[u];
+                        if(uc<0) continue;
+                        Mask[uc] = v;
                     }
                 }
-                INT c;
-                for (c=0; c!=MaxColorCapacity; c++)
+                int c=0;
+                for(; c!=BufSize; c++)
                     if(Mask[c]!=v)
                         break;
-                vtxColor[v] = c;
+                vtxColors[v] = c;
             } //end for
         }//end of omp parallel
-        tim_Color  += omp_get_wtime();    
+        tim_color  += omp_get_wtime();    
 
         // Phase - Detect Conflicts
-        tim_Detect -= omp_get_wtime();
-        #pragma omp parallel
+        tim_detect -= omp_get_wtime();
+        uncolored_nodes=0;        
+        #pragma omp parallel reduction(+: uncolored_nodes)
         {
             const int tid=omp_get_thread_num();
-            vector<INT>& Q = QQ[tid];
-            INT num_leftover = 0;
-            const INT Nloc = Q.size();
-            for(INT vit=0; vit<Nloc; vit++){
-                const auto v  = Q[vit];
-                const auto vc = vtxColor[v];
-                //unordered_set<INT> d012_neighbors={v};
-                bool b_find_conflict=false;
-                for(INT d1wit=verPtr[v]; d1wit!=verPtr[v+1]; d1wit++) { // d1 neighbors
-                    const auto d1w = verVal[d1wit];
-                    if(v>=d1w) continue;   // check conflict is little brother's job
-                    if(vc == vtxColor[d1w]) {
-                        Q[num_leftover++]=v;
-                        vtxColor[v]=-1;
-                        b_find_conflict=true;
+            vector<int>& Q = QQ[tid];
+            for(auto i=0; i<Q.size(); i++){
+                const auto v = Q[i];
+                const auto vc= vtxColors[v];
+                bool b_vis_conflict=false;
+                for(int iw=vtxPtr[v]; iw!=vtxPtr[v+1]; iw++){
+                    const auto w = vtxVal[iw];
+                    if( v >= w ) continue;
+                    if( vc== vtxColors[w]) {
+                        Q[n_uncolored++] = v;
+                        vtxColors[v] = -1;
+                        b_vis_conflict=true;
                         break;
                     }
-                    //d012_neighbors.insert(d1w);
                 }
-                if(b_find_conflict) continue;
-                for(INT d1wit=verPtr[v]; d1wit!=verPtr[v+1]; d1wit++) {
-                    const auto d1w = verVal[d1wit];
-                    for(INT d2wit=verPtr[d1w]; d2wit!=verPtr[d1w+1]; d2wit++) { // d2 neighbors
-                        const auto d2w = verVal[d2wit];
-                        if(v>=d2w) continue; // check conflict is little brother's job
-                        //if(d012_neighbors.find(d2w)!=d012_neighbors.end()) continue;
-                        if(vc == vtxColor[d2w]) {
-                            Q[num_leftover++]=v;
-                            vtxColor[v]=-1;
-                            b_find_conflict=true;
+                for(int iw=vtxPtr[v]; b_vis_conflict==false && iw!=vtxPtr[v+1]; iw++) {
+                    const auto w = vtxVal[iw];
+                    for(int iu=vtxPtr[w]; iu!=vtxPtr[w+1]; iu++){
+                        const auto u = vtxVal[iu];
+                        if(v>=u) continue;
+                        if(vc == vtxColors[u]) {
+                            Q[n_uncolored++]=v;
+                            vtxColors[v]=-1;
+                            b_vis_conflict=true;
                             break;
                         }
                     }
-                    if(b_find_conflict) break;
-                } //end for d1wit
-            } //end for v
-            Q.resize(num_leftover);
+                }
+            }
+            Q.resize(n_uncolored);
         } //end of omp parallel
         tim_Detect  += omp_get_wtime();
-    
-
-        tim_Sumconf -= omp_get_wtime();
-        num_un_colored_vertices=0;
-        for(int tid=0;tid<nT; tid++)
-            num_un_colored_vertices+=QQ[tid].size();
-        nConflicts+=num_un_colored_vertices;
-        nLoops++;
-        tim_Sumconf += omp_get_wtime();
-    }
+        n_loops++;
+        n_conflicts+=n_uncolored;
+    } //end while
 
     // get number of colors
-    tim_MxC = -omp_get_wtime();
+    tim_maxc = -omp_get_wtime();
     #pragma omp parallel for reduction(max:colors)
-    for(INT i=0; i<N; i++){
+    for(int i=0; i<N; i++){
         colors = max(colors, vtxColor[i]);
     }
     colors++; //number of colors, 
-    tim_MxC += omp_get_wtime();
+    tim_maxc += omp_get_wtime();
 
-    tim_Tot = tim_Color+tim_Detect+tim_Sumconf+tim_MxC;
+    tim_total = tim_color+tim_detect+tim_maxc;
 
-    printf("@D2GMMP_nT_c_T_TColor_TDetect_TSumconf_TMxC_nCnf_nLoop\t");
-    printf("%d\t",  nT);    
-    printf("%d\t",  colors);    
-    printf("%lf\t", tim_Tot);
-    printf("%lf\t", tim_Color);
-    printf("%lf\t", tim_Detect);
-    printf("%lf\t", tim_Sumconf);
-    printf("%lf\t", tim_MxC);
-    printf("%d\t", nConflicts);
-    printf("%d\n" , nLoops);
-    return _TRUE;   
+    string order_tag="unknown";
+    switch(local_order){
+        case ORDER_NONE:
+            order_tag="NoOrder"; break;
+        case ORDER_LARGEST_FIRST:
+            order_tag="LF"; break;
+        case ORDER_SMALLEST_LAST:
+            order_tag="SL"; break;
+        case ORDER_NATURAL:
+            order_tag="NT"; break;
+        case ORDER_RANDOM:
+            order_tag="RD"; break;
+        default:
+            printf("unkonw local order %d\n", local_order);
+    }
+
+    printf("@D2GMMP%s_nT_c_T_T(Lo+Color)_TDetect_TMxC_nCnf_nLoop_TPart", order_tag.c_str());
+    printf("\t%d",  nT);    
+    printf("\t%d",  colors);    
+    printf("\t%lf", tim_total);
+    printf("\t%lf", tim_color);
+    printf("\t%lf", tim_detect);
+    printf("\t%lf", tim_maxc);
+    printf("\t%d",  n_conflicts);
+    printf("\t%d" , n_loops);
+    printf("\t%lf", tim_partition);
+#ifdef SMPGC_VARIFY
+    printf("\t%s", (cnt_d2conflict(vtxColors)==0)?("Success"):("Failed"));
+#endif
+    printf("\n");
+    return true;   
 }
-
-
-
-
-// ============================================================================
-// distance two coloring GM 3 phase Local Ordering
-// ============================================================================
-int SMPGCInterface::D2_OMP_GM3P_LO(int nT, INT &colors, vector<INT>& vtxColor, const string& local_ordering) {
-    if(nT<=0) { printf("Warning, number of threads changed from %d to 1\n",nT); nT=1; }
-    omp_set_num_threads(nT);
-    
-    const int DEF_ORDER_LF = 1;
-    const int DEF_ORDER_SL = 2;
-    const int DEF_ORDER_SL1 = 21;
-    //const int DEF_ORDER_DY = 3;
-    //const int DEF_ORDER_ID = 4;
-    //const int DEF_ORDER_NT = 5;
-    //const int DEF_ORDER_RD = 6;
-    const int DEF_ORDER_ERR=-1;
-
-
-    int order_option = DEF_ORDER_ERR;
-    string order_short_tag="Non";
-    if(local_ordering=="LARGEST_FIRST"){
-        order_short_tag = "LF";
-        order_option    = DEF_ORDER_LF; 
-    }
-    else if(local_ordering=="SMALLEST_LAST"){
-        order_short_tag = "SL";
-        order_option    = DEF_ORDER_SL;
-    }
-    else if(local_ordering=="SMALLEST_LAST1"){
-        order_short_tag = "SL1";
-        order_option    = DEF_ORDER_SL1;
-    }
-
-    double tim_Tot=0;                          // run time
-    double tim_Color  = 0;                     // run time
-    double tim_Detect = 0;                     // run time
-    double tim_Recolor= 0;                     // run time
-    double tim_MxC    = 0;                     // run time
-    INT    nConflicts = 0;                     // Number of conflicts 
-    
-    const INT N = nodes();                     //number of vertex
-    const INT MaxColorCapacity =min( maxDeg()*(maxDeg()-1)+1, N); //maxDegree
-    const vector<INT>& verPtr = CSRia();
-    const vector<INT>& verVal = CSRja();
-    const vector<INT>& orig_ordered_vertex = ordered_vertex(); 
-    
-    colors=0;                       
-    vtxColor.assign(N, -1);
-
-    vector<vector<INT>> QQ(nT);
-    {
-        vector<int> lens (nT, N/nT);
-        for(int i=0; i<N%nT; i++)
-            lens[i]++;
-        vector<int> begs(nT+1,0);
-        for(int i=1; i<=nT; i++)
-            begs[i]=begs[i-1]+lens[i-1];
-        for(int i=0; i<nT; i++){
-            QQ[i].reserve(N/nT+1+16);
-            QQ[i].assign(orig_ordered_vertex.begin()+begs[i], orig_ordered_vertex.begin()+begs[i+1]); 
-        }
-    }
-
-    // Phase - Pseudo Coloring
-    tim_Color =- omp_get_wtime();
-    #pragma omp parallel
-    {
-        const int tid = omp_get_thread_num();
-        vector<INT> &Q = QQ[tid];
-        // Phase - local order
-        if(order_option == DEF_ORDER_LF)
-            local_largest_degree_first_ordering(Q);
-        else if(order_option == DEF_ORDER_SL)
-            local_smallest_degree_last_ordering(Q);
-        else if(order_option == DEF_ORDER_SL1)
-            local_smallest_degree_last_ordering_B1a(Q);
-
-        vector<INT> Mask; Mask.assign(MaxColorCapacity, -1);
-        const INT Nloc = Q.size();
-        for(INT vit=0; vit<Nloc; vit++) {
-            const auto v=Q[vit];
-            //unordered_set<INT> d012_neighbors={v};
-            //Mask.assign(MaxColorCapacity, -1);
-            for(INT d1wit=verPtr[v]; d1wit!=verPtr[v+1]; d1wit++ ) {  // d1 neighbors
-                const auto d1w  = verVal[d1wit];
-                const auto d1wc = vtxColor[d1w];
-                if(d1wc!=-1) Mask[d1wc] = v;
-                //d012_neighbors.insert(d1w);
-            }
-            for(INT d1wit=verPtr[v]; d1wit!=verPtr[v+1]; d1wit++) {
-                const auto d1w = verVal[d1wit];
-                for(INT d2wit=verPtr[d1w]; d2wit!=verPtr[d1w+1]; d2wit++) { // d2 neighbors
-                    const auto d2w  = verVal[d2wit];
-                    //if(d012_neighbors.find(d2w)!=d012_neighbors.end()) continue;
-                    const auto d2wc = vtxColor[d2w];
-                    if(d2wc!=-1) Mask[d2wc] = v;
-                }
-            }
-            
-            INT c;
-            for (c=0; c!=MaxColorCapacity; c++)
-                if(Mask[c]!=v)
-                    break;
-            vtxColor[v] = c;
-        } //end for
-    }//end of omp parallel
-    tim_Color  += omp_get_wtime();    
-
-    // Phase - Detect conflicts
-    tim_Detect =- omp_get_wtime();
-    #pragma omp parallel
-    {
-        const int tid=omp_get_thread_num();
-        vector<INT>& Q = QQ[tid];
-        INT num_leftover = 0;
-        const INT Nloc = Q.size();
-        for(INT vit=0; vit<Nloc; vit++){
-            const auto v  = Q[vit];
-            const auto vc = vtxColor[v];
-            //unordered_set<INT> d012_neighbors={v};
-            bool b_find_conflict=false;
-            for(INT d1wit=verPtr[v]; d1wit!=verPtr[v+1]; d1wit++) { // d1 neighbors
-                const auto d1w = verVal[d1wit];
-                if(v>=d1w) continue;   // check conflict is little brother's job
-                if(vc == vtxColor[d1w]) {
-                    Q[num_leftover++]=v;
-                    vtxColor[v]=-1;
-                    b_find_conflict=true;
-                    break;
-                }
-                //d012_neighbors.insert(d1w);
-            }
-            if(b_find_conflict) continue;
-            for(INT d1wit=verPtr[v]; d1wit!=verPtr[v+1]; d1wit++) {
-                const auto d1w = verVal[d1wit];
-                for(INT d2wit=verPtr[d1w]; d2wit!=verPtr[d1w+1]; d2wit++) { // d2 neighbors
-                    const auto d2w = verVal[d2wit];
-                    if(v>=d2w) continue; // check conflict is little brother's job
-                    //if(d012_neighbors.find(d2w)!=d012_neighbors.end()) continue;
-                    if(vc == vtxColor[d2w]) {
-                        Q[num_leftover++]=v;
-                        vtxColor[v]=-1;
-                        b_find_conflict=true;
-                        break;
-                    }
-                }
-                if(b_find_conflict) break;
-            } //end for d1wit
-        } //end for v
-        Q.resize(num_leftover);
-    } //end of omp parallel
-    tim_Detect  += omp_get_wtime();
-   
-    // Phase - Resolve conflicts
-    tim_Recolor =- omp_get_wtime();
-    vector<INT> Mark; Mark.assign(MaxColorCapacity,-1);
-    for(int tid=0;tid<nT; tid++){
-        nConflicts+=QQ[tid].size();
-        for(const auto v: QQ[tid]){
-            //Mark.assign(MaxColorCapacity, -1);
-            //unordered_set<INT> b012_neighbors={v};
-            for(auto d1wit=verPtr[v]; d1wit!=verPtr[v+1]; d1wit++) { // d1 neighbors
-                const auto d1w =verVal[d1wit];
-                const auto d1wc=vtxColor[d1w];
-                if(d1wc!=-1) Mark[d1wc]=v;
-                //b012_neighbors.insert(d1w);
-            }
-            for(auto d1wit=verPtr[v]; d1wit!=verPtr[v+1]; d1wit++) { 
-                const auto d1w = verVal[d1wit];
-                for(auto d2wit=verPtr[d1w]; d2wit!=verPtr[d1w+1]; d2wit++) { // d2 neighbors
-                    const auto d2w =verVal[d2wit];
-                    //if(b012_neighbors.find(d2w)!=b012_neighbors.end()) continue;
-                    const auto d2wc=vtxColor[d2w];
-                    if(d2wc!=-1) Mark[d2wc]=v;
-                    //b012_neighbors.insert(d2w);
-                }
-            }
-            INT c;
-            for (c=0; c!=MaxColorCapacity; c++)
-                if(Mark[c]!=v)
-                    break;
-            vtxColor[v] = c;
-        }
-    }
-    tim_Recolor += omp_get_wtime();
-
-    // get number of colors
-    tim_MxC = -omp_get_wtime();
-    #pragma omp parallel for reduction(max:colors)
-    for(INT i=0; i<N; i++){
-        colors = max(colors, vtxColor[i]);
-    }
-    colors++; //number of colors, 
-    tim_MxC += omp_get_wtime();
-
-    tim_Tot = tim_Color+tim_Detect+tim_Recolor+tim_MxC;
-
-    printf("@D2GM3PLO_%s_nT_c_T_TColor_TDetect_TRecolor_TMxC_nCnf\t", order_short_tag.c_str());
-    printf("%d\t",  nT);    
-    printf("%d\t",  colors);    
-    printf("%lf\t", tim_Tot);
-    printf("%lf\t", tim_Color);
-    printf("%lf\t", tim_Detect);
-    printf("%lf\t", tim_Recolor);
-    printf("%lf\t", tim_MxC);
-    printf("%d\n", nConflicts);
-    return _TRUE;   
-}
-
-
-
-// ============================================================================
-// Distance Two Coloring Openmp Multiple Phase Coloring Local Ordering
-// ============================================================================
-int SMPGCInterface::D2_OMP_GMMP_LO(int nT, INT &colors, vector<INT>&vtxColor, const string& local_ordering){
-    if(nT<=0) { printf("Warning, number of threads changed from %d to 1\n",nT); nT=1; }
-    omp_set_num_threads(nT);
-    
-    const int DEF_ORDER_LF = 1;
-    const int DEF_ORDER_SL = 2;
-    const int DEF_ORDER_SL1 = 21;
-    //const int DEF_ORDER_DY = 3;
-    //const int DEF_ORDER_ID = 4;
-    //const int DEF_ORDER_NT = 5;
-    //const int DEF_ORDER_RD = 6;
-    const int DEF_ORDER_ERR=-1;
-
-    int order_option = DEF_ORDER_ERR;
-    string order_short_tag="Non";
-    if(local_ordering=="LARGEST_FIRST"){
-        order_short_tag = "LF";
-        order_option    = DEF_ORDER_LF; 
-    }
-    else if(local_ordering=="SMALLEST_LAST"){
-        order_short_tag = "SL";
-        order_option    = DEF_ORDER_SL;
-    }
-    else if(local_ordering=="SMALLEST_LAST1"){
-        order_short_tag = "SL1";
-        order_option    = DEF_ORDER_SL1;
-    }
-
-
-    double tim_Tot=0;                          // run time
-    double tim_Color  = 0;                     // run time
-    double tim_Detect = 0;                     // run time
-    double tim_Sumconf= 0;                     // run time
-    double tim_MxC    = 0;                     // run time
-    INT    nConflicts = 0;                     // Number of conflicts 
-    int    nLoops     = 0;
-
-    const INT N = nodes();                     //number of vertex
-    const INT MaxColorCapacity =min( maxDeg()*(maxDeg()-1)+1, N); //maxDegree
-    const vector<INT>& verPtr = CSRia();
-    const vector<INT>& verVal = CSRja();
-    const vector<INT>& orig_ordered_vertex = ordered_vertex(); 
-    
-    colors=0;                       
-    vtxColor.assign(N, -1);
-
-
-    vector<vector<INT>> QQ(nT);
-    {
-        vector<int> lens (nT, N/nT);
-        for(int i=0; i<N%nT; i++)
-            lens[i]++;
-        vector<int> begs(nT+1,0);
-        for(int i=1; i<=nT; i++)
-            begs[i]=begs[i-1]+lens[i-1];
-        for(int i=0; i<nT; i++){
-            QQ[i].reserve(N/nT+1+16);
-            QQ[i].assign(orig_ordered_vertex.begin()+begs[i], orig_ordered_vertex.begin()+begs[i+1]); 
-        }
-    }
-
-    INT num_un_colored_vertices=N;
-    while(num_un_colored_vertices!=0){
-        // Phase - Pseudo Coloring
-        tim_Color -= omp_get_wtime();
-        #pragma omp parallel
-        {
-            const int tid = omp_get_thread_num();
-            vector<INT> &Q = QQ[tid];
-            if(order_option==DEF_ORDER_LF)
-                local_largest_degree_first_ordering(Q);
-            else if(order_option==DEF_ORDER_SL)
-                local_smallest_degree_last_ordering(Q);
-            else {
-                local_smallest_degree_last_ordering_B1a(Q);
-            }
-            
-            vector<INT> Mask; Mask.assign(MaxColorCapacity,-1);
-            const INT Nloc = Q.size();
-            for(INT vit=0; vit<Nloc; vit++) {
-                const auto v=Q[vit];
-                //unordered_set<INT> d012_neighbors={v};
-                //Mask.assign(MaxColorCapacity, -1);
-                for(INT d1wit=verPtr[v]; d1wit!=verPtr[v+1]; d1wit++ ) {  // d1 neighbors
-                    const auto d1w  = verVal[d1wit];
-                    const auto d1wc = vtxColor[d1w];
-                    if(d1wc!=-1) Mask[d1wc] = v;
-                    //d012_neighbors.insert(d1w);
-                }
-                for(INT d1wit=verPtr[v]; d1wit!=verPtr[v+1]; d1wit++) {
-                    const auto d1w = verVal[d1wit];
-                    for(INT d2wit=verPtr[d1w]; d2wit!=verPtr[d1w+1]; d2wit++) { // d2 neighbors
-                        const auto d2w  = verVal[d2wit];
-                        //if(d012_neighbors.find(d2w)!=d012_neighbors.end()) continue;
-                        const auto d2wc = vtxColor[d2w];
-                        if(d2wc!=-1) Mask[d2wc] = v;
-                    }
-                }
-                INT c;
-                for (c=0; c!=MaxColorCapacity; c++)
-                    if(Mask[c]!=v)
-                        break;
-                vtxColor[v] = c;
-            } //end for
-        }//end of omp parallel
-        tim_Color  += omp_get_wtime();    
-
-        // Phase - Detect Conflicts
-        tim_Detect -= omp_get_wtime();
-        #pragma omp parallel
-        {
-            const int tid=omp_get_thread_num();
-            vector<INT>& Q = QQ[tid];
-            INT num_leftover = 0;
-            const INT Nloc = Q.size();
-            for(INT vit=0; vit<Nloc; vit++){
-                const auto v  = Q[vit];
-                const auto vc = vtxColor[v];
-                //unordered_set<INT> d012_neighbors={v};
-                bool b_find_conflict=false;
-                for(INT d1wit=verPtr[v]; d1wit!=verPtr[v+1]; d1wit++) { // d1 neighbors
-                    const auto d1w = verVal[d1wit];
-                    if(v>=d1w) continue;   // check conflict is little brother's job
-                    if(vc == vtxColor[d1w]) {
-                        Q[num_leftover++]=v;
-                        vtxColor[v]=-1;
-                        b_find_conflict=true;
-                        break;
-                    }
-                    //d012_neighbors.insert(d1w);
-                }
-                if(b_find_conflict) continue;
-                for(INT d1wit=verPtr[v]; d1wit!=verPtr[v+1]; d1wit++) {
-                    const auto d1w = verVal[d1wit];
-                    for(INT d2wit=verPtr[d1w]; d2wit!=verPtr[d1w+1]; d2wit++) { // d2 neighbors
-                        const auto d2w = verVal[d2wit];
-                        if(v>=d2w) continue; // check conflict is little brother's job
-                        //if(d012_neighbors.find(d2w)!=d012_neighbors.end()) continue;
-                        if(vc == vtxColor[d2w]) {
-                            Q[num_leftover++]=v;
-                            vtxColor[v]=-1;
-                            b_find_conflict=true;
-                            break;
-                        }
-                    }
-                    if(b_find_conflict) break;
-                } //end for d1wit
-            } //end for v
-            Q.resize(num_leftover);
-        } //end of omp parallel
-        tim_Detect  += omp_get_wtime();
-    
-
-        tim_Sumconf -= omp_get_wtime();
-        num_un_colored_vertices=0;
-        for(int tid=0;tid<nT; tid++)
-            num_un_colored_vertices+=QQ[tid].size();
-        nConflicts+=num_un_colored_vertices;
-        nLoops++;
-        tim_Sumconf += omp_get_wtime();
-    }
-
-    // get number of colors
-    tim_MxC = -omp_get_wtime();
-    #pragma omp parallel for reduction(max:colors)
-    for(INT i=0; i<N; i++){
-        colors = max(colors, vtxColor[i]);
-    }
-    colors++; //number of colors, 
-    tim_MxC += omp_get_wtime();
-
-    tim_Tot = tim_Color+tim_Detect+tim_Sumconf+tim_MxC;
-
-    printf("@D2GMMPLO_%s_nT_c_T_TColor_TDetect_TSumconf_TMxC_nCnf_nLoop\t",order_short_tag.c_str());
-    printf("%d\t",  nT);    
-    printf("%d\t",  colors);    
-    printf("%lf\t", tim_Tot);
-    printf("%lf\t", tim_Color);
-    printf("%lf\t", tim_Detect);
-    printf("%lf\t", tim_Sumconf);
-    printf("%lf\t", tim_MxC);
-    printf("%d\t", nConflicts);
-    printf("%d\n" , nLoops);
-    return _TRUE;   
-}
-
-
-
 
 
 
