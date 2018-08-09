@@ -49,8 +49,7 @@ public: // Constructions
         SMPGCColoring& operator=(const SMPGCColoring&)=delete;
 
 public: // API
-    int Coloring(int nT, const string& method);
-    int Coloring(int nT, const string& method, const string &s_option, const int switch_iter);
+    int Coloring(int nT, const string& method, const int switch_iter);
     
     int get_num_colors(){ return m_total_num_colors; } 
     const vector<int>& get_vertex_colors() const { return m_vertex_color; }
@@ -74,7 +73,7 @@ public: // API
     int D2_OMP_GMMP   (int nT, int&color, vector<int>&vtxColors, const int local_order);
     
     // inner Algorithm for Hybird 
-    inline void hybrid_GM3P(const int nT, vector<int>&vtxColors, vector<vector<int>>&Q const int local_order); 
+    inline void hybrid_GM3P(const int nT, vector<int>&vtxColors, vector<vector<int>>&Q, const int local_order); 
     inline void hybrid_GMMP(const int nT, vector<int>&vtxColors, vector<vector<int>>&Q, const int local_order); 
     inline void hybrid_Serial(const int nT, vector<int>&vtxColors, vector<vector<int>>&Q, const int local_order); 
     

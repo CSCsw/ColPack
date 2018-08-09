@@ -40,9 +40,9 @@ public: // APIs
     int    max_degree() const { return m_max_degree; }
     int    min_degree() const { return m_min_degree; }
 
-    vector<int>&    get_CSR_ia() const { return m_ia; }
-    vector<int>&    get_CSR_ja() const { return m_ja; }
-    vector<double>& get_CSR_a () const { return m_a;  }
+    const vector<int>&    get_CSR_ia() const { return m_ia; }
+    const vector<int>&    get_CSR_ja() const { return m_ja; }
+    const vector<double>& get_CSR_a () const { return m_a;  }
     
     virtual void dump();
 

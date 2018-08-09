@@ -52,42 +52,42 @@ int SMPGCColoring::Coloring(int nT, const string& method, const int switch_iter=
                 else if(right.compare("RD")==0)   return D1_OMP_GM3P(nT, m_total_num_colors, m_vertex_color, ORDER_RANDOM);
                 else if(right.compare("NONE")==0) return D1_OMP_GM3P(nT, m_total_num_colors, m_vertex_color, ORDER_NONE);
             }
-            else if(md.compare("GMMP_")==0) {
+            else if(left.compare("GMMP_")==0) {
                 if     (right.compare("LF")==0)   return D1_OMP_GMMP(nT, m_total_num_colors, m_vertex_color, ORDER_LARGEST_FIRST);
                 else if(right.compare("SL")==0)   return D1_OMP_GMMP(nT, m_total_num_colors, m_vertex_color, ORDER_SMALLEST_LAST);
                 else if(right.compare("NT")==0)   return D1_OMP_GMMP(nT, m_total_num_colors, m_vertex_color, ORDER_NATURAL);
                 else if(right.compare("RD")==0)   return D1_OMP_GMMP(nT, m_total_num_colors, m_vertex_color, ORDER_RANDOM);
                 else if(right.compare("NONE")==0) return D1_OMP_GMMP(nT, m_total_num_colors, m_vertex_color, ORDER_NONE);
             }
-            else if(md.compare("JP_")==0) {
+            else if(left.compare("JP_")==0) {
                 if     (right.compare("LF")==0)   return D1_OMP_JP(nT, m_total_num_colors, m_vertex_color, ORDER_LARGEST_FIRST);
                 else if(right.compare("SL")==0)   return D1_OMP_JP(nT, m_total_num_colors, m_vertex_color, ORDER_SMALLEST_LAST);
                 else if(right.compare("NT")==0)   return D1_OMP_JP(nT, m_total_num_colors, m_vertex_color, ORDER_NATURAL);
                 else if(right.compare("RD")==0)   return D1_OMP_JP(nT, m_total_num_colors, m_vertex_color, ORDER_RANDOM);
                 else if(right.compare("NONE")==0) return D1_OMP_JP(nT, m_total_num_colors, m_vertex_color, ORDER_NONE);
             }
-            else if(md.compare("MTJP_")==0) {
+            else if(left.compare("MTJP_")==0) {
                 if     (right.compare("LF")==0)   return D1_OMP_MTJP(nT, m_total_num_colors, m_vertex_color, ORDER_LARGEST_FIRST);
                 else if(right.compare("SL")==0)   return D1_OMP_MTJP(nT, m_total_num_colors, m_vertex_color, ORDER_SMALLEST_LAST);
                 else if(right.compare("NT")==0)   return D1_OMP_MTJP(nT, m_total_num_colors, m_vertex_color, ORDER_NATURAL);
                 else if(right.compare("RD")==0)   return D1_OMP_MTJP(nT, m_total_num_colors, m_vertex_color, ORDER_RANDOM);
                 else if(right.compare("NONE")==0) return D1_OMP_MTJP(nT, m_total_num_colors, m_vertex_color, ORDER_NONE);
             }
-            else if(md.compare("LB_")==0) {
+            else if(left.compare("LB_")==0) {
                 if     (right.compare("LF")==0)   return D1_OMP_LB(nT, m_total_num_colors, m_vertex_color, ORDER_LARGEST_FIRST);
                 else if(right.compare("SL")==0)   return D1_OMP_LB(nT, m_total_num_colors, m_vertex_color, ORDER_SMALLEST_LAST);
                 else if(right.compare("NT")==0)   return D1_OMP_LB(nT, m_total_num_colors, m_vertex_color, ORDER_NATURAL);
                 else if(right.compare("RD")==0)   return D1_OMP_LB(nT, m_total_num_colors, m_vertex_color, ORDER_RANDOM);
                 else if(right.compare("NONE")==0) return D1_OMP_LB(nT, m_total_num_colors, m_vertex_color, ORDER_NONE);
             }
-            else if(md.compare("SERIAL_")==0) {
-                if     (right.compare("LF")==0)   return D1_Serial(m_total_num_colors, m_vertex_color, ORDER_LARGEST_FIRST);
-                else if(right.compare("SL")==0)   return D1_Serial(m_total_num_colors, m_vertex_color, ORDER_SMALLEST_LAST);
-                else if(right.compare("NT")==0)   return D1_Serial(m_total_num_colors, m_vertex_color, ORDER_NATURAL);
-                else if(right.compare("RD")==0)   return D1_Serial(m_total_num_colors, m_vertex_color, ORDER_RANDOM);
-                else if(right.compare("NONE")==0) return D1_Serial(m_total_num_colors, m_vertex_color, ORDER_NONE);
+            else if(left.compare("SERIAL_")==0) {
+                if     (right.compare("LF")==0)   return D1_serial(m_total_num_colors, m_vertex_color, ORDER_LARGEST_FIRST);
+                else if(right.compare("SL")==0)   return D1_serial(m_total_num_colors, m_vertex_color, ORDER_SMALLEST_LAST);
+                else if(right.compare("NT")==0)   return D1_serial(m_total_num_colors, m_vertex_color, ORDER_NATURAL);
+                else if(right.compare("RD")==0)   return D1_serial(m_total_num_colors, m_vertex_color, ORDER_RANDOM);
+                else if(right.compare("NONE")==0) return D1_serial(m_total_num_colors, m_vertex_color, ORDER_NONE);
             }
-            else if(md.compare("HBJP_")==0) {
+            else if(left.compare("HBJP_")==0) {
                 int local_order=ORDER_NONE;
                 iter_under_line = right.find('-');
                 if(iter_under_line==string::npos){
@@ -105,11 +105,11 @@ int SMPGCColoring::Coloring(int nT, const string& method, const int switch_iter=
                     else if(right.compare("NONE")==0) local_order=ORDER_NONE;
                     else { printf("Error local_order '%s' in method '%s' is not supported.\n", right.c_str(), method.c_str()); exit(1);}
                 }
-                if     (left.compare("GM3P")==0) return D1_OMP_HBJP(nT, m_total_num_colors, m_vertex_color, local_order, HB_GM3P, switch_iter);
-                else if(left.compare("GMMP")==0) return D1_OMP_HBJP(nT, m_total_num_colors, m_vertex_color, local_order, HB_GMMP, switch_iter);
-                else if(left.compare("SERIAL")==0) return D1_OMP_HBJP(nT, m_total_num_colors, m_vertex_color, local_order, HB_GMMP, switch_iter);
+                if     (left.compare("GM3P")==0) return D1_OMP_HBJP(nT, m_total_num_colors, m_vertex_color, local_order, HYBRID_GM3P, switch_iter);
+                else if(left.compare("GMMP")==0) return D1_OMP_HBJP(nT, m_total_num_colors, m_vertex_color, local_order, HYBRID_GMMP, switch_iter);
+                else if(left.compare("SERIAL")==0) return D1_OMP_HBJP(nT, m_total_num_colors, m_vertex_color, local_order, HYBRID_GMMP, switch_iter);
             }
-            else if(md.compare("HBMTJP_")==0) {
+            else if(left.compare("HBMTJP_")==0) {
                 int local_order=ORDER_NONE;
                 iter_under_line = right.find('-');
                 if(iter_under_line==string::npos){
@@ -127,9 +127,9 @@ int SMPGCColoring::Coloring(int nT, const string& method, const int switch_iter=
                     else if(right.compare("NONE")==0) local_order=ORDER_NONE;
                     else { printf("Error local_order '%s' in method '%s' is not supported.\n", right.c_str(), method.c_str()); exit(1);}
                 }
-                if     (left.compare("GM3P")==0) return D1_OMP_HBMTJP(nT, m_total_num_colors, m_vertex_color, local_order, HB_GM3P, switch_iter);
-                else if(left.compare("GMMP")==0) return D1_OMP_HBMTJP(nT, m_total_num_colors, m_vertex_color, local_order, HB_GMMP, switch_iter);
-                else if(left.compare("SERIAL")==0) return D1_OMP_HBMTJP(nT, m_total_num_colors, m_vertex_color, local_order, HB_GMMP, switch_iter);
+                if     (left.compare("GM3P")==0) return D1_OMP_HBMTJP(nT, m_total_num_colors, m_vertex_color, local_order, HYBRID_GM3P, switch_iter);
+                else if(left.compare("GMMP")==0) return D1_OMP_HBMTJP(nT, m_total_num_colors, m_vertex_color, local_order, HYBRID_GMMP, switch_iter);
+                else if(left.compare("SERIAL")==0) return D1_OMP_HBMTJP(nT, m_total_num_colors, m_vertex_color, local_order, HYBRID_GMMP, switch_iter);
            
             }
         }

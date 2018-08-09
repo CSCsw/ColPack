@@ -10,7 +10,7 @@
 #include <iostream>
 #include <omp.h>
 #include "ColPackHeaders.h" //#include "GraphOrdering.h"
-#include "SMPGCCore.h"
+#include "SMPGCGraph.h"
 #include <random>
 #include <algorithm>
 
