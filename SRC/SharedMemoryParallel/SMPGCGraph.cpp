@@ -17,8 +17,6 @@ SMPGCGraph::SMPGCGraph(const string& graph_name, const string& format, double* i
     m_graph_name = graph_name;
     if(format=="mm" || format == "MM")
         do_read_MM_struct(m_graph_name, m_ia, m_ja, &m_max_degree, &m_min_degree, &m_avg_degree, iotime);
-    else if(format=="binary")
-        do_read_Binary_struct(m_graph_name, m_ia, m_ja, &m_max_degree, &m_min_degree, &m_avg_degree, iotime);
     else{
         printf("Error! SMPGCCore() tried read graph \"%s\" with format \"%s\". But it is not supported\n", graph_name.c_str(), format.c_str());
         exit(1);
@@ -56,20 +54,20 @@ void SMPGCGraph::do_read_MM_struct(const string& graph_name, vector<int>&ia, vec
     getline(in, line);
     iss.str(line);
     if( !(iss>>word) || word!="\%\%MatrixMarket" || !(iss>>word) || word!="matrix") {
-        printf("Error! SMPGCCore() read matrix market file \"%s\". But it is not matrix market format.\n", graph_name.c_str());
+        printf("Error! SMPGCGraph() read matrix market file \"%s\". But it is not matrix market format.\n", graph_name.c_str());
         exit(1);
     }
     if( !(iss>>word) || word!="coordinate") {
-        printf("Error! SMPGCCore() %s is a dense graph\"%s\". Dense graph is a complete graph. Chromatic number will be simply N+1.\n", graph_name.c_str());
+        printf("Error! SMPGCGraph() read \"%s\" is a dense graph. Dense graph is a complete graph. Its chromatic number will be simply N+1.\n", graph_name.c_str());
         exit(1);
     }
     if( !(iss>>word) || word=="complex") {
-        printf("Error! SMPGCCore() graph \"%s\" is a complex matrix. Which is not supported.\n", graph_name.c_str());
+        printf("Error! SMPGCGraph() graph \"%s\" is a complex matrix. Which is not supported.\n", graph_name.c_str());
         exit(1);
     }
     if( !(iss>>word) || word=="general") {
         bSymmetric = false;
-        printf("Warning! SMPGCCore() grpah \"%s\" is not symmetric.\n", graph_name.c_str());
+        printf("Warning! SMPGCGraph() grpah \"%s\" is not symmetric.\n", graph_name.c_str());
     }
 
     // parse dimension
@@ -80,16 +78,21 @@ void SMPGCGraph::do_read_MM_struct(const string& graph_name, vector<int>&ia, vec
         break;
     }
     if(!in){ 
-        printf("Error! SMPGCCore() cannot get graph \"%s\" dimension.\n", graph_name.c_str());
+        printf("Error! SMPGCCore() cannot get graph \"%s\" dimension. You should make sure it is at least \"Structural Symmetric\"\n", graph_name.c_str());
         exit(1);
     }
     iss.clear(); iss.str(line);
     iss>>row_expect>>col_expect>>entry_expect;
-
+    
+    if(row_expect!=col_expect) {
+        printf("Error! SMPGCGraph() read the file \"%s\", but the file is a regular graph. row%d!=col%d\n", graph_name.c_str(), row_expect, col_expect);
+        exit(1);
+    }
+    
     // read graph into G
     unordered_map<int, vector<int>> G;
     int row, col;
-    ifstream fp(graph_name.c_str(), "r");
+    ifstream fp(graph_name.c_str());
     while(in&&entry_encount<=entry_expect){
         getline(in,line);
         if(line=="" || line[0]=='%')
@@ -103,15 +106,13 @@ void SMPGCGraph::do_read_MM_struct(const string& graph_name, vector<int>&ia, vec
         if(bSymmetric){
             G[col].push_back(row);
             if(row<col){
-                fclose(fp);
-                printf("Error! SMPGCCore() read \"%s\", but find non zero entry (row %s, col %s) in upper triangular part in a symmetric graph. This is not allowed by matrix market standard.\n", graph_name.c_str(), row+1, col+1);
+                printf("Error! SMPGCCore() read \"%s\", but find non zero entry (row %d, col %d) in upper triangular part in a symmetric graph. This is not allowed by matrix market standard.\n", graph_name.c_str(), row+1, col+1);
                 exit(1);
             }
         }
     }
     if(entry_encount != entry_expect){
         printf("Error! graph \"%s\" expected has %d entries, but we have found %d. Check the file.\n", graph_name.c_str(), entry_expect, entry_encount);
-        fclose(fp); fp=nullptr;
         exit(1);
     }
     for(auto it=G.begin();  it!=G.end(); it++) 
@@ -119,7 +120,7 @@ void SMPGCGraph::do_read_MM_struct(const string& graph_name, vector<int>&ia, vec
 
     // G into CSR
     ia.push_back(ja.size());
-    for(int i=0; i<N; i++){
+    for(int i=0; i<row_expect; i++){
         auto it=G.find(i);
         if(it!=G.end()) ja.insert(ja.end(), (it->second).begin(), (it->second).end());
         ia.push_back(ja.size());
@@ -147,19 +148,5 @@ void SMPGCGraph::do_read_MM_struct(const string& graph_name, vector<int>&ia, vec
 //
 // ============================================================================
 
-//void SMPGCCore::do_read_Binary_struct(const string&graph_name, vector<INT>&ia_, vector<INT>&ja_, INT* maxDeg_,INT* minDeg_,double* avgDeg_,double* iotime){
-//    return;
-//}
-//void SMPGCCore::do_write_Binary_struct(const string&graph_name, vector<INT>&ia_, vector<INT>&ja_,double* iotime){
-//    return;
-//}
-
-
-// ============================================================================
-// dump information
-// ============================================================================
-void SMPGCGraph::dump(){
-    ;
-}
 
 

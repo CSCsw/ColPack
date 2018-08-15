@@ -74,8 +74,6 @@ protected: // API: local ordering
     //void DynamicLargestDegreeFirstOrdering(vector<INT>& vtxs, INT N);
     //void IncidenceDegreeOrdering(vector<INT>& vtxs, INT N);
     //void LogOrdering(vector<INT>& vtxs, INT N);
-    
-    virtual void dump();
 
 protected: // members
     vector<int> m_global_ordered_vertex;   

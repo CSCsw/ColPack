@@ -7,7 +7,7 @@
 
 #ifndef SMPGCDEFINE_H
 #define SMPGCDEFINE_H
-
+#include <string>
 // ============================================================================
 // SMPGC: Shared Memory Parallel Graph Coloring
 // ----------------------------------------------------------------------------
@@ -50,24 +50,25 @@ class SMPGC{
     //#endif
 
 public:
-    static const int RAND_SEED ;
+    static const int RAND_SEED           = 5489u;
 
-    static const int HASH_SEED ;
-    static const int HASH_SHIFT;
-    static const int HASH_NUM_HASH;
+    static const int HASH_SEED           = 5489u;
+    static const int HASH_SHIFT          = 0XC2A50F;
+    static const int HASH_NUM_HASH       = 4;
 
-    static const string FORMAT_MM;
+    static const std::string FORMAT_MM   ="MM"      ;
+    static const std::string FORMAT_BINARY="BINARY"    ;
 
-    static const int ORDER_NONE;
-    static const int ORDER_NATURAL;
-    static const int ORDER_RANDOM;
-    static const int ORDER_LARGEST_FIRST;
-    static const int ORDER_SMALLEST_LAST;
+    static const int ORDER_NONE          = 0;
+    static const int ORDER_NATURAL       = 1;
+    static const int ORDER_RANDOM        = 2;
+    static const int ORDER_LARGEST_FIRST = 3;
+    static const int ORDER_SMALLEST_LAST = 4;
 
-    static const int HYBRID_GM3P ;
-    static const int HYBRID_GMMP ;
-    static const int HYBRID_GREEDY ;
-    static const int HYBRID_STREAM ;
+    static const int HYBRID_GM3P         = 1;
+    static const int HYBRID_GMMP         = 2;
+    static const int HYBRID_SERIAL       = 3;
+    static const int HYBRID_STREAM       = 4;
 
 
 public:

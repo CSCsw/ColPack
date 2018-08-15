@@ -44,7 +44,6 @@ public: // APIs
     const vector<int>&    get_CSR_ja() const { return m_ja; }
     const vector<double>& get_CSR_a () const { return m_a;  }
     
-    virtual void dump();
 
 protected: // implements
     virtual void do_read_MM_struct(const string& fname, vector<int>&vi, vector<int>&vj, int*p_maxdeg, int*p_mindeg, double *p_avgdeg, double*iotime);

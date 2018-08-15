@@ -11,8 +11,8 @@
 #include <random> //c++11 random
 using namespace std;
 using namespace ColPack;
-
-
+#include <unordered_map>
+#include <unordered_set>
 // ============================================================================
 // Interface
 // ============================================================================
@@ -141,7 +141,7 @@ int SMPGCColoring::Coloring(int nT, const string& method, const int switch_iter=
         const string mthd = method.substr(17);
         const auto iter_under_line = mthd.find('_');
         if(iter_under_line==string::npos){
-            if     (mthd.compare("GM3P")==0) return D2_OMP_GM3P(nT, m_total_num_colors, m_vertex_color);
+            if     (mthd.compare("GM3P")==0) return D2_OMP_GM3P(nT, m_total_num_colors, m_vertex_color, ORDER_NONE);
             else if(mthd.compare("GMMP")==0) return D2_OMP_GMMP(nT, m_total_num_colors, m_vertex_color);
             else if(mthd.compare("SERIAL")==0) return D2_serial(m_total_num_colors, m_vertex_color);
             else { printf("Error! method \"%s\" is not supported.\n", method.c_str()); exit(1); }
@@ -160,7 +160,7 @@ int SMPGCColoring::Coloring(int nT, const string& method, const int switch_iter=
             if     (left.compare("GM3P")==0) 
                 return D2_OMP_GM3P(nT, m_total_num_colors, m_vertex_color, local_order);
             else if(left.compare("GMMP")==0)
-                return D2_OMP_GMMP(nT< m_total_num_colors, m_vertex_color, local_order);
+                return D2_OMP_GMMP(nT, m_total_num_colors, m_vertex_color, local_order);
         }
         printf("Error! method \"%s\" with \"%s\" is not support.\n", method.c_str(), mthd.c_str());
         exit(1);
@@ -174,8 +174,8 @@ int SMPGCColoring::Coloring(int nT, const string& method, const int switch_iter=
 // ============================================================================
 // Construction
 // ============================================================================
-SMPGCColoring::SMPGCInterface(const string& graph_name)
-: SMPGCOrdering(graph_name, FORMAT_MM, nullptr, "NATURAL",nullptr) {
+SMPGCColoring::SMPGCColoring(const string& graph_name)
+: SMPGCOrdering(graph_name, FORMAT_MM, nullptr, "NATURAL", nullptr) {
     m_vertex_color.reserve(num_nodes());
     m_total_num_colors=0;
 }
@@ -183,7 +183,7 @@ SMPGCColoring::SMPGCInterface(const string& graph_name)
 // ============================================================================
 // Construction
 // ============================================================================
-SMPGCColoring::SMPGCInterface(const string& graph_name, const string& fmt, double* iotime, const string& glb_order="NATURAL", double *ordtime=nullptr) 
+SMPGCColoring::SMPGCColoring(const string& graph_name, const string& fmt, double* iotime, const string& glb_order="NATURAL", double *ordtime=nullptr) 
 : SMPGCOrdering(graph_name, fmt, iotime, glb_order, ordtime){
     m_vertex_color.reserve(num_nodes());
     m_total_num_colors=0;
@@ -193,7 +193,7 @@ SMPGCColoring::SMPGCInterface(const string& graph_name, const string& fmt, doubl
 // ============================================================================
 // check if the graph is correct colored
 // ============================================================================
-int SMPGCColoring::cnt_d1conflict(const vector<INT>& vtxColorConst, bool bVerbose=false){
+int SMPGCColoring::cnt_d1conflict(const vector<int>& vtxColorConst, bool bVerbose=false){
     vector<int>         vtxColor(vtxColorConst);
     const int N         = num_nodes();
     const vector<int>& vtxPtr = get_CSR_ia();
@@ -237,7 +237,7 @@ int SMPGCColoring::cnt_d2conflict(const vector<int>&vtxColorConst, bool bVerbose
         vector<int> vtxColor(vtxColorConst);
         const int N = num_nodes();
         const vector<int>& vtxPtr = get_CSR_ia();
-        const vector<int>& vtxVal = get+CSR_ja();
+        const vector<int>& vtxVal = get_CSR_ja();
         
         vector<int>                            uncolored_nodes;
         unordered_map<int, unordered_set<int>> conflicts_nodes;
@@ -267,7 +267,7 @@ int SMPGCColoring::cnt_d2conflict(const vector<int>&vtxColorConst, bool bVerbose
         }
         if(!uncolored_nodes.empty()){
             printf("uncolored_nodes[%d]: ", (int)uncolored_nodes.size());
-            for(int i=0; i<min(uncolored_nodes.size(), 10); i++) 
+            for(int i=0; i<min((int)uncolored_nodes.size(), 10); i++) 
                 printf("\t%d", uncolored_nodes[i]);
             printf("\n");
         }

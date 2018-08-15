@@ -15,14 +15,13 @@ using namespace ColPack;
 // Construction
 // ============================================================================
 SMPGCOrdering::SMPGCOrdering(const string& graph_name, const string& fmt, double*iotime,  const string& order="NATURAL", double* ordtime=nullptr) 
-: SMPGCGraph(graph_name, fmt, iotime), mt_(SMPGC::RAND_SEED) {
-    const int N = SMPGCCore::num_nodes();
+: SMPGCGraph(graph_name, fmt, iotime), m_mt(SMPGC::RAND_SEED) {
+    const int N = num_nodes();
     m_global_ordered_vertex.assign(N,0);
     global_ordering(order, ordtime);
 }
 
 SMPGCOrdering::~SMPGCOrdering(){}
-void SMPGCOrdering::dump(){}
 
 
 // ============================================================================
@@ -46,7 +45,7 @@ void SMPGCOrdering::global_ordering(const string& order="NATURAL", double * ordt
 // Natural is 0 1 2 3 4 5 6 7 ...
 // ============================================================================
 void SMPGCOrdering::global_natural_ordering(){
-    const int N = SMPGCCore::num_nodes();
+    const int N = num_nodes();
     m_global_ordered_vertex.resize(N);
     for(int i=0; i<N; i++) m_global_ordered_vertex[i]=i;
     m_global_ordered_method = "NATURAL";
@@ -56,7 +55,7 @@ void SMPGCOrdering::global_natural_ordering(){
 // Random is shuffle to natural
 // ============================================================================
 void SMPGCOrdering::global_random_ordering () {
-    const int N = SMPGCCore::num_nodes();
+    const int N = num_nodes();
     m_global_ordered_vertex.resize(N);
     for(int i=0; i<N; i++) m_global_ordered_vertex[i]=i;
     if(N<=1) return;
@@ -103,7 +102,7 @@ void SMPGCOrdering::local_largest_degree_first_ordering(vector<int>& vtxs, const
         GroupedVertexDegree[deg].push_back(v);
     }
     
-    const int pos=beg;
+    int pos=beg;
     for(int d=MaxDegreeP1-1, it=MaxDegreeP1; it!=0; it--, d--){
         for(const auto v : GroupedVertexDegree[d]){
             vtxs[pos++]=v;
@@ -171,8 +170,8 @@ void SMPGCOrdering::local_smallest_degree_last_ordering(vector<int>& vtxs){
     vector<int> Vertex2Degree(N,-1);
     vector<int> Vertex2Index(N,-1);
     vector<vector<int>> GroupedVertexDegree(MaxDegreeP1);
-    INT max_deg = 0;
-    INT min_deg = MaxDegreeP1-1;
+    int max_deg = 0;
+    int min_deg = MaxDegreeP1-1;
     // set up environment
     for(const auto v: vtxs){ 
         const int deg = verPtr[v+1]-verPtr[v];
@@ -223,7 +222,7 @@ void SMPGCOrdering::local_smallest_degree_last_ordering(vector<int>& vtxs){
     return;    
 }
 
-
+/*
 
 // ============================================================================
 // Smallest Degree Last 
@@ -263,7 +262,7 @@ void SMPGCOrdering::local_smallest_degree_last_ordering_B1a(vector<int>& vtxs){
     int min_deg = MaxDegreeP1-1;
     // set up environment
     for(const auto v: vtxs){ 
-        const int deg = verPtr[v+1]-verPtr[v];
+        int deg = verPtr[v+1]-verPtr[v];
         int inter_deg=0;
         for(auto wit = verPtr[v], witEnd=verPtr[v+1]; wit<witEnd; wit++) {
             const auto w = verVal[wit];
@@ -328,5 +327,5 @@ void SMPGCOrdering::local_smallest_degree_last_ordering_B1a(vector<int>& vtxs){
 
 //}
 
-
+*/
 
