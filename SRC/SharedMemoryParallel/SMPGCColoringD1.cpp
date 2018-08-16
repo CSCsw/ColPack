@@ -45,7 +45,7 @@ int SMPGCColoring::D1_OMP_GM3P(int nT, int&colors, vector<int>&vtxColors, const 
     tim_partition =- omp_get_wtime();
     {
         vector<int> lens(nT, N/nT); for(int i=0; i<N%nT; i++) lens[i]++;
-        vector<int> disps(nT+1, 0); for(int i=1; i<nT+1; i++) disps[i]=disp[i-1]+lens[i-1];
+        vector<int> disps(nT+1, 0); for(int i=1; i<nT+1; i++) disps[i]=disps[i-1]+lens[i-1];
         for(int i=0; i<nT; i++)
             QQ[i].insert(QQ[i].end(), const_ordered_vertex.begin()+disps[i], 
                     const_ordered_vertex.begin()+disps[i+1]);
@@ -57,7 +57,7 @@ int SMPGCColoring::D1_OMP_GM3P(int nT, int&colors, vector<int>&vtxColors, const 
     #pragma omp parallel
     {
         const int tid = omp_get_thread_num();
-        const vector<int>& Q = QQ[tid];
+        vector<int>& Q = QQ[tid];
         
         switch(local_order){
             case ORDER_NONE:
@@ -77,7 +77,6 @@ int SMPGCColoring::D1_OMP_GM3P(int nT, int&colors, vector<int>&vtxColors, const 
 
         vector<int> Mask; Mask.assign(BufSize,-1);
         for(const auto v : Q){
-            const auto vc = vtxColors[v];
             for(int iw=vtxPtr[v]; iw!=vtxPtr[v+1]; iw++) {
                 const auto wc=vtxColors[vtxVal[iw]];
                 if( wc >= 0) 

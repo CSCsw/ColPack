@@ -44,7 +44,6 @@ int SMPGCColoring::D2_serial(int&colors, vector<int>& vtxColors, const int local
         }
 
         for(const auto v : Q){
-            const auto v=Q[vit];
             for(int iw=vtxPtr[v]; iw!=vtxPtr[v+1]; iw++) {  
                 const auto wc = vtxColors[ vtxVal[iw] ];
                 if(wc<0) continue;
@@ -71,7 +70,6 @@ int SMPGCColoring::D2_serial(int&colors, vector<int>& vtxColors, const int local
     tim_total  += omp_get_wtime();    
     
     colors++; //number of colors, 
-    tim_total = tim_color;
 
     string order_tag="unknown";
     switch(local_order){
@@ -89,8 +87,7 @@ int SMPGCColoring::D2_serial(int&colors, vector<int>& vtxColors, const int local
             printf("unkonw local order %d\n", local_order);
     }
 
-    printf("@D2Serial%s_nT_c_T(lo+Color)\t", order_tag.c_str());
-    printf("\t%d",  nT);    
+    printf("@D2Serial%s_c_T(lo+Color)\t", order_tag.c_str());
     printf("\t%d",  colors);    
     printf("\t%lf", tim_total);
 #ifdef SMPGC_VARIFY
@@ -145,7 +142,7 @@ int SMPGCColoring::D2_OMP_GM3P(int nT, int &colors, vector<int>& vtxColors, cons
     {
         const int tid = omp_get_thread_num();
         vector<int> &Q = QQ[tid];
-        vector<int> Mask; Mask.assign(MaxColorCapacity, -1);
+        vector<int> Mask; Mask.assign(BufSize, -1);
         
         switch(local_order){
             case ORDER_NONE:
@@ -164,7 +161,6 @@ int SMPGCColoring::D2_OMP_GM3P(int nT, int &colors, vector<int>& vtxColors, cons
         }
 
         for(const auto v : Q){
-            const auto v=Q[vit];
             for(int iw=vtxPtr[v]; iw!=vtxPtr[v+1]; iw++) {  
                 const auto w  = vtxVal[iw];
                 const auto wc = vtxColors[w];
@@ -198,7 +194,7 @@ int SMPGCColoring::D2_OMP_GM3P(int nT, int &colors, vector<int>& vtxColors, cons
         const int tid=omp_get_thread_num();
         vector<int>& Q = QQ[tid];
         for(int iv=0; iv<(signed)Q.size(); iv++){
-            const auto v  = Q[vi];
+            const auto v  = Q[iv];
             const auto vc = vtxColors[v];
             bool b_vis_conflict=false;
             for(int iw=vtxPtr[v]; iw!=vtxPtr[v+1]; iw++) { // d1 neighbors
@@ -218,7 +214,7 @@ int SMPGCColoring::D2_OMP_GM3P(int nT, int &colors, vector<int>& vtxColors, cons
                     if(v >= u) continue; // check conflict is little brother's job
                     if(vc == vtxColors[u]) {
                         Q[num_uncolored++]=v;
-                        vtxColor[v]=-1;
+                        vtxColors[v]=-1;
                         b_vis_conflict=true;
                         break;
                     }
@@ -267,7 +263,7 @@ int SMPGCColoring::D2_OMP_GM3P(int nT, int &colors, vector<int>& vtxColors, cons
         colors = max(colors, vtxColors[i]);
     }
     colors++; //number of colors, 
-    tim_mxc += omp_get_wtime();
+    tim_maxc += omp_get_wtime();
 
     tim_total = tim_color+tim_detect+tim_recolor+tim_maxc;
 
@@ -322,7 +318,7 @@ int SMPGCColoring::D2_OMP_GMMP(int nT, int &colors, vector<int>&vtxColors, const
     
     int    n_loops        = 0;
     int    n_conflicts    = 0;                     // Number of conflicts 
-    int    uncolored_nodes= 0;
+    int    n_uncolored    = 0;
     
     const int N = num_nodes();                     //number of vertex
     const int BufSize = min( max_degree()*(max_degree()-1)+1, N); //maxDegree
@@ -346,15 +342,15 @@ int SMPGCColoring::D2_OMP_GMMP(int nT, int &colors, vector<int>&vtxColors, const
     tim_partition += omp_get_wtime();
 
 
-    uncolored_nodes=N;
-    while(uncolord_nodes!=0){
+    n_uncolored=N;
+    while(n_uncolored!=0){
         // phase - Pseudo Coloring
         tim_color -= omp_get_wtime();
         #pragma omp parallel
         {
             const int tid = omp_get_thread_num();
-            const vector<int> &Q = QQ[tid];
-            vector<int> Mask; Mask.assign(MaxColorCapacity, -1);
+            vector<int> &Q = QQ[tid];
+            vector<int> Mask; Mask.assign(BufSize, -1);
 
             switch(local_order){
                 case ORDER_NONE:
@@ -399,12 +395,12 @@ int SMPGCColoring::D2_OMP_GMMP(int nT, int &colors, vector<int>&vtxColors, const
 
         // Phase - Detect Conflicts
         tim_detect -= omp_get_wtime();
-        uncolored_nodes=0;        
-        #pragma omp parallel reduction(+: uncolored_nodes)
+        n_uncolored=0;        
+        #pragma omp parallel reduction(+: n_uncolored)
         {
             const int tid=omp_get_thread_num();
             vector<int>& Q = QQ[tid];
-            for(auto i=0; i<Q.size(); i++){
+            for(int i=0; i<(signed)Q.size(); i++){
                 const auto v = Q[i];
                 const auto vc= vtxColors[v];
                 bool b_vis_conflict=false;
@@ -434,7 +430,7 @@ int SMPGCColoring::D2_OMP_GMMP(int nT, int &colors, vector<int>&vtxColors, const
             }
             Q.resize(n_uncolored);
         } //end of omp parallel
-        tim_Detect  += omp_get_wtime();
+        tim_detect  += omp_get_wtime();
         n_loops++;
         n_conflicts+=n_uncolored;
     } //end while
@@ -443,7 +439,7 @@ int SMPGCColoring::D2_OMP_GMMP(int nT, int &colors, vector<int>&vtxColors, const
     tim_maxc = -omp_get_wtime();
     #pragma omp parallel for reduction(max:colors)
     for(int i=0; i<N; i++){
-        colors = max(colors, vtxColor[i]);
+        colors = max(colors, vtxColors[i]);
     }
     colors++; //number of colors, 
     tim_maxc += omp_get_wtime();

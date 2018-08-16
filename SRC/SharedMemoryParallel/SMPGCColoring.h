@@ -69,13 +69,13 @@ public: // API
     // Algorithm for distance two coloring
     int D2_serial(int &color, vector<int>&vtxColors, const int local_order=ORDER_NONE);
 
-    int D2_OMP_GM3P   (int nT, int&color, vector<int>&vtxColors, const int local_order=ORDER_NONE);
-    int D2_OMP_GMMP   (int nT, int&color, vector<int>&vtxColors, const int local_order=ORDER_NONE);
+    int D2_OMP_GM3P   (int nT, int&color, vector<int>&vtxColors, const int local_order);
+    int D2_OMP_GMMP   (int nT, int&color, vector<int>&vtxColors, const int local_order);
     
     // inner Algorithm for Hybird 
     inline void hybrid_GM3P(const int nT, vector<int>&vtxColors, vector<vector<int>>&Q, const int local_order); 
     inline void hybrid_GMMP(const int nT, vector<int>&vtxColors, vector<vector<int>>&Q, const int local_order); 
-    inline void hybrid_Serial(const int nT, vector<int>&vtxColors, vector<vector<int>>&Q, const int local_order); 
+    inline void hybrid_Serial(vector<int>&vtxColors, vector<vector<int>>&Q, const int local_order); 
     
     // Some experimental funtions
     //int D1_OMP_GMMP_LO_once(int nT, int&color, vector<int>&vtxColors, const int local_ordering);

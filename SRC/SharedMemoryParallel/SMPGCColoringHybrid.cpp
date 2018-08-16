@@ -12,19 +12,19 @@ using namespace std;
 using namespace ColPack;
 
 
-int SMPGCColoring::D1_OMP_HBJP(int nT, int&colors, vector<int>& vtxColors, const int loocal_order, const int option, const int swithch_iter=0){
+int SMPGCColoring::D1_OMP_HBJP(int nT, int&colors, vector<int>& vtxColors, const int local_order, const int option, const int switch_iter=0){
     if(nT<=0) { printf("Warning, number of threads changed from %d to 1\n",nT); nT=1; }
     omp_set_num_threads(nT);
 
     double tim_Ptt =.0;
     double tim_Wgt =.0;    //run time
     double tim_MIS =.0;
-    double tim_ReG =.0;    //run time
+    double tim_Alg2=.0;
     double tim_MxC =.0;    //run time
     double tim_Tot =.0;               //run time
     int    n_loops = 0;                         //Number of rounds 
     int    n_conflicts=0;
-    int    uncolored_nodes=0;
+    int    n_uncolored=0;
 
     const int N       = num_nodes(); //number of vertex
     const int BufSize = max_degree()+1;
@@ -43,7 +43,7 @@ int SMPGCColoring::D1_OMP_HBJP(int nT, int&colors, vector<int>& vtxColors, const
     tim_Ptt =- omp_get_wtime();
     {
         vector<int> lens(nT, N/nT); for(int i=0; i<N%nT; i++) lens[i]++;
-        vector<int> disps(nT+1, 0); for(int i=1; i<nT+1; i++) disps[i]=disp[i-1]+lens[i-1];
+        vector<int> disps(nT+1, 0); for(int i=1; i<nT+1; i++) disps[i]=disps[i-1]+lens[i-1];
         for(int i=0; i<nT; i++)
             QQ[i].insert(QQ[i].end(), const_ordered_vertex.begin()+disps[i], 
                     const_ordered_vertex.begin()+disps[i+1]);
@@ -61,11 +61,11 @@ int SMPGCColoring::D1_OMP_HBJP(int nT, int&colors, vector<int>& vtxColors, const
     tim_Wgt +=omp_get_wtime();
     
     tim_MIS -= omp_get_wtime();
-    uncolored_nodes = N;
-    while(uncolored_nodes!=0){
-        if(n_loop>=switch_iter) break;
-        uncolored_nodes = 0;
-        #pragma omp parallel reduction(+, uncolored_nodes)
+    n_uncolored = N;
+    while(n_uncolored!=0){
+        if(n_loops>=switch_iter) break;
+        n_uncolored = 0;
+        #pragma omp parallel reduction(+ : n_uncolored)
         {
             const int tid = omp_get_thread_num();
             vector<int>& Q = QQ[tid];
@@ -88,7 +88,7 @@ int SMPGCColoring::D1_OMP_HBJP(int nT, int&colors, vector<int>& vtxColors, const
 
             vector<int> candi;
             // phase find maximal indenpenent set, and color it
-            for(auto i=0; i<Q.size(); i++){
+            for(int i=0; i<(signed)Q.size(); i++){
                 const auto v = Q[i];
                 if(vtxColors[v]>=0) 
                     continue;
@@ -104,15 +104,15 @@ int SMPGCColoring::D1_OMP_HBJP(int nT, int&colors, vector<int>& vtxColors, const
                         break;
                     }
                 }
-                if(b_visdomain) cand.push_back(v);
-                else            Q[uncolored_nodes++]=v;
+                if(b_visdomain) candi.push_back(v);
+                else            Q[n_uncolored++]=v;
             }
             
-            Q.resize(uncolored_nodes);
+            Q.resize(n_uncolored);
             // phase greedy coloring 
             #pragma omp barrier
             vector<int> Mask(BufSize, -1);
-            for(const auto v : Q){
+            for(const auto v : candi){
                 for(auto iw=vtxPtr[v]; iw!=vtxPtr[v+1]; iw++){
                     const auto w = vtxVal[iw];
                     const auto wc= vtxColors[w];
@@ -121,29 +121,29 @@ int SMPGCColoring::D1_OMP_HBJP(int nT, int&colors, vector<int>& vtxColors, const
                 }
                 int c=0; 
                 for(;c<BufSize; c++)
-                    if(Mask[wc]!=v)
+                    if(Mask[c]!=v)
                         break;
                 vtxColors[v]=c;
             }
         } //end omp parallel
 
-        n_conflicts+=uncolored_nodes;
+        n_conflicts+=n_uncolored;
         n_loops++;
     } //end while 
     tim_MIS += omp_get_wtime();
     
-    tim_alg2 =- omp_get_wtime();
+    tim_Alg2 =- omp_get_wtime();
     switch(option)
     {
-        case HB_GM3P:      hybrid_GM3P  (nT, vtxColors, QQ, local_order); break;
-        case HB_GMMP:      hybrid_GMMP  (nT, vtxColors, QQ, local_order); break;
-        case HB_SERIAL:    hybrid_SERIAL(nT, vtxColors, QQ, local_order); break;
+        case HYBRID_GM3P:      hybrid_GM3P  (nT, vtxColors, QQ, local_order); break;
+        case HYBRID_GMMP:      hybrid_GMMP  (nT, vtxColors, QQ, local_order); break;
+        case HYBRID_SERIAL:    hybrid_Serial(vtxColors, QQ, local_order); break;
         case HYBRID_STREAM:
         default:
             printf("Error %d option for hybrid alg is not support!", option);
             exit(1);
     }
-    tim_alg2+= omp_get_wtime();
+    tim_Alg2+= omp_get_wtime();
 
 
     tim_MxC = -omp_get_wtime();
@@ -155,13 +155,13 @@ int SMPGCColoring::D1_OMP_HBJP(int nT, int&colors, vector<int>& vtxColors, const
     colors++;
     tim_MxC += omp_get_wtime();
 
-    tim_Tot = tim_Wgt + tim_MIS + tim_MxC+ tim_alg2;
+    tim_Tot = tim_Wgt + tim_MIS + tim_MxC+ tim_Alg2;
 
     string alg_tag="unknown";
     switch(option){
-        case HB_GM3P:       alg_tag="GM3P";    break;
-        case HB_GMMP:       alg_tag="GMMP";    break;
-        case HB_SERIAL:     alg_tag="Serial";  break;
+        case HYBRID_GM3P:       alg_tag="GM3P";    break;
+        case HYBRID_GMMP:       alg_tag="GMMP";    break;
+        case HYBRID_SERIAL:     alg_tag="Serial";  break;
         case HYBRID_STREAM:
         default:               printf("Error %d option for hybrid alg is not support!", option);
     }
@@ -182,11 +182,11 @@ int SMPGCColoring::D1_OMP_HBJP(int nT, int&colors, vector<int>& vtxColors, const
     printf("\t%d",  nT);    
     printf("\t%d",  colors);    
     printf("\t%lf", tim_Tot);
-    printf("\t%lf", tim_Wgt+tim_MISC);
-    printf("\t%lf", tim_alg2);
+    printf("\t%lf", tim_Wgt+tim_MIS);
+    printf("\t%lf", tim_Alg2);
     printf("\t%lf", tim_MxC);
     printf("\t%d",  switch_iter);
-    printf("\t%lf", tim_partition);
+    printf("\t%lf", tim_Ptt);
 #ifdef SMPGC_VARIFY
     printf("\t%s", (cnt_d1conflict(vtxColors)==0)?("Success"):("Failed"));
 #endif
@@ -195,7 +195,7 @@ int SMPGCColoring::D1_OMP_HBJP(int nT, int&colors, vector<int>& vtxColors, const
 }
 
 
-int SMPGCColoring::D1_OMP_HBMTJP(int nT, int&colors, vector<int>& vtxColors, const int local_order, const int option, const int swithch_iter=0){
+int SMPGCColoring::D1_OMP_HBMTJP(int nT, int&colors, vector<int>& vtxColors, const int local_order, const int option, const int switch_iter=0){
     if(nT<=0) { printf("Warning, number of threads changed from %d to 1\n",nT); nT=1; }
     omp_set_num_threads(nT);
     
@@ -203,7 +203,6 @@ int SMPGCColoring::D1_OMP_HBMTJP(int nT, int&colors, vector<int>& vtxColors, con
     double tim_Wgt =.0;                      // run time
     double tim_MIS =.0;                       // run time
     double tim_Alg2=.0;
-    double tim_ReG =.0;                       // run time
     double tim_MxC =.0;                       // run time
     double tim_Tot =.0;                       // run time
 
@@ -212,7 +211,6 @@ int SMPGCColoring::D1_OMP_HBMTJP(int nT, int&colors, vector<int>& vtxColors, con
     int    uncolored_nodes=0;
 
     const int N = num_nodes(); //number of vertex
-    const int BufSize = max_degree()+1;
     const vector<int>& vtxPtr = get_CSR_ia();
     const vector<int>& vtxVal = get_CSR_ja();
     const vector<int>& const_ordered_vertex = global_ordered_vertex(); 
@@ -228,7 +226,7 @@ int SMPGCColoring::D1_OMP_HBMTJP(int nT, int&colors, vector<int>& vtxColors, con
     tim_Ptt =- omp_get_wtime();
     {
         vector<int> lens(nT, N/nT); for(int i=0; i<N%nT; i++) lens[i]++;
-        vector<int> disps(nT+1, 0); for(int i=1; i<nT+1; i++) disps[i]=disp[i-1]+lens[i-1];
+        vector<int> disps(nT+1, 0); for(int i=1; i<nT+1; i++) disps[i]=disps[i-1]+lens[i-1];
         for(int i=0; i<nT; i++)
             QQ[i].insert(QQ[i].end(), const_ordered_vertex.begin()+disps[i], 
                     const_ordered_vertex.begin()+disps[i+1]);
@@ -242,11 +240,11 @@ int SMPGCColoring::D1_OMP_HBMTJP(int nT, int&colors, vector<int>& vtxColors, con
             break;
         uncolored_nodes=0;
 
-        #pragma omp parallel reduction(+, uncolored_nodes)
+        #pragma omp parallel reduction(+: uncolored_nodes)
         {
             const int tid = omp_get_thread_num();
             vector<int> candi_nodes_color;
-            const int CAPACITY = 2*NUM_HASH;
+            const int CAPACITY = 2*HASH_NUM_HASH;
             const int Color_Base = n_loops*CAPACITY;
             vector<int>& Q = QQ[tid];
             // phase local order
@@ -267,21 +265,21 @@ int SMPGCColoring::D1_OMP_HBMTJP(int nT, int&colors, vector<int>& vtxColors, con
             }
 
             // phase find maximal indenpenent set, and color it
-            for(auto i=0; i<Q.size(); i++){
+            for(int i=0; i<(signed)Q.size(); i++){
                 const auto v = Q[i];
                 if(vtxColors[v]>=0)
                     continue;
-                int vw[NUM_HASH];
-                for(int i=0; i<NUM_HASH; i++) vwt[i]=mhash(v, HASH_SEED+HASH_SHIFT*i);
+                unsigned int vwt[HASH_NUM_HASH];
+                for(int i=0; i<HASH_NUM_HASH; i++) vwt[i]=mhash(v, HASH_SEED+HASH_SHIFT*i);
                 int b_visdomain = ((1<<CAPACITY)-1); //0:nether 1:LargeDomain, 2:SmallDomain, 3 Both/Reserve/Init
                 for(auto iw=vtxPtr[v]; iw!=vtxPtr[v+1]; iw++){
-                    const auto w = verVal[iw];
+                    const auto w = vtxVal[iw];
                     if(vtxColors[w]>=0) 
                         continue;
                     for(int i=0; i<HASH_NUM_HASH; i++){
                         const auto ww = mhash(w, HASH_SEED+HASH_SHIFT*i);
-                        if( (b_visdomain&(0x1<<(i<<1))) && (vw[i] <= ww) ) b_isdomain^= (0x1<<(i<<1));
-                        if( (b_visdomain&(0x2<<(i<<1))) && (vw[i] >= ww) ) b_isdomain^= (0x2<<(i<<1));
+                        if( (b_visdomain&(0x1<<(i<<1))) && (vwt[i] <= ww) ) b_visdomain^= (0x1<<(i<<1));
+                        if( (b_visdomain&(0x2<<(i<<1))) && (vwt[i] >= ww) ) b_visdomain^= (0x2<<(i<<1));
                     }
                     if( b_visdomain==0) break;
                 }
@@ -298,8 +296,9 @@ int SMPGCColoring::D1_OMP_HBMTJP(int nT, int&colors, vector<int>& vtxColors, con
             } //end for 
             Q.resize(uncolored_nodes);
             #pragma omp barrier
-            for(auto i=0; i<candi_nodes_color.size(); i+=2){
+            for(int i=0; i<(signed)candi_nodes_color.size(); i+=2){
                 vtxColors[ candi_nodes_color[i] ] = candi_nodes_color[i+1];
+            }
         } //end omp parallel
         tim_MIS += omp_get_wtime();
     
@@ -310,9 +309,9 @@ int SMPGCColoring::D1_OMP_HBMTJP(int nT, int&colors, vector<int>& vtxColors, con
     tim_Alg2 =- omp_get_wtime();
     switch(option)
     {
-        case HB_GM3P:      hybrid_GM3P  (nT, vtxColors, QQ, local_order ); break;
-        case HB_GMMP:      hybrid_GMMP  (nT, vtxColors, QQ, local_order ); break;
-        case HB_SERIAL:    hybrid_SERIAL(nT, vtxColors, QQ, local_order ); break;
+        case HYBRID_GM3P:      hybrid_GM3P  (nT, vtxColors, QQ, local_order ); break;
+        case HYBRID_GMMP:      hybrid_GMMP  (nT, vtxColors, QQ, local_order ); break;
+        case HYBRID_SERIAL:    hybrid_Serial(vtxColors, QQ, local_order ); break;
         case HYBRID_STREAM:
         default:
             printf("Error %d option for hybrid alg is not support!", option);
@@ -330,13 +329,13 @@ int SMPGCColoring::D1_OMP_HBMTJP(int nT, int&colors, vector<int>& vtxColors, con
     colors++;
     tim_MxC += omp_get_wtime();
 
-    tim_Tot = tim_Wgt + tim_MIS + tim_MxC+ tim_alg2;
+    tim_Tot = tim_Wgt + tim_MIS + tim_MxC+ tim_Alg2;
 
     string alg_tag="unknown";
     switch(option){
-        case HB_GM3P:       alg_tag="GM3P";    break;
-        case HB_GMMP:       alg_tag="GMMP";    break;
-        case HB_SERIAL:     alg_tag="Serial";  break;
+        case HYBRID_GM3P:       alg_tag="GM3P";    break;
+        case HYBRID_GMMP:       alg_tag="GMMP";    break;
+        case HYBRID_SERIAL:     alg_tag="Serial";  break;
         case HYBRID_STREAM:
         default:               printf("Error %d option for hybrid alg is not support!", option);
     }
@@ -365,7 +364,7 @@ int SMPGCColoring::D1_OMP_HBMTJP(int nT, int&colors, vector<int>& vtxColors, con
     printf("\t%lf", tim_Alg2);
     printf("\t%lf", tim_MxC);
     printf("\t%d",  switch_iter);
-    printf("\t%lf", tim_partition);
+    printf("\t%lf", tim_Ptt);
 #ifdef SMPGC_VARIFY
     printf("\t%s", (cnt_d1conflict(vtxColors)==0)?("Success"):("Failed"));
 #endif
@@ -376,8 +375,7 @@ int SMPGCColoring::D1_OMP_HBMTJP(int nT, int&colors, vector<int>& vtxColors, con
 
 
 
-void SMPGCColoring::hybrid_GM3P(const int nT, vector<int>&vtxColors, vector<vector<int>>&Q, const int local_order=ORDER_NONE){
-    const int N               = num_nodes();   //number of vertex
+void SMPGCColoring::hybrid_GM3P(const int nT, vector<int>&vtxColors, vector<vector<int>>&QQ, const int local_order=ORDER_NONE){
     const int BufSize         = max_degree()+1;
     const vector<int>& vtxPtr = get_CSR_ia();
     const vector<int>& vtxVal = get_CSR_ja();
@@ -385,7 +383,7 @@ void SMPGCColoring::hybrid_GM3P(const int nT, vector<int>&vtxColors, vector<vect
     #pragma omp parallel
     {
         const int tid = omp_get_thread_num();
-        const vector<int>& Q = QQ[tid];
+        vector<int>& Q = QQ[tid];
         switch(local_order){
             case ORDER_NONE:
                 break;
@@ -404,7 +402,6 @@ void SMPGCColoring::hybrid_GM3P(const int nT, vector<int>&vtxColors, vector<vect
 
         vector<int> Mask; Mask.assign(BufSize,-1);
         for(const auto v : Q){
-            const auto vc = vtxColors[v];
             for(int iw=vtxPtr[v]; iw!=vtxPtr[v+1]; iw++) {
                 const auto wc=vtxColors[vtxVal[iw]];
                 if( wc >= 0) 
@@ -456,9 +453,7 @@ void SMPGCColoring::hybrid_GM3P(const int nT, vector<int>&vtxColors, vector<vect
 }
 
 
-void SMPGCColoring::hybrid_GMMP(const int nT, vector<int>&vtxColors, vector<vector<int>>&Q, const int local_order=ORDER_NONE){
-    
-    const int N                = num_nodes();                    // number of vertex
+void SMPGCColoring::hybrid_GMMP(const int nT, vector<int>&vtxColors, vector<vector<int>>&QQ, const int local_order=ORDER_NONE){
     const int BufSize          = max_degree()+1;         // maxDegree
     const vector<int>& vtxPtr  = get_CSR_ia();     // ia of csr
     const vector<int>& vtxVal  = get_CSR_ja();     // ja of csr
@@ -470,7 +465,7 @@ void SMPGCColoring::hybrid_GMMP(const int nT, vector<int>&vtxColors, vector<vect
         #pragma omp parallel reduction(+: uncolored_nodes)
         {
             const int tid = omp_get_thread_num();
-            const vector<int>& Q = QQ[tid];
+            vector<int>& Q = QQ[tid];
             // phase local order
             switch(local_order){
                 case ORDER_NONE:
@@ -490,7 +485,7 @@ void SMPGCColoring::hybrid_GMMP(const int nT, vector<int>&vtxColors, vector<vect
             // phase psedue color
             vector<int> Mark; Mark.assign(BufSize,-1);
             for(const auto v : Q){
-                for(int iw = vtxPtr[v], iw!=vtxPtr[v+1]; iw++) {
+                for(int iw = vtxPtr[v]; iw!=vtxPtr[v+1]; iw++) {
                     const auto w = vtxVal[iw];
                     const auto wc= vtxColors[w];
                     if(wc>=0) 
@@ -505,7 +500,7 @@ void SMPGCColoring::hybrid_GMMP(const int nT, vector<int>&vtxColors, vector<vect
             // phase Detect Conflicts:
             uncolored_nodes=0;
             #pragma omp barrier
-            for(auto i=0; i<Q.size(); i++){
+            for(int i=0; i<(signed)Q.size(); i++){
                 const auto v = Q[i];
                 const auto vc= vtxColors[v];
                 for(int iw=vtxPtr[v]; iw!=vtxPtr[v+1]; iw++) {
@@ -524,8 +519,8 @@ void SMPGCColoring::hybrid_GMMP(const int nT, vector<int>&vtxColors, vector<vect
 }
 
 
-void SMPGCColoring::hybrid_Serial(const int nT, vector<int>&vtxColors, vector<vector<int>>&Q, const int local_order=ORDER_NONE){
-    const int N                = num_nodes();                    // number of vertex
+void SMPGCColoring::hybrid_Serial(vector<int>&vtxColors, vector<vector<int>>&QQ, const int local_order=ORDER_NONE){
+    const int nT               = QQ.size();
     const int BufSize          = max_degree()+1;         // maxDegree
     const vector<int>& vtxPtr  = get_CSR_ia();     // ia of csr
     const vector<int>& vtxVal  = get_CSR_ja();     // ja of csr
@@ -534,13 +529,13 @@ void SMPGCColoring::hybrid_Serial(const int nT, vector<int>&vtxColors, vector<ve
         case ORDER_NONE:
             break;
         case ORDER_LARGEST_FIRST:
-            local_largest_degree_first_ordering(Q); break;
+            for(int i=0; i<nT; i++) local_largest_degree_first_ordering(QQ[i]); break;
         case ORDER_SMALLEST_LAST:
-            local_smallest_degree_last_ordering(Q); break;
+            for(int i=0; i<nT; i++) local_smallest_degree_last_ordering(QQ[i]); break;
         case ORDER_NATURAL:
-            local_natural_ordering(Q); break;
+            for(int i=0; i<nT; i++) local_natural_ordering(QQ[i]); break;
         case ORDER_RANDOM:
-            local_random_ordering(Q); break;
+            for(int i=0; i<nT; i++) local_random_ordering(QQ[i]); break;
         case -1:
             break;
         default:

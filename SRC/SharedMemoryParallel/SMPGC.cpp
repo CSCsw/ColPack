@@ -7,7 +7,7 @@
 
 #include "SMPGC.h"
 
-//const std::string SMPGC::FORMAT_MM = "MM";
-//const std::string SMPGC::FORMAT_BINARY= "BINARY";
+const std::string SMPGC::FORMAT_MM = "MM";
+const std::string SMPGC::FORMAT_BINARY= "BINARY";
 
 

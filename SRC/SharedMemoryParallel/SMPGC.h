@@ -56,8 +56,8 @@ public:
     static const int HASH_SHIFT          = 0XC2A50F;
     static const int HASH_NUM_HASH       = 4;
 
-    static const std::string FORMAT_MM   ="MM"      ;
-    static const std::string FORMAT_BINARY="BINARY"    ;
+    static const std::string FORMAT_MM   ;
+    static const std::string FORMAT_BINARY;
 
     static const int ORDER_NONE          = 0;
     static const int ORDER_NATURAL       = 1;
