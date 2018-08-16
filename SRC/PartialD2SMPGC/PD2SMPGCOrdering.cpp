@@ -14,9 +14,9 @@ using namespace ColPack;
 // ============================================================================
 // Construction
 // ============================================================================
-PD2SMPGCOrdering::PD2SMPGCOrdering(const string& graph_name, const string& fmt, double*iotime, const int side, const string& order="NATURAL", double* ordtime=nullptr) 
+PD2SMPGCOrdering::PD2SMPGCOrdering(const string& graph_name, const string& fmt, double*iotime, const int side, const string& order, double* ordtime) 
 : m_global_ordered_method(order), m_global_ordered_side(side), m_mt(5489u) {
-    if( fmt!="MM") {
+    if( fmt!=FORMAT_MM) {
         printf("Error!PD2SMPGCOrdering only support MatrixMarket format (mm). \"%s\" with fmt \"%s\" is under construction... \n", graph_name.c_str(), fmt.c_str());
         exit(1);
     }
@@ -33,11 +33,11 @@ PD2SMPGCOrdering::~PD2SMPGCOrdering(){}
 // ============================================================================
 // 
 // ============================================================================
-void PD2SMPGCOrdering::global_ordering(const int side, const string& order="NATURAL", double * ordtime=nullptr){
+void PD2SMPGCOrdering::global_ordering(const int side, const string& order, double * ordtime){
     if(ordtime) *(time_t*)ordtime=-clock();
-    if(order == ORDER_NATURAL)
+    if(order == ORDER_STR_NATURAL)
         global_natural_ordering(side);
-    else if(order == ORDER_RANDOM) 
+    else if(order == ORDER_STR_RANDOM) 
         global_random_ordering(side);
     else{
         fprintf(stderr, "Err! PD2SMPGCOrdering::Unknow order %s\n",order.c_str());

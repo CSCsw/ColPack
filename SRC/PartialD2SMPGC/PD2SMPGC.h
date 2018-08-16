@@ -37,12 +37,21 @@ public:
     static const int ROW = 1;
     static const int COL = 2;
 public:
-    const string ORDER_NATURAL = "NATURAL";
-     const string ORDER_RANDOM  = "RANDOM";
-     const string ORDER_LARGEST_FIRST = "LARGEST_FIRST";
-     const string ORDER_SMALLEST_LAST = "SMALLEST_LAST";
+    static const int  ORDER_NONE    = 0;
+    static const int  ORDER_NATURAL = 1;
+    static const int  ORDER_RANDOM  = 2;
+    static const int  ORDER_LARGEST_FIRST = 3;
+    static const int  ORDER_SMALLEST_LAST = 4;
+
 public:
-    const int _TRUE = 1;
+    static const string FORMAT_MM; //="MM";
+
+    static const string ORDER_STR_NATURAL;// = "NATURAL";
+    static const string ORDER_STR_RANDOM ;// = "RANDOM";
+    static const string ORDER_STR_LARGEST_FIRST;// = "LARGEST_FIRST";
+    static const string ORDER_STR_SMALLEST_LAST;// = "SMALLEST_LAST";
+public:
+    static const int _TRUE = 1;
 
 public:
     PD2SMPGC(){}

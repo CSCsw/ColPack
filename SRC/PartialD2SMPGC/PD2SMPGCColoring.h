@@ -20,7 +20,7 @@ namespace ColPack {
 class PD2SMPGCColoring : public PD2SMPGCOrdering {
 public: // Constructions
     PD2SMPGCColoring(const string& graph_name);
-    PD2SMPGCColoring(const string& graph_name, const string& fmt, double*iotime, const int side, const string&ord, double*ordtime);
+    PD2SMPGCColoring(const string& graph_name, const string& fmt=FORMAT_MM, double*iotime=nullptr, const int side=L, const string&ord=ORDER_STR_RANDOM, double*ordtime=nullptr);
     virtual ~PD2SMPGCColoring(){}
 
         // Deplete constructions
@@ -37,14 +37,9 @@ public: // API
     void         get_vertex_colors(vector<int>& x) { x.assign(m_vertex_color.begin(), m_vertex_color.end()); }
     
     // Algorithms 
-    int PD2_OMP_GM3P(const int side, int nT, int&color, vector<int>&vtxColors);
-    int PD2_OMP_GMMP(const int side, int nT, int&color, vector<int>&vtxColors);
-
-    int PD2_OMP_GM3P_LO(const int side, int nT, int&color, vector<int>&vtxColors, const string& local_ordering);
-    int PD2_OMP_GMMP_LO(const int side, int nT, int&color, vector<int>&vtxColors, const string& local_ordering);
-
+    int PD2_OMP_GM3P(const int side, int nT, int&color, vector<int>&vtxColors, const int local_order=ORDER_NONE);
+    int PD2_OMP_GMMP(const int side, int nT, int&color, vector<int>&vtxColors, const int local_order=ORDER_NONE);
     int PD2_serial(const int side, int&color, vector<int>&vtxColors);
-public:
 
 public: // Utilites
     int cnt_pd2conflict(const int side, const vector<int>& vc);
@@ -53,7 +48,6 @@ protected:
     int m_total_num_colors;
     vector<int> m_vertex_color;
     string m_method;
-
 }; // end of class SMPGCInterface
 
 

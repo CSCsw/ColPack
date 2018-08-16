@@ -19,8 +19,8 @@ int PD2SMPGCColoring::Coloring(const int side, int nT, const string& method){
     m_method = method;
     if     (method.compare("PD2_OMP_GM3P")==0) return PD2_OMP_GM3P(side, nT, m_total_num_colors, m_vertex_color);
     else if(method.compare("PD2_OMP_GMMP")==0) return PD2_OMP_GMMP(side, nT, m_total_num_colors, m_vertex_color);
-    else if(method.compare("PD2_OMP_GM3P_LOLF")==0) return PD2_OMP_GM3P_LO(side, nT, m_total_num_colors, m_vertex_color, "LARGEST_FIRST");
-    else if(method.compare("PD2_OMP_GMMP_LOLF")==0) return PD2_OMP_GMMP_LO(side, nT, m_total_num_colors, m_vertex_color, "LARGEST_FIRST");
+    else if(method.compare("PD2_OMP_GM3P_LOLF")==0) return PD2_OMP_GM3P(side, nT, m_total_num_colors, m_vertex_color, ORDER_LARGEST_FIRST);
+    else if(method.compare("PD2_OMP_GMMP_LOLF")==0) return PD2_OMP_GMMP(side, nT, m_total_num_colors, m_vertex_color, ORDER_LARGEST_FIRST);
     else if(method.compare("PD2_SERIAL")==0) return PD2_serial(side, m_total_num_colors, m_vertex_color);
     else { fprintf(stdout, "Unknow method %s\n",method.c_str()); exit(1); }   
     return _TRUE;
@@ -31,13 +31,13 @@ int PD2SMPGCColoring::Coloring(const int side, int nT, const string& method){
 // Construction
 // ============================================================================
 PD2SMPGCColoring::PD2SMPGCColoring(const string& graph_name)
-: PD2SMPGCOrdering(graph_name, "MM", nullptr, L, ORDER_NATURAL, nullptr), m_total_num_colors(0) {
+: PD2SMPGCOrdering(graph_name, FORMAT_MM, nullptr, L, ORDER_STR_NATURAL, nullptr), m_total_num_colors(0) {
 }
 
 // ============================================================================
 // Construction
 // ============================================================================
-PD2SMPGCColoring::PD2SMPGCColoring(const string& graph_name, const string& fmt, double* iotime, const int side, const string& glb_order="RANDOM", double *ordtime=nullptr) 
+PD2SMPGCColoring::PD2SMPGCColoring(const string& graph_name, const string& fmt, double* iotime, const int side, const string& glb_order, double *ordtime) 
 : PD2SMPGCOrdering(graph_name, fmt, iotime, side, glb_order, ordtime), m_total_num_colors(0) {
 }
 
@@ -126,16 +126,17 @@ int PD2SMPGCColoring::PD2_serial(const int side, int&colors, vector<int>&vtxColo
 
 
 
-int PD2SMPGCColoring::PD2_OMP_GM3P(const int side, int nT, int&colors, vector<int>&vtxColor) {
+int PD2SMPGCColoring::PD2_OMP_GM3P(const int side, int nT, int&colors, vector<int>&vtxColor, const int local_order) {
     if(nT<=0) { printf("Warning, number of threads changed from %d to 1\n",nT); nT=1; }
     omp_set_num_threads(nT);
 
-    double tim_color  = 0;                     // run time
-    double tim_detect = 0;                     // run time
-    double tim_recolor= 0;                     // run time
-    double tim_maxc   = 0;
-    double tim_total=0;                          // run time
-    int    nConflicts = 0;                     // Number of conflicts 
+    double tim_local_order =.0;
+    double tim_color       =.0;                     // run time
+    double tim_detect      =.0;                     // run time
+    double tim_recolor     =.0;                     // run time
+    double tim_maxc        =.0;
+    double tim_total       =.0;                     // run time
+    int    n_conflicts     = 0;                     // Number of conflicts 
 
     const int          N             = (side==PD2SMPGC::L)?(GetLeftVertexCount()):(GetRightVertexCount()); 
     const vector<int>& srcPtr        = (side==PD2SMPGC::L)?(GetLeftVertices()   ):(GetRightVertices()   );
@@ -159,9 +160,40 @@ int PD2SMPGCColoring::PD2_OMP_GM3P(const int side, int nT, int&colors, vector<in
             QQ[tid].insert(QQ[tid].end(), ordered_queue.begin()+disp[tid], ordered_queue.begin()+disp[tid+1]);
     }
 
+
+    tim_local_order =-omp_get_wtime();
+    switch(local_order){
+        case ORDER_NONE: break;
+        case ORDER_NATURAL:
+            #pragma omp parallel
+            {
+                const int tid = omp_get_thread_num();
+                local_natural_ordering(QQ[tid]);
+            }
+            break;
+        case ORDER_RANDOM:
+            #pragma omp parallel
+            {
+                const int tid = omp_get_thread_num();
+                local_random_ordering(QQ[tid]);
+            }
+            break;
+        case ORDER_LARGEST_FIRST:
+            #pragma omp parallel
+            {
+                const int tid = omp_get_thread_num();
+                local_largest_degree_first_ordering(side, QQ[tid]);
+            }
+            break;
+        default:
+            printf("Error! PD2_OMP_GM3P tring to use order no. %d. But it is not supported.\n", local_order);
+            exit(1);
+    }
+    tim_local_order +=omp_get_wtime();
+
     tim_color =- omp_get_wtime();
     // phase pseudo coloring
-#pragma omp parallel
+    #pragma omp parallel
     {
         const int tid = omp_get_thread_num();
         const vector<int>& Q = QQ[tid];
@@ -186,8 +218,8 @@ int PD2SMPGCColoring::PD2_OMP_GM3P(const int side, int nT, int&colors, vector<in
     tim_color += omp_get_wtime();
     // phase conflicts detection
     tim_detect =- omp_get_wtime();
-    nConflicts=0;
-    #pragma omp parallel reduction(+:nConflicts)
+    n_conflicts=0;
+    #pragma omp parallel reduction(+:n_conflicts)
     {
         const int tid = omp_get_thread_num();
         vector<int>& Q = QQ[tid];
@@ -202,14 +234,14 @@ int PD2SMPGCColoring::PD2_OMP_GM3P(const int side, int nT, int&colors, vector<in
                     if(v == u) continue;
                     if(vc== vtxColor[u]){
                         b_false_colored=true;
-                        Q[nConflicts++]=v;
+                        Q[n_conflicts++]=v;
                         vtxColor[v]=-1;
                         break;
                     }
                 }
             }
         }
-        Q.resize(nConflicts);
+        Q.resize(n_conflicts);
     }// end omp parallel
     tim_detect  += omp_get_wtime();
 
@@ -248,10 +280,20 @@ int PD2SMPGCColoring::PD2_OMP_GM3P(const int side, int nT, int&colors, vector<in
     colors++; //number of colors, 
     tim_maxc += omp_get_wtime();
 
-    tim_total = tim_color+tim_detect+tim_recolor+tim_maxc;
+    tim_total = tim_color+tim_detect+tim_recolor+tim_maxc+tim_local_order;
 
-    printf("@PD2GM3P_side_nT_c_T_Tcolor_Tdetect_Trecolor_TmaxC_nCnf\t");
-    printf("%s\t", (side==PD2SMPGC::L)?"L":"R");
+    string lotag = "";
+    switch(local_order){
+        case ORDER_NONE:    lotag="None"; break;
+        case ORDER_NATURAL: lotag="NT"; break;
+        case ORDER_RANDOM:  lotag="RD"; break;
+        case ORDER_LARGEST_FIRST: lotag="LF"; break;
+        default:
+            printf("Error! PD2_OMP_GM3P tring to use local order %d. which is not supported.\n",local_order); 
+            exit(1);
+    }
+    printf("@PD2GM3PLO(%s)_side_nT_c_T_Tcolor_Tdetect_Trecolor_TmaxC_Tlo_nCnf\t",lotag.c_str());
+    printf("%s ", (side==PD2SMPGC::L)?"L":"R");
     printf("%d\t",  nT);    
     printf("%d\t",  colors);    
     printf("%lf\t", tim_total);
@@ -259,7 +301,8 @@ int PD2SMPGCColoring::PD2_OMP_GM3P(const int side, int nT, int&colors, vector<in
     printf("%lf\t", tim_detect);
     printf("%lf\t", tim_recolor);
     printf("%lf\t", tim_maxc);
-    printf("%d\t",  nConflicts);
+    printf("%lf\t", tim_local_order);
+    printf("%d\t",  n_conflicts);
     printf("%s", cnt_pd2conflict(side, vtxColor)?"Failed":"Varified");
     printf("\n");
     return _TRUE;   
@@ -270,16 +313,17 @@ int PD2SMPGCColoring::PD2_OMP_GM3P(const int side, int nT, int&colors, vector<in
 
 // ============================================================================
 // ============================================================================
-int PD2SMPGCColoring::PD2_OMP_GMMP(const int side, int nT, int &colors, vector<int>&vtxColor) {
+int PD2SMPGCColoring::PD2_OMP_GMMP(const int side, int nT, int &colors, vector<int>&vtxColor, const int local_order) {
     if(nT<=0) { printf("Warning, number of threads changed from %d to 1\n",nT); nT=1; }
     omp_set_num_threads(nT);
 
-    double tim_color  = 0;                     // run time
-    double tim_detect = 0;                     // run time
-    double tim_maxc   = 0;
-    double tim_total=0;                          // run time
-    int    nConflicts = 0;                     // Number of conflicts 
-    int    nLoops     = 0;
+    double tim_local_order=.0;
+    double tim_color      =.0;                     // run time
+    double tim_detect     =.0;                     // run time
+    double tim_maxc       =.0;
+    double tim_total      =.0;                          // run time
+    int    n_conflicts    = 0;                     // Number of conflicts 
+    int    n_loops        = 0;
     const int          N             = (side==PD2SMPGC::L)?(GetLeftVertexCount()):(GetRightVertexCount()); 
     const vector<int>& srcPtr        = (side==PD2SMPGC::L)?(GetLeftVertices()   ):(GetRightVertices()   );
     const vector<int>& dstPtr        = (side==PD2SMPGC::L)?(GetRightVertices()  ):(GetLeftVertices()    );
@@ -302,9 +346,42 @@ int PD2SMPGCColoring::PD2_OMP_GMMP(const int side, int nT, int &colors, vector<i
             QQ[tid].insert(QQ[tid].end(), ordered_queue.begin()+disp[tid], ordered_queue.begin()+disp[tid+1]);
     }
 
+
+
     int num_uncolored_vertex = N;
     while(num_uncolored_vertex!=0){
-        tim_color =- omp_get_wtime();
+
+        tim_local_order -=omp_get_wtime();
+        switch(local_order){
+            case ORDER_NONE: break;
+            case ORDER_NATURAL:
+                #pragma omp parallel
+                {
+                    const int tid = omp_get_thread_num();
+                    local_natural_ordering(QQ[tid]);
+                }
+                break;
+            case ORDER_RANDOM:
+                #pragma omp parallel
+                {
+                    const int tid = omp_get_thread_num();
+                    local_random_ordering(QQ[tid]);
+                }
+                break;
+            case ORDER_LARGEST_FIRST:
+                #pragma omp parallel
+                {
+                    const int tid = omp_get_thread_num();
+                    local_largest_degree_first_ordering(side, QQ[tid]);
+                }
+                break;
+            default:
+                printf("Error! PD2_OMP_GMMP tring to use order no. %d. But it is not supported.\n", local_order);
+                exit(1);
+        }
+        tim_local_order +=omp_get_wtime();
+
+        tim_color -= omp_get_wtime();
         // phase pseudo coloring
         #pragma omp parallel
         {
@@ -359,8 +436,8 @@ int PD2SMPGCColoring::PD2_OMP_GMMP(const int side, int nT, int &colors, vector<i
         } //end omp parallel
         tim_detect  += omp_get_wtime();
         
-        nConflicts += num_uncolored_vertex;
-        nLoops      += 1;
+        n_conflicts += num_uncolored_vertex;
+        n_loops      += 1;
     } //end while
 
     // get number of colors
@@ -372,356 +449,35 @@ int PD2SMPGCColoring::PD2_OMP_GMMP(const int side, int nT, int &colors, vector<i
     colors++; //number of colors, 
     tim_maxc += omp_get_wtime();
 
-    tim_total = tim_color+tim_detect + tim_maxc;
+    tim_total = tim_color+tim_detect + tim_maxc+tim_local_order;
 
-    printf("@PD2GMMP_side_nT_c_T_Tcolor_Tdetect_TmaxC_nCnf_nLoop\t");
-    printf("%s\t", (side==PD2SMPGC::L)?"L":"R");
+    string lotag = "";
+    switch(local_order){
+        case ORDER_NONE:    lotag="None"; break;
+        case ORDER_NATURAL: lotag="NT"; break;
+        case ORDER_RANDOM:  lotag="RD"; break;
+        case ORDER_LARGEST_FIRST: lotag="LF"; break;
+        default:
+            printf("Error! PD2_OMP_GMMP tring to use local order %d. which is not supported.\n", local_order); 
+            exit(1);
+    }
+
+
+    printf("@PD2GMMPLO(%s)_side_nT_c_T_Tcolor_Tdetect_TmaxC_Tlo_nCnf_nLoop\t", lotag.c_str());
+    printf("%s ", (side==PD2SMPGC::L)?"L":"R");
     printf("%d\t",  nT);    
     printf("%d\t",  colors);    
     printf("%lf\t", tim_total);
     printf("%lf\t", tim_color);
     printf("%lf\t", tim_detect);
     printf("%lf\t", tim_maxc);
-    printf("%d\t",  nConflicts);
-    printf("%d\t", nLoops);
+    printf("%lf\t", tim_local_order);
+    printf("%d\t",  n_conflicts);
+    printf("%d\t", n_loops);
     printf("%s", cnt_pd2conflict(side, vtxColor)?"Failed":"Varified");
     printf("\n");
     return _TRUE;   
 }
 
-
-int PD2SMPGCColoring::PD2_OMP_GM3P_LO(const int side, int nT, int& colors, vector<int>& vtxColor, const string &local_order_method="LARGEST_FIRST"){ 
-    if(nT<=0) { printf("Warning, number of threads changed from %d to 1\n",nT); nT=1; }
-    omp_set_num_threads(nT);
-    string lo_tag = "NONE";
-    double tim_local_order   = 0;
-    double tim_color  = 0;                     // run time
-    double tim_detect = 0;                     // run time
-    double tim_recolor= 0;                     // run time
-    double tim_maxc   = 0;
-    double tim_total=0;                          // run time
-    int    nConflicts = 0;                     // Number of conflicts 
-
-    const int          N             = (side==PD2SMPGC::L)?(GetLeftVertexCount()):(GetRightVertexCount()); 
-    const vector<int>& srcPtr        = (side==PD2SMPGC::L)?(GetLeftVertices()   ):(GetRightVertices()   );
-    const vector<int>& dstPtr        = (side==PD2SMPGC::L)?(GetRightVertices()  ):(GetLeftVertices()    );
-    const vector<int>& vtxVal        = GetEdges();
-    const vector<int>& ordered_queue = global_ordered_vertex(side);
-    const int          srcMaxDegree  = (side==PD2SMPGC::L)?GetMaximumLeftVertexDegree():GetMaximumRightVertexDegree();
-    const int          dstMaxDegree  = (side==PD2SMPGC::L)?GetMaximumRightVertexDegree():GetMaximumLeftVertexDegree();
-    const int          BufSize       = min(N, dstMaxDegree * srcMaxDegree +1);
-    colors=0;                       
-    vtxColor.assign(N, -1);
-
-    // pre-partition
-    vector<vector<int>> QQ(nT);
-    for(int tid=0; tid<nT; tid++) QQ[tid].reserve(N/nT+1+16); // +1 for even/odd, +16 for bus wide of 64bit machine
-    {
-        vector<int> lens(nT,N/nT), disp(nT+1,0);
-        for(int tid=0; tid<N%nT; tid++) lens[tid]++;
-        for(int tid=0; tid<nT; tid++) disp[tid+1]=disp[tid] + lens[tid];
-        for(int tid=0; tid<nT; tid++)
-            QQ[tid].insert(QQ[tid].end(), ordered_queue.begin()+disp[tid], ordered_queue.begin()+disp[tid+1]);
-    }
-
-    if(local_order_method=="LARGEST_FIRST"){
-        tim_local_order  =- omp_get_wtime();
-        lo_tag = "LF";
-        #pragma omp parallel
-        {
-            const int tid = omp_get_thread_num();
-            PD2SMPGCOrdering::local_largest_degree_first_ordering(side, QQ[tid]);
-        }
-        tim_local_order  += omp_get_wtime();
-    }
-    else if(local_order_method=="NATURAL"){
-        lo_tag = "NT";
-        tim_local_order  =- omp_get_wtime();
-        #pragma omp parallel
-        {
-            const int tid = omp_get_thread_num();
-            PD2SMPGCOrdering::local_natural_ordering(QQ[tid]);
-        }
-        tim_local_order  += omp_get_wtime();
-    }
-    else if(local_order_method=="RANDOM"){
-        lo_tag = "RD";
-        tim_local_order  =- omp_get_wtime();
-        #pragma omp parallel
-        {
-            const int tid = omp_get_thread_num();
-            PD2SMPGCOrdering::local_random_ordering(QQ[tid]);
-        }
-        tim_local_order  += omp_get_wtime();
-    }
-    else{
-        printf("Error! PD2_OMP_GM3P_Local_Order() tring to use \"%s\" order. But it is not supported.\n", local_order_method.c_str());
-        exit(1);
-    }
-
-
-    tim_color =- omp_get_wtime();
-    // phase pseudo coloring
-#pragma omp parallel
-    {
-        const int tid = omp_get_thread_num();
-        const vector<int>& Q = QQ[tid];
-        vector<int> Mask; Mask.assign(BufSize,-1);
-        for(const auto v : Q){    //v-w-u
-            for(int iw=srcPtr[v]; iw!=srcPtr[v+1]; iw++){
-                const auto w = vtxVal[iw];
-                for(int iu=dstPtr[w]; iu!=dstPtr[w+1]; iu++){
-                    const auto u = vtxVal[iu];
-                    if(v==u) continue;
-                    if(vtxColor[u]==-1) continue;
-                    Mask[vtxColor[u]] = v;
-                }
-            }
-            int c = 0;
-            for(; c<BufSize; c++)
-                if(Mask[c]!=v) 
-                    break;
-            vtxColor[v]=c;
-        } // end for
-    }// end omp parallel
-    tim_color += omp_get_wtime();
-    // phase conflicts detection
-    tim_detect =- omp_get_wtime();
-    nConflicts=0;
-    #pragma omp parallel reduction(+:nConflicts)
-    {
-        const int tid = omp_get_thread_num();
-        vector<int>& Q = QQ[tid];
-        for(int iv=0; iv<(signed)Q.size(); iv++){
-            bool  b_false_colored = false;
-            const int v = Q[iv];
-            const int vc = vtxColor[v];
-            for(int iw=srcPtr[v]; b_false_colored==false && iw!=srcPtr[v+1]; iw++) {
-                const int w = vtxVal[iw];
-                for(int iu=dstPtr[w]; iu!=dstPtr[w+1]; iu++) {
-                    const auto u = vtxVal[iu];
-                    if(v == u) continue;
-                    if(vc== vtxColor[u]){
-                        b_false_colored=true;
-                        Q[nConflicts++]=v;
-                        vtxColor[v]=-1;
-                        break;
-                    }
-                }
-            }
-        }
-        Q.resize(nConflicts);
-    }// end omp parallel
-    tim_detect  += omp_get_wtime();
-
-    tim_recolor =- omp_get_wtime();
-    // serial coloring remains part
-    {
-        vector<int> Mask; Mask.assign(BufSize,-1);
-        for(int tid=0; tid<nT; tid++){
-            const vector<int>& Q = QQ[tid];
-            for(const auto v : Q) {
-                for(int iw=srcPtr[v]; iw!=srcPtr[v+1]; iw++) {
-                    const auto w = vtxVal[iw];
-                    for(int iu=dstPtr[w]; iu!=dstPtr[w+1]; iu++) {
-                        const auto u = vtxVal[iu];
-                        if(v==u) continue;
-                        if(vtxColor[u]==-1) continue;
-                        Mask[vtxColor[u]] = v; 
-                    }
-                }
-                int c=0; 
-                for(; c<BufSize; c++) 
-                    if(Mask[c]!=v) 
-                        break;
-                vtxColor[v]=c;
-            }
-        }
-    }
-    tim_recolor += omp_get_wtime();
-
-    // get number of colors
-    tim_maxc = -omp_get_wtime();
-    #pragma omp parallel for reduction(max:colors)
-    for(int i=0; i<N; i++){
-        colors = max(colors, vtxColor[i]);
-    }
-    colors++; //number of colors, 
-    tim_maxc += omp_get_wtime();
-
-    tim_total = tim_local_order + tim_color+tim_detect+tim_recolor+tim_maxc;
-
-    printf("@PD2GM3PLO_%s_side_nT_c_T_Tcolor_Tdetect_Trecolor_TmaxC_nCnf\t",lo_tag.c_str());
-    printf("%s\t", (side==PD2SMPGC::L)?"L":"R");
-    printf("%d\t",  nT);    
-    printf("%d\t",  colors);    
-    printf("%lf\t", tim_total);
-    printf("%lf\t", tim_local_order);
-    printf("%lf\t", tim_color);
-    printf("%lf\t", tim_detect);
-    printf("%lf\t", tim_recolor);
-    printf("%lf\t", tim_maxc);
-    printf("%d\t",  nConflicts);
-    printf("%s", cnt_pd2conflict(side, vtxColor)?"Failed":"Varified");
-    printf("\n");
-    return _TRUE;   
-}
-
-int PD2SMPGCColoring::PD2_OMP_GMMP_LO(const int side, int nT, int&  colors, vector<int>& vtxColor, const string& local_order_method="LARGEST_FIRST"){
-    if(nT<=0) { printf("Warning, number of threads changed from %d to 1\n",nT); nT=1; }
-    omp_set_num_threads(nT);
-
-    string lo_tag = "NONE";
-    double tim_local_order=0;
-    double tim_color  = 0;                     // run time
-    double tim_detect = 0;                     // run time
-    double tim_maxc   = 0;
-    double tim_total=0;                          // run time
-    int    nConflicts = 0;                     // Number of conflicts 
-    int    nLoops     = 0;
-    const int          N             = (side==PD2SMPGC::L)?(GetLeftVertexCount()):(GetRightVertexCount()); 
-    const vector<int>& srcPtr        = (side==PD2SMPGC::L)?(GetLeftVertices()   ):(GetRightVertices()   );
-    const vector<int>& dstPtr        = (side==PD2SMPGC::L)?(GetRightVertices()  ):(GetLeftVertices()    );
-    const vector<int>& vtxVal        = GetEdges();
-    const vector<int>& ordered_queue = global_ordered_vertex(side);
-    const int          srcMaxDegree  = (side==PD2SMPGC::L)?GetMaximumLeftVertexDegree():GetMaximumRightVertexDegree();
-    const int          dstMaxDegree  = (side==PD2SMPGC::L)?GetMaximumRightVertexDegree():GetMaximumLeftVertexDegree();
-    const int          BufSize       = min(N, dstMaxDegree * srcMaxDegree +1);
-    colors=0;                       
-    vtxColor.assign(N, -1);
-
-    // pre-partition
-    vector<vector<int>> QQ(nT);
-    for(int tid=0; tid<nT; tid++) QQ[tid].reserve(N/nT+1+16); // +1 for even/odd, +16 for bus wide of 64bit machine
-    {
-        vector<int> lens(nT,N/nT), disp(nT+1,0);
-        for(int tid=0; tid<N%nT; tid++) lens[tid]++;
-        for(int tid=0; tid<nT; tid++) disp[tid+1]=disp[tid] + lens[tid];
-        for(int tid=0; tid<nT; tid++)
-            QQ[tid].insert(QQ[tid].end(), ordered_queue.begin()+disp[tid], ordered_queue.begin()+disp[tid+1]);
-    }
-
-    if(local_order_method=="LARGEST_FIRST"){
-        tim_local_order  =- omp_get_wtime();
-        lo_tag = "LF";
-        #pragma omp parallel
-        {
-            const int tid = omp_get_thread_num();
-            PD2SMPGCOrdering::local_largest_degree_first_ordering(side, QQ[tid]);
-        }
-        tim_local_order  += omp_get_wtime();
-    }
-    else if(local_order_method=="NATURAL"){
-        lo_tag = "NT";
-        tim_local_order  =- omp_get_wtime();
-        #pragma omp parallel
-        {
-            const int tid = omp_get_thread_num();
-            PD2SMPGCOrdering::local_natural_ordering(QQ[tid]);
-        }
-        tim_local_order  += omp_get_wtime();
-    }
-    else if(local_order_method=="RANDOM"){
-        lo_tag = "RD";
-        tim_local_order  =- omp_get_wtime();
-        #pragma omp parallel
-        {
-            const int tid = omp_get_thread_num();
-            PD2SMPGCOrdering::local_random_ordering(QQ[tid]);
-        }
-        tim_local_order  += omp_get_wtime();
-    }
-    else{
-        printf("Error! PD2_OMP_GM3P_Local_Order() tring to use \"%s\" order. But it is not supported.\n", local_order_method.c_str());
-        exit(1);
-    }
-
-    int num_uncolored_vertex = N;
-    while(num_uncolored_vertex!=0){
-        tim_color =- omp_get_wtime();
-        // phase pseudo coloring
-        #pragma omp parallel
-        {
-            const int tid = omp_get_thread_num();
-            const vector<int>& Q = QQ[tid];
-            vector<int> Mask; Mask.assign(BufSize,-1);
-            for(const auto v : Q){    //v-w-u
-                for(int iw=srcPtr[v]; iw!=srcPtr[v+1]; iw++){
-                    const auto w = vtxVal[iw];
-                    for(int iu=dstPtr[w]; iu!=dstPtr[w+1]; iu++){
-                        const auto u = vtxVal[iu];
-                        if(v==u) continue;
-                        if(vtxColor[u]==-1) continue;
-                        Mask[vtxColor[u]] = v;
-                    }
-                }
-                int c = 0;
-                for(; c<BufSize; c++)
-                    if(Mask[c]!=v) 
-                        break;
-                vtxColor[v]=c;
-            } // end for
-        }// end omp parallel
-        tim_color += omp_get_wtime();
-    
-        // phase conflicts detection
-        tim_detect =- omp_get_wtime();
-        num_uncolored_vertex=0;
-        #pragma omp parallel reduction(+:num_uncolored_vertex)
-        {
-            const int tid = omp_get_thread_num();
-            vector<int>& Q = QQ[tid];
-            for(int iv=0; iv<(signed)Q.size(); iv++){
-                bool  b_visfalse_colored = false;
-                const int v = Q[iv];
-                const int vc = vtxColor[v];
-                for(int iw=srcPtr[v]; b_visfalse_colored==false && iw!=srcPtr[v+1]; iw++) {
-                    const int w = vtxVal[iw];
-                    for(int iu=dstPtr[w]; iu!=dstPtr[w+1]; iu++) {
-                        const auto u = vtxVal[iu];
-                        if(v == u) continue;
-                        if(vc== vtxColor[u]){
-                            b_visfalse_colored=true;
-                            Q[num_uncolored_vertex++]=v;
-                            vtxColor[v]=-1;
-                            break;
-                        }
-                    }
-                }
-            }
-            Q.resize(num_uncolored_vertex);
-        } //end omp parallel
-        tim_detect  += omp_get_wtime();
-        
-        nConflicts += num_uncolored_vertex;
-        nLoops      += 1;
-    } //end while
-
-    // get number of colors
-    tim_maxc = -omp_get_wtime();
-    #pragma omp parallel for reduction(max:colors)
-    for(int i=0; i<N; i++){
-        colors = max(colors, vtxColor[i]);
-    }
-    colors++; //number of colors, 
-    tim_maxc += omp_get_wtime();
-
-    tim_total =tim_local_order+ tim_color+tim_detect + tim_maxc;
-
-    printf("@PD2GMMPLO_%s_side_nT_c_T_Torder_Tcolor_Tdetect_TmaxC_nCnf_nLoop\t",lo_tag.c_str());
-    printf("%s\t", (side==PD2SMPGC::L)?"L":"R");
-    printf("%d\t",  nT);    
-    printf("%d\t",  colors);    
-    printf("%lf\t", tim_total);
-    printf("%lf\t", tim_local_order);
-    printf("%lf\t", tim_color);
-    printf("%lf\t", tim_detect);
-    printf("%lf\t", tim_maxc);
-    printf("%d\t",  nConflicts);
-    printf("%d\t", nLoops);
-    printf("%s", cnt_pd2conflict(side, vtxColor)?"Failed":"Varified");
-    printf("\n");
-    return _TRUE;
-}
 
 
