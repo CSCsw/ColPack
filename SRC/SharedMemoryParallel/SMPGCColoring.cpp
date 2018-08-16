@@ -127,9 +127,9 @@ int SMPGCColoring::Coloring(int nT, const string& method, const int switch_iter=
                     else if(right.compare("NONE")==0) local_order=ORDER_NONE;
                     else { printf("Error local_order '%s' in method '%s' is not supported.\n", right.c_str(), method.c_str()); exit(1);}
                 }
-                if     (left.compare("GM3P")==0) return D1_OMP_HBMTJP(nT, m_total_num_colors, m_vertex_color, local_order, HYBRID_GM3P, switch_iter);
-                else if(left.compare("GMMP")==0) return D1_OMP_HBMTJP(nT, m_total_num_colors, m_vertex_color, local_order, HYBRID_GMMP, switch_iter);
-                else if(left.compare("SERIAL")==0) return D1_OMP_HBMTJP(nT, m_total_num_colors, m_vertex_color, local_order, HYBRID_GMMP, switch_iter);
+                if     (left.compare("GM3P"  )==0) return D1_OMP_HBMTJP(nT, m_total_num_colors, m_vertex_color, HYBRID_GM3P, switch_iter, local_order);
+                else if(left.compare("GMMP"  )==0) return D1_OMP_HBMTJP(nT, m_total_num_colors, m_vertex_color, HYBRID_GMMP, switch_iter, local_order);
+                else if(left.compare("SERIAL")==0) return D1_OMP_HBMTJP(nT, m_total_num_colors, m_vertex_color, HYBRID_GMMP, switch_iter, local_order);
            
             }
         }
@@ -183,7 +183,7 @@ SMPGCColoring::SMPGCColoring(const string& graph_name)
 // ============================================================================
 // Construction
 // ============================================================================
-SMPGCColoring::SMPGCColoring(const string& graph_name, const string& fmt, double* iotime, const string& glb_order="NATURAL", double *ordtime=nullptr) 
+SMPGCColoring::SMPGCColoring(const string& graph_name, const string& fmt, double* iotime, const string& glb_order, double *ordtime) 
 : SMPGCOrdering(graph_name, fmt, iotime, glb_order, ordtime){
     m_vertex_color.reserve(num_nodes());
     m_total_num_colors=0;
@@ -193,7 +193,7 @@ SMPGCColoring::SMPGCColoring(const string& graph_name, const string& fmt, double
 // ============================================================================
 // check if the graph is correct colored
 // ============================================================================
-int SMPGCColoring::cnt_d1conflict(const vector<int>& vtxColorConst, bool bVerbose=false){
+int SMPGCColoring::cnt_d1conflict(const vector<int>& vtxColorConst, bool bVerbose){
     vector<int>         vtxColor(vtxColorConst);
     const int N         = num_nodes();
     const vector<int>& vtxPtr = get_CSR_ia();
@@ -230,7 +230,7 @@ int SMPGCColoring::cnt_d1conflict(const vector<int>& vtxColorConst, bool bVerbos
 // ----------------------------------------------------------------------------
 // uncolored vertex will not conflict with any other vertex
 // ============================================================================
-int SMPGCColoring::cnt_d2conflict(const vector<int>&vtxColorConst, bool bVerbose=false) {
+int SMPGCColoring::cnt_d2conflict(const vector<int>&vtxColorConst, bool bVerbose) {
     //do it serial
     if(0)
     {

@@ -12,7 +12,7 @@ using namespace std;
 using namespace ColPack;
 
 
-int SMPGCColoring::D1_OMP_HBJP(int nT, int&colors, vector<int>& vtxColors, const int local_order, const int option, const int switch_iter=0){
+int SMPGCColoring::D1_OMP_HBJP(int nT, int&colors, vector<int>& vtxColors, const int option, const int switch_iter,  const int local_order){
     if(nT<=0) { printf("Warning, number of threads changed from %d to 1\n",nT); nT=1; }
     omp_set_num_threads(nT);
 
@@ -195,7 +195,7 @@ int SMPGCColoring::D1_OMP_HBJP(int nT, int&colors, vector<int>& vtxColors, const
 }
 
 
-int SMPGCColoring::D1_OMP_HBMTJP(int nT, int&colors, vector<int>& vtxColors, const int local_order, const int option, const int switch_iter=0){
+int SMPGCColoring::D1_OMP_HBMTJP(int nT, int&colors, vector<int>& vtxColors,  const int option, const int switch_iter, const int local_order){
     if(nT<=0) { printf("Warning, number of threads changed from %d to 1\n",nT); nT=1; }
     omp_set_num_threads(nT);
     
@@ -375,7 +375,7 @@ int SMPGCColoring::D1_OMP_HBMTJP(int nT, int&colors, vector<int>& vtxColors, con
 
 
 
-void SMPGCColoring::hybrid_GM3P(const int nT, vector<int>&vtxColors, vector<vector<int>>&QQ, const int local_order=ORDER_NONE){
+void SMPGCColoring::hybrid_GM3P(const int nT, vector<int>&vtxColors, vector<vector<int>>&QQ, const int local_order){
     const int BufSize         = max_degree()+1;
     const vector<int>& vtxPtr = get_CSR_ia();
     const vector<int>& vtxVal = get_CSR_ja();
@@ -453,7 +453,7 @@ void SMPGCColoring::hybrid_GM3P(const int nT, vector<int>&vtxColors, vector<vect
 }
 
 
-void SMPGCColoring::hybrid_GMMP(const int nT, vector<int>&vtxColors, vector<vector<int>>&QQ, const int local_order=ORDER_NONE){
+void SMPGCColoring::hybrid_GMMP(const int nT, vector<int>&vtxColors, vector<vector<int>>&QQ, const int local_order){
     const int BufSize          = max_degree()+1;         // maxDegree
     const vector<int>& vtxPtr  = get_CSR_ia();     // ia of csr
     const vector<int>& vtxVal  = get_CSR_ja();     // ja of csr
@@ -519,7 +519,7 @@ void SMPGCColoring::hybrid_GMMP(const int nT, vector<int>&vtxColors, vector<vect
 }
 
 
-void SMPGCColoring::hybrid_Serial(vector<int>&vtxColors, vector<vector<int>>&QQ, const int local_order=ORDER_NONE){
+void SMPGCColoring::hybrid_Serial(vector<int>&vtxColors, vector<vector<int>>&QQ, const int local_order){
     const int nT               = QQ.size();
     const int BufSize          = max_degree()+1;         // maxDegree
     const vector<int>& vtxPtr  = get_CSR_ia();     // ia of csr

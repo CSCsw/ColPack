@@ -11,10 +11,95 @@
 using namespace std;
 using namespace ColPack;
 
+
+
 // ============================================================================
 // based on Gebremedhin and Manne's GM algorithm [1]
 // ============================================================================
-int SMPGCColoring::D1_OMP_GM3P(int nT, int&colors, vector<int>&vtxColors, const int local_order=ORDER_NONE) {
+int SMPGCColoring::D1_serial(int&colors, vector<int>&vtxColors, const int local_order) {
+    omp_set_num_threads(1);
+    
+    //double tim_local_order=.0;
+    double tim_color      =.0;                     // run time
+    const int N               = num_nodes();   //number of vertex
+    const int BufSize         = max_degree()+1;
+    const vector<int>& vtxPtr = get_CSR_ia();
+    const vector<int>& vtxVal = get_CSR_ja();
+    const vector<int>& const_ordered_vertex = global_ordered_vertex(); 
+
+    colors=0;                       
+    vtxColors.assign(N, -1);
+
+    vector<int> Q(const_ordered_vertex);  //copied to local memory
+
+    // phase pseudo color
+    tim_color =- omp_get_wtime();
+    {
+        switch(local_order){
+            case ORDER_NONE:
+                break;
+            case ORDER_LARGEST_FIRST:
+                local_largest_degree_first_ordering(Q); break;
+            case ORDER_SMALLEST_LAST:
+                local_smallest_degree_last_ordering(Q); break;
+            case ORDER_NATURAL:
+                local_natural_ordering(Q); break;
+            case ORDER_RANDOM:
+                local_random_ordering(Q); break;
+            default:
+                printf("Error! unknown local order \"%d\".\n", local_order);
+                exit(1);
+        }
+
+        vector<int> Mask; Mask.assign(BufSize,-1);
+        for(const auto v : Q){
+            for(int iw=vtxPtr[v]; iw!=vtxPtr[v+1]; iw++) {
+                const auto wc=vtxColors[vtxVal[iw]];
+                if( wc >= 0) 
+                    Mask[wc] = v;
+            } 
+            int c=0;
+            for (; c!=BufSize; c++)
+                if(Mask[c]!=v)
+                    break;
+            vtxColors[v] = c;
+            if(colors<c) colors=c;
+        }
+    } //end omp parallel
+    tim_color  += omp_get_wtime();    
+    colors++; //number of colors, 
+
+    string order_tag="unknown";
+    switch(local_order){
+        case ORDER_NONE:
+            order_tag="NoOrder"; break;
+        case ORDER_LARGEST_FIRST:
+            order_tag="LF"; break;
+        case ORDER_SMALLEST_LAST:
+            order_tag="SL"; break;
+        case ORDER_NATURAL:
+            order_tag="NT"; break;
+        case ORDER_RANDOM:
+            order_tag="RD"; break;
+        default:
+            printf("unkonw local order %d\n", local_order);
+    }
+
+    printf("@D1Serial%s_c_T", order_tag.c_str());
+    printf("\t%d",  colors);    
+    printf("\t%lf", tim_color);
+#ifdef SMPGC_VARIFY
+    printf("\t%s", (cnt_d1conflict(vtxColors)==0)?("Success"):("Failed"));
+#endif
+    printf("\n");
+    return true;   
+}
+
+
+// ============================================================================
+// based on Gebremedhin and Manne's GM algorithm [1]
+// ============================================================================
+int SMPGCColoring::D1_OMP_GM3P(int nT, int&colors, vector<int>&vtxColors, const int local_order) {
     if(nT<=0) { printf("Warning, number of threads changed from %d to 1\n",nT); nT=1; }
     omp_set_num_threads(nT);
     
@@ -143,7 +228,7 @@ int SMPGCColoring::D1_OMP_GM3P(int nT, int&colors, vector<int>&vtxColors, const 
     colors++; //number of colors, 
     tim_maxc += omp_get_wtime();
 
-    tim_total = tim_local_order+tim_color+tim_detect+tim_recolor+tim_maxc;
+    tim_total = tim_color+tim_detect+tim_recolor+tim_maxc;
 
     string order_tag="unknown";
     switch(local_order){
@@ -186,7 +271,7 @@ int SMPGCColoring::D1_OMP_GM3P(int nT, int&colors, vector<int>&vtxColors, const 
 // ============================================================================
 // based on Catalyurek et al 's IP algorithm [2]
 // ============================================================================
-int SMPGCColoring::D1_OMP_GMMP(int nT, int&colors, vector<int>&vtxColors, const int local_order=ORDER_NONE) {
+int SMPGCColoring::D1_OMP_GMMP(int nT, int&colors, vector<int>&vtxColors, const int local_order) {
     if(nT<=0) { printf("Warning, number of threads changed from %d to 1\n",nT); nT=1; }
     omp_set_num_threads(nT); 
 
@@ -216,7 +301,7 @@ int SMPGCColoring::D1_OMP_GMMP(int nT, int&colors, vector<int>&vtxColors, const 
     tim_partition =- omp_get_wtime();
     {
         vector<int> lens(nT, N/nT); for(int i=0; i<N%nT; i++) lens[i]++;
-        vector<int> disps(nT+1, 0); for(int i=1; i<nT+1; i++) disps[i]=disp[i-1]+lens[i-1];
+        vector<int> disps(nT+1, 0); for(int i=1; i<nT+1; i++) disps[i]=disps[i-1]+lens[i-1];
         for(int i=0; i<nT; i++)
             QQ[i].insert(QQ[i].end(), const_ordered_vertex.begin()+disps[i], 
                     const_ordered_vertex.begin()+disps[i+1]);
@@ -231,7 +316,7 @@ int SMPGCColoring::D1_OMP_GMMP(int nT, int&colors, vector<int>&vtxColors, const 
         #pragma omp parallel
         {
             const int tid = omp_get_thread_num();
-            const vector<int>& Q = QQ[tid];
+            vector<int>& Q = QQ[tid];
             // phase local order
             switch(local_order){
                 case ORDER_NONE:
@@ -250,7 +335,7 @@ int SMPGCColoring::D1_OMP_GMMP(int nT, int&colors, vector<int>&vtxColors, const 
             }
             vector<int> Mark; Mark.assign(BufSize,-1);
             for(const auto v : Q){
-                for(int iw = vtxPtr[v], iw!=vtxPtr[v+1]; iw++) {
+                for(int iw = vtxPtr[v]; iw!=vtxPtr[v+1]; iw++) {
                     const auto w = vtxVal[iw];
                     const auto wc= vtxColors[w];
                     if(wc>=0) 
@@ -272,7 +357,7 @@ int SMPGCColoring::D1_OMP_GMMP(int nT, int&colors, vector<int>&vtxColors, const 
         {
             const int tid = omp_get_thread_num();
             vector<int>& Q = QQ[tid];
-            for(auto i=0; i<Q.size(); i++){
+            for(int i=0; i<(signed)Q.size(); i++){
                 const auto v = Q[i];
                 const auto vc= vtxColors[v];
                 for(int iw=vtxPtr[v]; iw!=vtxPtr[v+1]; iw++) {
@@ -326,8 +411,8 @@ int SMPGCColoring::D1_OMP_GMMP(int nT, int&colors, vector<int>&vtxColors, const 
     printf("\t%lf", tim_color);
     printf("\t%lf", tim_detect);
     printf("\t%lf", tim_maxc);
-    printf("\t%d",  nConflicts);  
-    printf("\t%d",  nLoops);
+    printf("\t%d",  n_conflicts);  
+    printf("\t%d",  n_loops);
     printf("\t%lf", tim_partition);
 #ifdef SMPGC_VARIFY
     printf("\t%s", (cnt_d1conflict(vtxColors)==0)?("Success"):("Failed"));
@@ -340,14 +425,13 @@ int SMPGCColoring::D1_OMP_GMMP(int nT, int&colors, vector<int>&vtxColors, const 
 // ============================================================================
 // based on Luby's algorithm [3]
 // ============================================================================
-int SMPGCiColoring::D1_OMP_LB(int nT, int&colors, vector<int>&vtxColors, const int local_order=ORDER_NONE) {
+int SMPGCColoring::D1_OMP_LB(int nT, int&colors, vector<int>&vtxColors, const int local_order) {
     if(nT<=0) { printf("Warning, number of threads changed from %d to 1\n",nT); nT=1; }
     omp_set_num_threads(nT);
    
     double tim_Ptt=0;    //partition time
     double tim_Wgt=0;    //run time
     double tim_MIS=0;    //run time
-    double tim_ReG=0;    //run time
     double tim_Tot=0;               //run time
 
     int n_loops        =0;
@@ -370,7 +454,7 @@ int SMPGCiColoring::D1_OMP_LB(int nT, int&colors, vector<int>&vtxColors, const i
     tim_Ptt =- omp_get_wtime();
     {
         vector<int> lens(nT, N/nT); for(int i=0; i<N%nT; i++) lens[i]++;
-        vector<int> disps(nT+1, 0); for(int i=1; i<nT+1; i++) disps[i]=disp[i-1]+lens[i-1];
+        vector<int> disps(nT+1, 0); for(int i=1; i<nT+1; i++) disps[i]=disps[i-1]+lens[i-1];
         for(int i=0; i<nT; i++)
             QQ[i].insert(QQ[i].end(), const_ordered_vertex.begin()+disps[i], 
                     const_ordered_vertex.begin()+disps[i+1]);
@@ -392,7 +476,7 @@ int SMPGCiColoring::D1_OMP_LB(int nT, int&colors, vector<int>&vtxColors, const i
     while(uncolored_nodes!=0) {
         // phase find maximal indenpend set
         uncolored_nodes = 0;
-        #pragma omp parallel reduction(+, uncolored_nodes)
+        #pragma omp parallel reduction(+: uncolored_nodes)
         {
             const int tid = omp_get_thread_num();
             vector<int>& Q = QQ[tid];
@@ -414,7 +498,7 @@ int SMPGCiColoring::D1_OMP_LB(int nT, int&colors, vector<int>&vtxColors, const i
             }
 
             vector<int> candi;
-            for(auto i=0; i<Q.size(); i++){
+            for(int i=0; i<(signed)Q.size(); i++){
                 const auto v = Q[i];
                 if(vtxColors[v]>=0) 
                     continue;
@@ -438,18 +522,18 @@ int SMPGCiColoring::D1_OMP_LB(int nT, int&colors, vector<int>&vtxColors, const i
             Q.resize(uncolored_nodes);
             #pragma omp barrier
             for(auto v : candi)
-                vtxColors[v]=n_loop;
+                vtxColors[v]=n_loops;
         } //end omp parallel
         n_conflicts+=uncolored_nodes;
         n_loops++;
     }
-    tim_MIS += omp_get_witme();
+    tim_MIS += omp_get_wtime();
 
     tim_Tot = tim_Wgt+tim_MIS;
 
     string order_tag="unkonwn";
     switch(local_order){
-        case ORDER_NON:
+        case ORDER_NONE:
             order_tag="NoOrder"; break;
         case ORDER_LARGEST_FIRST:
             order_tag="LF"; break;
@@ -485,14 +569,13 @@ int SMPGCiColoring::D1_OMP_LB(int nT, int&colors, vector<int>&vtxColors, const i
 // ============================================================================
 // based on Jone Plassmann's JP algorithm [3]
 // ============================================================================
-int SMPGCColoring::D1_OMP_JP(int nT, int&colors, vector<int>&vtxColors, const int local_order=ORDER_NONE) {
+int SMPGCColoring::D1_OMP_JP(int nT, int&colors, vector<int>&vtxColors, const int local_order) {
     if(nT<=0) { printf("Warning, number of threads changed from %d to 1\n",nT); nT=1; }
     omp_set_num_threads(nT);
 
     double tim_Ptt =.0;
     double tim_Wgt =.0;    //run time
     double tim_MIS =.0;
-    double tim_ReG =.0;    //run time
     double tim_MxC =.0;    //run time
     double tim_Tot =.0;               //run time
     int    n_loops = 0;                         //Number of rounds 
@@ -516,7 +599,7 @@ int SMPGCColoring::D1_OMP_JP(int nT, int&colors, vector<int>&vtxColors, const in
     tim_Ptt =- omp_get_wtime();
     {
         vector<int> lens(nT, N/nT); for(int i=0; i<N%nT; i++) lens[i]++;
-        vector<int> disps(nT+1, 0); for(int i=1; i<nT+1; i++) disps[i]=disp[i-1]+lens[i-1];
+        vector<int> disps(nT+1, 0); for(int i=1; i<nT+1; i++) disps[i]=disps[i-1]+lens[i-1];
         for(int i=0; i<nT; i++)
             QQ[i].insert(QQ[i].end(), const_ordered_vertex.begin()+disps[i], 
                     const_ordered_vertex.begin()+disps[i+1]);
@@ -538,7 +621,7 @@ int SMPGCColoring::D1_OMP_JP(int nT, int&colors, vector<int>&vtxColors, const in
     while(uncolored_nodes!=0){
 
         uncolored_nodes = 0;
-        #pragma omp parallel reduction(+, uncolored_nodes)
+        #pragma omp parallel reduction(+: uncolored_nodes)
         {
             const int tid = omp_get_thread_num();
             vector<int>& Q = QQ[tid];
@@ -561,7 +644,7 @@ int SMPGCColoring::D1_OMP_JP(int nT, int&colors, vector<int>&vtxColors, const in
 
             vector<int> candi;
             // phase find maximal indenpenent set, and color it
-            for(auto i=0; i<Q.size(); i++){
+            for(int i=0; i<(signed)Q.size(); i++){
                 const auto v = Q[i];
                 if(vtxColors[v]>=0) 
                     continue;
@@ -577,7 +660,7 @@ int SMPGCColoring::D1_OMP_JP(int nT, int&colors, vector<int>&vtxColors, const in
                         break;
                     }
                 }
-                if(b_visdomain) cand.push_back(v);
+                if(b_visdomain) candi.push_back(v);
                 else            Q[uncolored_nodes++]=v;
             }
             
@@ -585,16 +668,15 @@ int SMPGCColoring::D1_OMP_JP(int nT, int&colors, vector<int>&vtxColors, const in
             // phase greedy coloring 
             #pragma omp barrier
             vector<int> Mask(BufSize, -1);
-            for(const auto v : Q){
+            for(const auto v : candi){
                 for(auto iw=vtxPtr[v]; iw!=vtxPtr[v+1]; iw++){
-                    const auto w = vtxVal[iw];
-                    const auto wc= vtxColors[w];
+                    const auto wc= vtxColors[ vtxVal[iw] ];
                     if(wc>=0) 
                         Mask[wc]=v;
                 }
                 int c=0; 
                 for(;c<BufSize; c++)
-                    if(Mask[wc]!=v)
+                    if(Mask[c]!=v)
                         break;
                 vtxColors[v]=c;
             }
@@ -642,7 +724,7 @@ int SMPGCColoring::D1_OMP_JP(int nT, int&colors, vector<int>&vtxColors, const in
     printf("\t%lf", tim_MxC);
     printf("\t%d", n_loops);
     printf("\t%d", n_conflicts);
-    printf("\t%lf", tim_partition);
+    printf("\t%lf", tim_Ptt);
 #ifdef SMPGC_VARIFY
     printf("\t%s", (cnt_d1conflict(vtxColors)==0)?("Success"):("Failed"));
 #endif
@@ -653,14 +735,13 @@ int SMPGCColoring::D1_OMP_JP(int nT, int&colors, vector<int>&vtxColors, const in
 
 
 
-int SMPGCColoring::D1_OMP_MTJP(int nT, int& colors, vector<int>&vtxColors, const int local_order=ORDER_NONE) {
+int SMPGCColoring::D1_OMP_MTJP(int nT, int& colors, vector<int>&vtxColors, const int local_order) {
     if(nT<=0) { printf("Warning, number of threads changed from %d to 1\n",nT); nT=1; }
     omp_set_num_threads(nT);
     
     double tim_Ptt =.0;
     double tim_Wgt =.0;                      // run time
     double tim_MIS =.0;                       // run time
-    double tim_ReG =.0;                       // run time
     double tim_MxC =.0;                       // run time
     double tim_Tot =.0;                       // run time
 
@@ -669,7 +750,6 @@ int SMPGCColoring::D1_OMP_MTJP(int nT, int& colors, vector<int>&vtxColors, const
     int    uncolored_nodes=0;
 
     const int N = num_nodes(); //number of vertex
-    const int BufSize = max_degree()+1;
     const vector<int>& vtxPtr = get_CSR_ia();
     const vector<int>& vtxVal = get_CSR_ja();
     const vector<int>& const_ordered_vertex = global_ordered_vertex(); 
@@ -685,7 +765,7 @@ int SMPGCColoring::D1_OMP_MTJP(int nT, int& colors, vector<int>&vtxColors, const
     tim_Ptt =- omp_get_wtime();
     {
         vector<int> lens(nT, N/nT); for(int i=0; i<N%nT; i++) lens[i]++;
-        vector<int> disps(nT+1, 0); for(int i=1; i<nT+1; i++) disps[i]=disp[i-1]+lens[i-1];
+        vector<int> disps(nT+1, 0); for(int i=1; i<nT+1; i++) disps[i]=disps[i-1]+lens[i-1];
         for(int i=0; i<nT; i++)
             QQ[i].insert(QQ[i].end(), const_ordered_vertex.begin()+disps[i], 
                     const_ordered_vertex.begin()+disps[i+1]);
@@ -697,11 +777,11 @@ int SMPGCColoring::D1_OMP_MTJP(int nT, int& colors, vector<int>&vtxColors, const
     while(uncolored_nodes!=0){
         uncolored_nodes=0;
 
-        #pragma omp parallel reduction(+, uncolored_nodes)
+        #pragma omp parallel reduction(+: uncolored_nodes)
         {
             const int tid = omp_get_thread_num();
             vector<int> candi_nodes_color;
-            const int CAPACITY = 2*NUM_HASH;
+            const int CAPACITY = 2*HASH_NUM_HASH;
             const int Color_Base = n_loops*CAPACITY;
             vector<int>& Q = QQ[tid];
             // phase local order
@@ -722,21 +802,21 @@ int SMPGCColoring::D1_OMP_MTJP(int nT, int& colors, vector<int>&vtxColors, const
             }
 
             // phase find maximal indenpenent set, and color it
-            for(auto i=0; i<Q.size(); i++){
+            for(int i=0; i<(signed)Q.size(); i++){
                 const auto v = Q[i];
                 if(vtxColors[v]>=0)
                     continue;
-                int vw[NUM_HASH];
-                for(int i=0; i<NUM_HASH; i++) vwt[i]=mhash(v, HASH_SEED+HASH_SHIFT*i);
+                unsigned int vw[HASH_NUM_HASH];
+                for(int i=0; i<HASH_NUM_HASH; i++) vw[i]=mhash(v, HASH_SEED+HASH_SHIFT*i);
                 int b_visdomain = ((1<<CAPACITY)-1); //0:nether 1:LargeDomain, 2:SmallDomain, 3 Both/Reserve/Init
                 for(auto iw=vtxPtr[v]; iw!=vtxPtr[v+1]; iw++){
-                    const auto w = verVal[iw];
+                    const auto w = vtxVal[iw];
                     if(vtxColors[w]>=0) 
                         continue;
                     for(int i=0; i<HASH_NUM_HASH; i++){
                         const auto ww = mhash(w, HASH_SEED+HASH_SHIFT*i);
-                        if( (b_visdomain&(0x1<<(i<<1))) && (vw[i] <= ww) ) b_isdomain^= (0x1<<(i<<1));
-                        if( (b_visdomain&(0x2<<(i<<1))) && (vw[i] >= ww) ) b_isdomain^= (0x2<<(i<<1));
+                        if( (b_visdomain&(0x1<<(i<<1))) && (vw[i] <= ww) ) b_visdomain^= (0x1<<(i<<1));
+                        if( (b_visdomain&(0x2<<(i<<1))) && (vw[i] >= ww) ) b_visdomain^= (0x2<<(i<<1));
                     }
                     if( b_visdomain==0) break;
                 }
@@ -753,8 +833,9 @@ int SMPGCColoring::D1_OMP_MTJP(int nT, int& colors, vector<int>&vtxColors, const
             } //end for 
             Q.resize(uncolored_nodes);
             #pragma omp barrier
-            for(auto i=0; i<candi_nodes_color.size(); i+=2){
+            for(int i=0; i<(signed)candi_nodes_color.size(); i+=2){
                 vtxColors[ candi_nodes_color[i] ] = candi_nodes_color[i+1];
+            }
         } //end omp parallel
         tim_MIS += omp_get_wtime();
     
@@ -799,7 +880,7 @@ int SMPGCColoring::D1_OMP_MTJP(int nT, int& colors, vector<int>&vtxColors, const
     printf("\t%lf", tim_MxC);
     printf("\t%d", n_loops);
     printf("\t%d", n_conflicts);
-    printf("\t%lf", tim_partition);
+    printf("\t%lf", tim_Ptt);
 #ifdef SMPGC_VARIFY
     printf("\t%s", (cnt_d1conflict(vtxColors)==0)?("Success"):("Failed"));
 #endif

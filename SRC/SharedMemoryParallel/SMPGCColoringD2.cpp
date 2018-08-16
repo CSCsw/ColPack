@@ -102,7 +102,7 @@ int SMPGCColoring::D2_serial(int&colors, vector<int>& vtxColors, const int local
 // ============================================================================
 // distance two coloring GM 3 phase
 // ============================================================================
-int SMPGCColoring::D2_OMP_GM3P(int nT, int &colors, vector<int>& vtxColors, const int local_order=ORDER_NONE) {
+int SMPGCColoring::D2_OMP_GM3P(int nT, int &colors, vector<int>& vtxColors, const int local_order) {
     if(nT<=0) { printf("Warning, number of threads changed from %d to 1\n",nT); nT=1; }
     omp_set_num_threads(nT);
 
@@ -306,7 +306,7 @@ int SMPGCColoring::D2_OMP_GM3P(int nT, int &colors, vector<int>& vtxColors, cons
 // ============================================================================
 // Distance Two Openmp Multiple Phase Coloring
 // ============================================================================
-int SMPGCColoring::D2_OMP_GMMP(int nT, int &colors, vector<int>&vtxColors, const int local_order=ORDER_NONE){
+int SMPGCColoring::D2_OMP_GMMP(int nT, int &colors, vector<int>&vtxColors, int local_order){
     if(nT<=0) { printf("Warning, number of threads changed from %d to 1\n",nT); nT=1; }
     omp_set_num_threads(nT);
    
