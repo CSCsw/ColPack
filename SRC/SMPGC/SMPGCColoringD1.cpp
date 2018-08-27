@@ -202,7 +202,7 @@ int SMPGCColoring::D1_OMP_GM3P(int nT, int&colors, vector<int>&vtxColors, const 
     // phase serial coloring remain part
     tim_recolor =- omp_get_wtime();
     {
-        vector<bool> Mark; Mark.assign(BufSize, -1);
+        vector<int> Mark; Mark.assign(BufSize, -1);
         for(int tid=0; tid<nT; tid++){
             for(const auto v : QQ[tid]){
                 for(auto iw=vtxPtr[v]; iw!=vtxPtr[v+1]; iw++) {
@@ -837,12 +837,11 @@ int SMPGCColoring::D1_OMP_MTJP(int nT, int& colors, vector<int>&vtxColors, const
                 vtxColors[ candi_nodes_color[i] ] = candi_nodes_color[i+1];
             }
         } //end omp parallel
-        tim_MIS += omp_get_wtime();
-    
         n_loops++;
         n_conflicts+=uncolored_nodes;
     } //end while
 
+    tim_MIS += omp_get_wtime();
     tim_MxC = -omp_get_wtime();
     colors=0;
     #pragma omp parallel for reduction(max:colors)
