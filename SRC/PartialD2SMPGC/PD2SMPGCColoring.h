@@ -40,6 +40,9 @@ public: // API
     int PD2_OMP_GM3P(const int side, int nT, int&color, vector<int>&vtxColors, const int local_order=ORDER_NONE);
     int PD2_OMP_GMMP(const int side, int nT, int&color, vector<int>&vtxColors, const int local_order=ORDER_NONE);
     int PD2_serial(const int side, int&color, vector<int>&vtxColors);
+    
+    // Developing Algorithms
+    int PD2_OMP_GM3P_VBBIT(const int side, int nT, int &color, vector<int>&vtxColors, const int local_order=ORDER_NONE);
 
 public: // Utilites
     int cnt_pd2conflict(const int side, const vector<int>& vc);

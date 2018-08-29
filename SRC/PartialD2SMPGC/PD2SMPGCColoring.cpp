@@ -422,7 +422,7 @@ int PD2SMPGCColoring::PD2_OMP_GMMP(const int side, int nT, int &colors, vector<i
                     const int w = vtxVal[iw];
                     for(int iu=dstPtr[w]; iu!=dstPtr[w+1]; iu++) {
                         const auto u = vtxVal[iu];
-                        if(v == u) continue;
+                        if(v <= u) continue;
                         if(vc== vtxColor[u]){
                             b_visfalse_colored=true;
                             Q[num_uncolored_vertex++]=v;
