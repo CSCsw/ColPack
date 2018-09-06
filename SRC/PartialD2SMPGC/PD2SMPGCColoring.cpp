@@ -22,6 +22,13 @@ int PD2SMPGCColoring::Coloring(const int side, int nT, const string& method){
     else if(method.compare("PD2_OMP_GM3P_LOLF")==0) return PD2_OMP_GM3P(side, nT, m_total_num_colors, m_vertex_color, ORDER_LARGEST_FIRST);
     else if(method.compare("PD2_OMP_GMMP_LOLF")==0) return PD2_OMP_GMMP(side, nT, m_total_num_colors, m_vertex_color, ORDER_LARGEST_FIRST);
     else if(method.compare("PD2_SERIAL")==0) return PD2_serial(side, m_total_num_colors, m_vertex_color);
+    else if(method.compare("PD2_OMP_GM3P_VBBIT_LOLF")==0) return PD2_OMP_GM3P_VBBIT_EF(side, nT, m_total_num_colors, m_vertex_color, ORDER_LARGEST_FIRST);
+    else if(method.compare("PD2_OMP_GMMP_VBBIT_LOLF")==0) return PD2_OMP_GMMP_VBBIT_EF(side, nT, m_total_num_colors, m_vertex_color, ORDER_LARGEST_FIRST);
+    else if(method.compare("PD2_OMP_GM3P_VBBIT")==0) return PD2_OMP_GM3P_VBBIT_EF(side, nT, m_total_num_colors, m_vertex_color, ORDER_NONE);
+    else if(method.compare("PD2_OMP_GMMP_VBBIT")==0) return PD2_OMP_GMMP_VBBIT_EF(side, nT, m_total_num_colors, m_vertex_color, ORDER_NONE);
+    else if(method.compare("PD2_SERIAL")==0) return PD2_serial(side, m_total_num_colors, m_vertex_color);
+    
+    
     else { fprintf(stdout, "Unknow method %s\n",method.c_str()); exit(1); }   
     return _TRUE;
 }
