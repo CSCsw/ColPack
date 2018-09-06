@@ -3,6 +3,11 @@
 using namespace ColPack;
 void usage();
 
+
+#ifdef DEBUG_JP_PROFILE
+string profile_name="profile_";
+#endif
+
 int main(int argc, char* argv[]) {
     vector<string> fnames;
     vector<string> orders(1,"RANDOM");
@@ -10,8 +15,9 @@ int main(int argc, char* argv[]) {
     bool   bVerbose(false);
     vector<int> nTs(1);
     vector<string> options(1,"PD2_OMP_GM3P");
-    vector<string> pf_names(1,".");
-    int   bCheck(0);
+    bool   bCheck=false; 
+    int    side = PD2SMPGC::L;
+    bool   bShowLowBound=false; 
 
     for(int i=1; i<argc; i++){
         if(     !strcmp(argv[i], "-f")) {
@@ -49,9 +55,12 @@ int main(int argc, char* argv[]) {
                 options.push_back( argv[j]);
             }
         }
-        else if(!strcmp(argv[i],"-checkd1")||!strcmp(argv[i],"--checkd1")) bCheck|=1;
-        else if(!strcmp(argv[i],"-checkd2")||!strcmp(argv[i],"--checkd2")) bCheck|=2;
-        
+        else if(!strcmp(argv[i],"-check")) bCheck = true;
+        else if(!strcmp(argv[i],"-low"))   bShowLowBound = true;
+        else if(!strcmp(argv[i],"-side")) {
+            if(!strcmp(argv[i+1],"R")) side = PD2SMPGC::R;
+            i++;
+        }
         else printf("Waringing, unused argument %s",argv[i]);
     }   
 
@@ -65,15 +74,18 @@ int main(int argc, char* argv[]) {
                 printf("iotime"); if(iotime>60) { printf(" %d min",((int)iotime)/60); iotime= ((int)(iotime)%60)+(iotime- (int)(iotime)); }  printf(" %g sec\n",iotime);  
         }
 
+        if(bShowLowBound) printf("LowBound of %s coloring is %d\n", (side==PD2SMPGC::L)?"L":"R", g->get_lowbound_coloring(side));
+
         for(auto & o : orders){
-            g->global_ordering(PD2SMPGC::L, o, bVerbose?(&ordtime):nullptr);
+            g->global_ordering(side, o, bVerbose?(&ordtime):nullptr);
             if(bVerbose)  {
                 printf("global order %s ordtime",o.c_str()); if(ordtime>60) { printf(" %d min",((int)ordtime)/60); ordtime= ((int)(ordtime)%60)+(ordtime- (int)(ordtime)); }  printf(" %g sec\n",ordtime);  
             }
 
             for(auto & m : methds) {
                 for(auto nT : nTs) {
-                    g->Coloring(PD2SMPGC::L, nT, m);
+                    g->Coloring(side, nT, m);
+                    if(bCheck) printf("%s\n", g->cnt_pd2conflict(side, g->get_vertex_colors())?"Failed":"Varified");
                 }
             }//end for methods
         }//end for orders
@@ -94,11 +106,15 @@ void usage(){
             "                 PD2_OMP_GM3P_LOLF\n"
             "                 PD2_OMP_GMMP_LOLF\n"
             "                 PD2_SERIAL\n"
+            "                 PD2_OMP_GM3P_VBBIT\n"
+            "                 PD2_OMP_GMMP_VBBIT\n"
             "\n"
             " -nT <threads>:  list of number threads, --nT also accept.\n"
             " -v           :  verbose for debug infomation\n"
             "\n"
-            "\n"
+            " -side        :  L/R , set coloring side. Default L\n"
+            " -low         :  print low bound of number of colors\n"
+            " -check       :  check coloring is correct or not\n"
             "\n"
            ); 
 }

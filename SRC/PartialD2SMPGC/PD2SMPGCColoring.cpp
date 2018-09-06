@@ -85,6 +85,16 @@ int PD2SMPGCColoring::cnt_pd2conflict(const int side, const vector<int>& vtxColo
     return conflicts;
 }
 
+// ============================================================================
+// get the low bound of number of coloring
+// ----------------------------------------------------------------------------
+// the uncolored side's max degree is the low bound of number of coloring
+// ============================================================================
+int PD2SMPGCColoring::get_lowbound_coloring(const int side){
+    return (side==PD2SMPGC::L)?GetMaximumRightVertexDegree():GetMaximumLeftVertexDegree();
+}
+
+
 int PD2SMPGCColoring::PD2_serial(const int side, int&colors, vector<int>&vtxColor) {
     double tim_color = 0;
     const int          N             = (side==PD2SMPGC::L)?(GetLeftVertexCount()):(GetRightVertexCount()); 
@@ -126,7 +136,9 @@ int PD2SMPGCColoring::PD2_serial(const int side, int&colors, vector<int>&vtxColo
     printf("%s\t", (side==PD2SMPGC::L)?"L":"R");
     printf("%d\t",  colors);    
     printf("%lf\t", tim_color);
+#ifdef PD2_VARIFY
     printf("%s", cnt_pd2conflict(side, vtxColor)?"Failed":"Varified");
+#endif
     printf("\n");
     return _TRUE;   
 }
@@ -310,7 +322,9 @@ int PD2SMPGCColoring::PD2_OMP_GM3P(const int side, int nT, int&colors, vector<in
     printf("%lf\t", tim_maxc);
     printf("%lf\t", tim_local_order);
     printf("%d\t",  n_conflicts);
+#ifdef PD2_VARIFY
     printf("%s", cnt_pd2conflict(side, vtxColor)?"Failed":"Varified");
+#endif
     printf("\n");
     return _TRUE;   
 }
@@ -481,7 +495,9 @@ int PD2SMPGCColoring::PD2_OMP_GMMP(const int side, int nT, int &colors, vector<i
     printf("%lf\t", tim_local_order);
     printf("%d\t",  n_conflicts);
     printf("%d\t", n_loops);
+#ifdef PD2_VARIFY
     printf("%s", cnt_pd2conflict(side, vtxColor)?"Failed":"Varified");
+#endif
     printf("\n");
     return _TRUE;   
 }

@@ -47,7 +47,7 @@ public: // API
 
 public: // Utilites
     int cnt_pd2conflict(const int side, const vector<int>& vc);
-
+    int get_lowbound_coloring(const int side);  //return other side's max degree
 protected:
     int m_total_num_colors;
     vector<int> m_vertex_color;
