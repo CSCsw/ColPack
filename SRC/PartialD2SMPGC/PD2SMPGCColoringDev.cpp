@@ -9,6 +9,15 @@
 #include <bits/stdc++.h>
 using namespace std;
 using namespace ColPack;
+
+#ifdef PD2_MASKWIDE_64
+        #define PD2_MASKWIDE 64
+#else
+        #define PD2_MASKWIDE 32
+#endif
+
+
+
 // ============================================================================
 // GM3P   is GM's algorithm 3 phase: Color, Detect and Conflicts
 // VBBIT  is Vertice Based, Forbinden Array using Binary information, using EdegFiltering 
@@ -85,31 +94,37 @@ int PD2SMPGCColoring::PD2_OMP_GM3P_VBBIT_EF(const int side, int nT, int &colors,
     {
         const int tid = omp_get_thread_num();
         const vector<int>& Q = QQ[tid];
-        unsigned long long int Mask = 0x0;//FFFFFFFFFFFFFFFF;
+
+#ifdef PD2_MASKWIDE_64
+        unsigned long long int Mask = ~0; 
+#else
+        unsigned int Mask = ~0;
+#endif
 
         for(const auto v : Q){    //v-w-u
             int vc = -1;
             int offset_mask=0;
             while(vc==-1){ //for(int offset_mask=0; offset_mask!=NUM_ROUNDS_MASK; offset_mask++){
-                Mask=0x0000000000000000;
-                const int LOW = offset_mask*64;
-                const int UPP = LOW+64;
+                Mask = ~0;
+                const int LOW = (offset_mask++)*PD2_MASKWIDE;
                 for(int iw=srcPtr[v]; iw!=srcPtr[v+1]; iw++){
                     const auto w = vtxVal[iw];
                     for(int iu=dstPtr[w]; iu!=dstPtr[w+1]; iu++){
                         if(v==vtxVal[iu]) continue;
-                        const auto uc = vtxColor[ vtxVal[iu] ];
-                        if(uc>=LOW && uc<UPP){
-                            Mask|=(1<<(uc-LOW));
+                        const auto uc_local = vtxColor[ vtxVal[iu] ] - LOW;
+                        if(uc_local >=0 && uc_local < PD2_MASKWIDE){
+                            Mask &= ~(1<<(uc_local));
                         }
                     }// end for distance two neighbors
                 }// end for distance one neighbors
-                if(Mask!=0xFFFFFFFFFFFFFFFF){
-                    vc = 0;
-                    while(vc<63 && Mask&(1<<vc)){
-                        vc++;
+                
+                // find first settled bit
+                for(int i=0; i<PD2_MASKWIDE; i++) {
+                    if(Mask&(1<<i)){
+                        vc=i;
+                        vtxColor[v] = LOW+i;
+                        break;
                     }
-                    vtxColor[v]=LOW+vc;
                 }
             }// end while vc==-1
         }// end for v
@@ -147,29 +162,35 @@ int PD2SMPGCColoring::PD2_OMP_GM3P_VBBIT_EF(const int side, int nT, int &colors,
     tim_recolor =- omp_get_wtime();
     // serial coloring remains part
     {
-        unsigned long long int Mask = 0;
+#ifdef PD2_MASKWIDE_64 
+        unsigned long long int Mask = ~0;
+#else
+        unsigned int Mask = ~0;
+#endif
         for(int tid=0; tid<nT; tid++){
             const vector<int>& Q = QQ[tid];
             for(const auto v : Q) {
                 int vc=-1;
                 int offset_mask=0;
                 while(vc==-1){
-                    const int LOW = offset_mask*64;
-                    const int UPP = LOW + 64;
+                    Mask = ~0;
+                    const int LOW = (offset_mask++)*PD2_MASKWIDE;
                     for(int iw=srcPtr[v]; iw!=srcPtr[v+1]; iw++) {
                         const auto w = vtxVal[iw];
                         for(int iu=dstPtr[w]; iu!=dstPtr[w+1]; iu++) {
                             if(v==vtxVal[iu]) continue;
-                            const auto uc = vtxColor[vtxVal[iu]];
-                            if(uc>=LOW && uc<UPP) 
-                                Mask|=(1<<(uc-LOW));
+                            const auto uc_local = vtxColor[vtxVal[iu]]-LOW;
+                            if(uc_local>=0 && uc_local< PD2_MASKWIDE) 
+                                Mask &= ~(1<<(uc_local));
                         }
                     }
-                    if(Mask!=0xFFFFFFFFFFFFFFFF){
-                        vc=0;
-                        while(vc<63 && (Mask&(1<<vc)))
-                            vc++;
-                        vtxColor[v]=vc;
+                    //find first settled bit
+                    for(int i=0; i<PD2_MASKWIDE; i++){
+                        if(Mask&(1<<i)){
+                            vc=i;
+                            vtxColor[v]=LOW+i;
+                            break;
+                        }
                     }
                 }// end while vc==-1
             }// end for v
@@ -198,7 +219,7 @@ int PD2SMPGCColoring::PD2_OMP_GM3P_VBBIT_EF(const int side, int nT, int &colors,
             printf("Error! PD2_OMP_GM3P tring to use local order %d. which is not supported.\n",local_order); 
             exit(1);
     }
-    printf("@PD2GM3PVBBITLO(%s)_side_nT_c_T_Tcolor_Tdetect_Trecolor_TmaxC_Tlo_nCnf\t",lotag.c_str());
+    printf("@PD2GM3PVBBIT(%d)LO(%s)_side_nT_c_T_Tcolor_Tdetect_Trecolor_TmaxC_Tlo_nCnf\t",PD2_MASKWIDE,lotag.c_str());
     printf("%s ", (side==PD2SMPGC::L)?"L":"R");
     printf("%d\t",  nT);    
     printf("%d\t",  colors);    
@@ -209,7 +230,9 @@ int PD2SMPGCColoring::PD2_OMP_GM3P_VBBIT_EF(const int side, int nT, int &colors,
     printf("%lf\t", tim_maxc);
     printf("%lf\t", tim_local_order);
     printf("%d\t",  n_conflicts);
+#ifdef PD2_VARIFY
     printf("%s", cnt_pd2conflict(side, vtxColor)?"Failed":"Varified");
+#endif
     printf("\n");
     return _TRUE;
 
@@ -295,39 +318,35 @@ int PD2SMPGCColoring::PD2_OMP_GMMP_VBBIT_EF(const int side, int nT, int &colors,
         {
             const int tid = omp_get_thread_num();
             const vector<int>& Q = QQ[tid];
-            unsigned  int Mask=0xffffffff; //0xFFFFFFFFFFFFFFFF; //unsigned long long int Mask = 0;
-#define MASKWIDE 32
-            //const int MASKWIDE = 64;
+#ifdef PD2_MASKWIDE_64
+            unsigned long long int Mask = ~0;
+#else
+            unsigned int Mask = ~0;
+#endif
             for(const auto v : Q){    //v-w-u
                 int vc = -1;
                 int offset_mask=0;
                 while(vc==-1){ 
-                    Mask=0xffffffff; //0xFFFFFFFFFFFFFFFF;
-                    const int LOW = (offset_mask++)*MASKWIDE;
-                    //const int UPP = LOW+MASKWIDE;
+                    Mask=~0;
+                    const int LOW = (offset_mask++)*PD2_MASKWIDE;
                     for(int iw=srcPtr[v]; iw!=srcPtr[v+1]; iw++){
                         const auto w = vtxVal[iw];
                         for(int iu=dstPtr[w]; iu!=dstPtr[w+1]; iu++){
                             if(v==vtxVal[iu]) continue;
                             const int uc_local = vtxColor[ vtxVal[iu] ]-LOW;
-                            if(uc_local>=0 && uc_local < MASKWIDE)
+                            if(uc_local>=0 && uc_local < PD2_MASKWIDE)
                                 Mask &= ~(1<<uc_local);
-                                //Mask[uc_local]=0; 
-
                         }// end for distance two neighbors
                     }// end for distance one neighbors
-                    //find first setted bit
                     
-                    int position =-1;
-                    for(int i=0; i<MASKWIDE; i++){
-                        if(Mask&(1<<i) /*Mask[i]==1*/){
-                            position = i;
+                    //find first setted bit
+                    for(int i=0; i<PD2_MASKWIDE; i++){
+                        if(Mask&(1<<i)){
+                            vc=i;
+                            vtxColor[v]=LOW+i;
                             break;
                         }
                     }
-                    vc = position;
-                    if(vc!=-1)
-                        vtxColor[v]=LOW+vc;
                 }// end while vc==-1
             }// end for v
         }// end omp parallel
@@ -388,7 +407,7 @@ int PD2SMPGCColoring::PD2_OMP_GMMP_VBBIT_EF(const int side, int nT, int &colors,
             exit(1);
     }
     
-    printf("@PD2GMMPVBBITLO(%s)_side_nT_c_T_Tcolor_Tdetect_Trecolor_TmaxC_Tlo_nCnf\t",lotag.c_str());
+    printf("@PD2GMMPVBBIT(%d)LO(%s)_side_nT_c_T_Tcolor_Tdetect_Trecolor_TmaxC_Tlo_nCnf\t",PD2_MASKWIDE, lotag.c_str());
     printf("%s ", (side==PD2SMPGC::L)?"L":"R");
     printf("%d\t",  nT);    
     printf("%d\t",  colors);    
@@ -399,7 +418,9 @@ int PD2SMPGCColoring::PD2_OMP_GMMP_VBBIT_EF(const int side, int nT, int &colors,
     printf("%lf\t", tim_maxc);
     printf("%lf\t", tim_local_order);
     printf("%d\t",  n_conflicts);
+#ifdef PD2_VARIFY
     printf("%s", cnt_pd2conflict(side, vtxColor)?"Failed":"Varified");
+#endif
     printf("\n");
     return _TRUE;
 
