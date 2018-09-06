@@ -415,7 +415,7 @@ int PD2SMPGCColoring::PD2_OMP_GMMP(const int side, int nT, int &colors, vector<i
         tim_color += omp_get_wtime();
     
         // phase conflicts detection
-        tim_detect =- omp_get_wtime();
+        tim_detect -= omp_get_wtime();
         num_uncolored_vertex=0;
         #pragma omp parallel reduction(+:num_uncolored_vertex)
         {
