@@ -251,7 +251,6 @@ int PD2SMPGCColoring::PD2_OMP_GMMP_VBBIT_EF(const int side, int nT, int &colors,
     double tim_local_order =.0;
     double tim_color       =.0;                     // run time
     double tim_detect      =.0;                     // run time
-    double tim_recolor     =.0;                     // run time
     double tim_maxc        =.0;
     double tim_total       =.0;                     // run time
     int    n_conflicts     = 0;                     // Number of conflicts 
@@ -414,10 +413,10 @@ int PD2SMPGCColoring::PD2_OMP_GMMP_VBBIT_EF(const int side, int nT, int &colors,
     printf("%lf\t", tim_total);
     printf("%lf\t", tim_color);
     printf("%lf\t", tim_detect);
-    printf("%lf\t", tim_recolor);
     printf("%lf\t", tim_maxc);
     printf("%lf\t", tim_local_order);
     printf("%d\t",  n_conflicts);
+    printf("%d\t", n_loops);
 #ifdef PD2_VARIFY
     printf("%s", cnt_pd2conflict(side, vtxColor)?"Failed":"Varified");
 #endif
