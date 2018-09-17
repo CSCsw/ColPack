@@ -22,7 +22,6 @@ PD2SMPGCOrdering::PD2SMPGCOrdering(const string& graph_name, const string& fmt, 
     }
     if(iotime) *(time_t*) iotime=-clock();
     ReadMMBipartiteGraphCpp11(graph_name);
-    BipartiteGraphInputOutput::ReadMMBipartiteGraphCpp11(graph_name);
     if(iotime) { *(time_t*)iotime+=clock(); *iotime= (*(time_t*)iotime)*1.0/CLOCKS_PER_SEC; }
     global_ordering(side, order, ordtime);
 }
