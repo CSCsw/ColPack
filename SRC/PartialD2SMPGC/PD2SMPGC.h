@@ -36,6 +36,7 @@ public:
     static const int R = 2;
     static const int ROW = 1;
     static const int COL = 2;
+    static const int LR  = 3;
 public:
     static const int  ORDER_NONE    = 0;
     static const int  ORDER_NATURAL = 1;

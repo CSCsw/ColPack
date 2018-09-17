@@ -94,6 +94,52 @@ int PD2SMPGCColoring::get_lowbound_coloring(const int side){
     return (side==PD2SMPGC::L)?GetMaximumRightVertexDegree():GetMaximumLeftVertexDegree();
 }
 
+// ============================================================================
+// return sample stand deviation
+// ----------------------------------------------------------------------------
+//
+// ============================================================================
+double PD2SMPGCColoring::get_std_degree(const int side){
+    if(side==PD2SMPGC::L){
+        const int N = GetLeftVertexCount();
+        const double mean = m_d_AverageLeftVertexDegree;
+        const vector<int>& srcPtr = GetLeftVertices();
+        double sum=.0;
+        for(int v=0; v<N; v++){
+            const double deg = (double)-(srcPtr[v]-srcPtr[v+1]);
+            sum+=(deg-mean)*(deg-mean);
+        }
+        return sqrt(sum/(N-1));
+    }
+    else if(side==PD2SMPGC::R) {
+        const int N = GetRightVertexCount();
+        const double mean = m_d_AverageRightVertexDegree;
+        const vector<int>& srcPtr = GetRightVertices();
+        double sum=.0;
+        for(int v=0; v<N; v++){
+            const double deg = (double)-(srcPtr[v]-srcPtr[v+1]);
+            sum+=(deg-mean)*(deg-mean);
+        }
+        return sqrt(sum/(N-1));
+    }else{
+        const int NL = GetLeftVertexCount();
+        const int NR = GetRightVertexCount();
+        const int mean = m_d_AverageVertexDegree;
+        const vector<int>& srcLPtr = GetLeftVertices();
+        const vector<int>& srcRPtr = GetRightVertices();
+        double sum=.0;
+        for(int v=0; v<NL; v++){
+            const double deg = (double)-(srcLPtr[v]-srcLPtr[v+1]);
+            sum += (deg-mean)*(deg-mean);
+        }
+        for(int v=0; v<NR; v++){
+            const double deg = (double)-(srcRPtr[v]-srcRPtr[v+1]);
+            sum += (deg-mean)*(deg-mean);
+        }
+        return sqrt(sum/(NL+NR-1));
+    }
+}
+
 
 int PD2SMPGCColoring::PD2_serial(const int side, int&colors, vector<int>&vtxColor) {
     double tim_color = 0;

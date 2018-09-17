@@ -1267,7 +1267,7 @@ namespace ColPack
             m_i_MinimumRightVertexDegree = row_count;
             for(int i=0; i<col_count; i++){
                 m_vi_RightVertices.push_back((signed) m_vi_Edges.size());
-                const int deg = Grow[i].size();
+                const int deg = Gcol[i].size();
                 if(m_i_MaximumRightVertexDegree < deg) 
                     m_i_MaximumRightVertexDegree = deg;
                 if(m_i_MinimumRightVertexDegree > deg)
