@@ -57,17 +57,16 @@ void SMPGCGraph::do_read_MM_struct(const string& graph_name, vector<int>&ia, vec
         printf("Error! SMPGCGraph() read matrix market file \"%s\". But it is not matrix market format.\n", graph_name.c_str());
         exit(1);
     }
-    if( !(iss>>word) || word!="coordinate") {
+    if( !(iss>>word) || word!="coordinate") { //coordinate, array
         printf("Error! SMPGCGraph() read \"%s\" is a dense graph. Dense graph is a complete graph. Its chromatic number will be simply N+1.\n", graph_name.c_str());
         exit(1);
     }
-    if( !(iss>>word) || word=="complex") {
-        printf("Error! SMPGCGraph() graph \"%s\" is a complex matrix. Which is not supported.\n", graph_name.c_str());
-        exit(1);
+    if( !(iss>>word) || word=="complex") { //complex, integer, real, pattern
+        printf("Warning! SMPGCGraph() graph \"%s\" is a complex matrix. Only non-zero structure will be keeped.\n", graph_name.c_str());
     }
-    if( !(iss>>word) || word=="general") {
+    if( !(iss>>word) || word=="general") { //general, symmetric, hermitan, skew-symmetric
         bSymmetric = false;
-        printf("Warning! SMPGCGraph() grpah \"%s\" is not symmetric.\n", graph_name.c_str());
+        printf("Warning! SMPGCGraph() grpah \"%s\" is not symmetric. The upper triangular and diagonal elements are going to be removed. \n", graph_name.c_str());
     }
 
     // parse dimension
@@ -100,16 +99,16 @@ void SMPGCGraph::do_read_MM_struct(const string& graph_name, vector<int>&ia, vec
         entry_encount ++;
         iss.clear(); iss.str(line);
         iss>>row>>col;
-        if(row==col) continue;     //eliminate self edge
-        row--; col--;              //1-based to 0-based
-        G[row].push_back(col);
-        if(bSymmetric){
-            G[col].push_back(row);
-            if(row<col){
-                printf("Error! SMPGCCore() read \"%s\", but find non zero entry (row %d, col %d) in upper triangular part in a symmetric graph. This is not allowed by matrix market standard.\n", graph_name.c_str(), row+1, col+1);
+        if(row<=col){  //upper-triangular or diagonal
+            if(bSymmetric && row!=col){
+                printf("Error! SMPGCGraph() read the file \"%s\", but meet an upper-triangular entry in symmetric graph. %s\n", graph_name.c_str(), line.c_str());
                 exit(1);
             }
+            continue;     //
         }
+        row--; col--;              //1-based to 0-based
+        G[row].push_back(col);
+        G[col].push_back(row);
     }
     if(entry_encount != entry_expect){
         printf("Error! graph \"%s\" expected has %d entries, but we have found %d. Check the file.\n", graph_name.c_str(), entry_expect, entry_encount);
