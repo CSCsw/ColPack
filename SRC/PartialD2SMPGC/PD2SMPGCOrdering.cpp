@@ -16,12 +16,17 @@ using namespace ColPack;
 // ============================================================================
 PD2SMPGCOrdering::PD2SMPGCOrdering(const string& graph_name, const string& fmt, double*iotime, const int side, const string& order, double* ordtime) 
 : m_global_ordered_method(order), m_global_ordered_side(side), m_mt(5489u) {
-    if( fmt!=FORMAT_MM) {
-        printf("Error!PD2SMPGCOrdering only support MatrixMarket format (mm). \"%s\" with fmt \"%s\" is under construction... \n", graph_name.c_str(), fmt.c_str());
+    if( fmt==FORMAT_MM) {
+        if(iotime) *(time_t*) iotime=-clock();
+        ReadMMBipartiteGraphCpp11(graph_name);
+    }else if( fmt == FORMAT_POTHEN){
+        if(iotime) *(time_t*) iotime=-clock();
+        ReadMMGeneralGraphIntoPothenBipartiteGraphCpp11(graph_name);
+    }
+    else{
+        printf("Error!PD2SMPGCOrdering only support MatrixMarket format (MM), or pothen. \"%s\" with fmt \"%s\" is under construction... \n", graph_name.c_str(), fmt.c_str());
         exit(1);
     }
-    if(iotime) *(time_t*) iotime=-clock();
-    ReadMMBipartiteGraphCpp11(graph_name);
     if(iotime) { *(time_t*)iotime+=clock(); *iotime= (*(time_t*)iotime)*1.0/CLOCKS_PER_SEC; }
     global_ordering(side, order, ordtime);
 }

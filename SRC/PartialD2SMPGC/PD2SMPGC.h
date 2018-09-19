@@ -46,7 +46,7 @@ public:
 
 public:
     static const string FORMAT_MM; //="MM";
-
+    static const string FORMAT_POTHEN; //="POTHEN";
     static const string ORDER_STR_NATURAL;// = "NATURAL";
     static const string ORDER_STR_RANDOM ;// = "RANDOM";
     static const string ORDER_STR_LARGEST_FIRST;// = "LARGEST_FIRST";
