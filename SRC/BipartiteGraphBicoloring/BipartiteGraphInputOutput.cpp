@@ -1287,4 +1287,151 @@ namespace ColPack
         }// end fun ReadMMBipartiteGraphCpp11 
 
 
+	// Author Xin Cheng
+        // Sep 2018
+        // Reading a Gerenal Matrix Market graph. which means it is at least structure symmetric.
+        // For each edge of original graph been break into two edge. with the new breaking nodes be added to the Bipartite graph columns
+        // while original vertices be added to Bipartite graph rows.
+        // ----------------------------------------------------------------------------------------------------------------
+        int BipartiteGraphInputOutput::ReadMMGeneralGraphIntoPothenBipartiteGraphCpp11(string s_InputFile){
+            bool b_symmetric=true;
+            int entry_encounter=0, expect_entries=0;
+            int row_count=0, col_count=0;
+
+            string line, word;
+            istringstream iss;
+            Clear();
+
+            m_s_InputFile = s_InputFile;
+            if(s_InputFile=="") {
+                printf("Error, ReadMMGenearlGraphIntoPothenBipartiteGraphCpp11() tries to read a graph with empty filename\n"); 
+                exit(1);
+            }
+
+            ifstream in(s_InputFile.c_str());
+            if(!in.is_open()){
+                printf("Error, ReadMMGenearlGraphIntoPothenBipartiteGraphCpp11() tries to open \"%s\". But the file cannot be open.\n", s_InputFile.c_str());
+                exit(1);
+            }
+            
+
+            // Parse structure
+            getline(in, line);
+            iss.str(line);
+            if( !(iss>>word) || word!="%%MatrixMarket" || !(iss>>word) || word!="matrix"){
+                printf("Error,ReadMMGeneralGraphIntoPothenBipartiteGraphCpp11() tries to open \"%s\". But it is not MatrixMarket format\n",s_InputFile.c_str());
+                exit(1);
+            }
+            if(!(iss>>word) || word!="coordinate"){ //coordinate/array
+                printf("Error, ReadMMGeneralGraphIntoPothenBipartiteGraphCpp11() tries to open \"%s\". But the graph is a complet graph.\n", s_InputFile.c_str());
+                exit(1);
+            }
+            if(!(iss>>word) || word=="complex"){ //real/integer/complex/pattern
+                printf("Warning, ReadMMGeneralGraphIntoPothenBipartiteGraphCpp11() tries to open \"%s\" and find it is complex value graph.\n", s_InputFile.c_str());
+            }
+
+            if(!(iss>>word) || word=="general"){ // geneal/symmetric/skew-symmetric/Hermitian
+                b_symmetric=false;
+                printf("Warning! ReadMMGeneralGraphIntoPothenBipartiteGraphCpp11() expect to open '%s' as a symmtrix matrix with non-diagonal elements. But the graph is '%s' not 'symmetric'.\nThus the diagnal elements and upper triangular part will be removed.\n", s_InputFile.c_str(),line.c_str());
+            }
+
+            // Parse dimension
+            while(in){
+                getline(in,line);
+                if(line==""||line[0]=='%')
+                    continue;
+                break;
+            }
+            if(!in) {
+                printf("Error, ReadMMGeneralGraphIntoPothenBipartiteGraphCpp11() tries to open\"%s\". But cannot read dimension inforation.\n", s_InputFile.c_str());
+                exit(1);
+            }
+            iss.clear(); iss.str(line);
+            iss>>row_count>>col_count>>expect_entries;
+            
+            if(row_count!=col_count){
+                printf("Error, ReadMMGeneralGraphIntoPothenBipartiteGraphCpp11() find graph %s has %d rows and %d columns, it is not simple graph.\n", s_InputFile.c_str(), row_count, col_count);
+                exit(1);
+            }
+
+            // Read matrix into G
+            unordered_map<int, vector<int>> Grow,Gcol;
+            int r,c;
+            int edge_count=0;
+            while(in){
+                getline(in, line);
+                if(line=="" || line[0]=='%') 
+                    continue;
+                iss.clear(); iss.str(line);
+                entry_encounter++;
+                iss>>r>>c;
+                if( r <= c ){
+                    if(b_symmetric and r!=c ) {
+                        printf("Error! ReadMMGeneralGraphIntoPothenBipartiteGraphCpp11() find an and entry in upper triangular matrix \"%s\"\nRow,Col=%d,%d\n", s_InputFile.c_str(), r, c);
+                        exit(1);
+                    }
+                    continue;
+                }
+                
+                r--;c--;
+                Grow[c].push_back(edge_count);
+                Grow[r].push_back(edge_count);
+                
+                Gcol[edge_count].push_back(c);
+                Gcol[edge_count].push_back(r);
+                
+                edge_count++;
+            }
+            
+            in.close();
+            if(entry_encounter!=expect_entries){
+                printf("Error, ReadMMGeneralGraphIntoPothenBipartiteGraphCpp11() tries to read \"%s\". But only read %d entries (expect %d)\n",s_InputFile.c_str(), entry_encounter, expect_entries);
+                exit(1);
+            }
+           
+            for(auto &g : Grow)
+                sort(g.second.begin(), g.second.end());
+            //for(auto &g : Gcol)
+            //    sort(g.second.begin(), g.second.end());
+
+
+            // G into class member 
+            m_i_MaximumLeftVertexDegree = 0;
+            m_i_MinimumLeftVertexDegree = edge_count;
+            for(int i=0; i<row_count+col_count; i++){
+                m_vi_LeftVertices.push_back((signed) m_vi_Edges.size());
+                const int deg = Grow[i].size();
+                if(m_i_MaximumLeftVertexDegree < deg) 
+                    m_i_MaximumLeftVertexDegree = deg;
+                if(m_i_MinimumLeftVertexDegree > deg)
+                    m_i_MinimumLeftVertexDegree = deg;
+                m_vi_Edges.insert(m_vi_Edges.end(), Grow[i].begin(), Grow[i].end());
+            }
+            m_vi_LeftVertices.push_back((signed) m_vi_Edges.size());
+            
+            m_i_MaximumRightVertexDegree = 0;                    //2
+            m_i_MinimumRightVertexDegree = row_count+col_count;  //2
+            for(int i=0; i<edge_count; i++){
+                m_vi_RightVertices.push_back((signed) m_vi_Edges.size());
+                const int deg = Gcol[i].size();
+                if(m_i_MaximumRightVertexDegree < deg) 
+                    m_i_MaximumRightVertexDegree = deg;
+                if(m_i_MinimumRightVertexDegree > deg)
+                    m_i_MinimumRightVertexDegree = deg;
+                m_vi_Edges.insert(m_vi_Edges.end(), Gcol[i].begin(), Gcol[i].end());
+            }
+            m_vi_RightVertices.push_back((signed) m_vi_Edges.size());
+
+            m_i_MaximumVertexDegree = max(m_i_MaximumLeftVertexDegree, m_i_MaximumRightVertexDegree);
+            m_i_MinimumVertexDegree = min(m_i_MinimumLeftVertexDegree, m_i_MinimumRightVertexDegree);
+
+            m_d_AverageLeftVertexDegree  = (m_vi_LeftVertices.back() - m_vi_LeftVertices.front())*1.0/row_count;
+            m_d_AverageRightVertexDegree = (m_vi_RightVertices.back() - m_vi_RightVertices.front())*1.0/col_count;
+            m_d_AverageVertexDegree      = (m_vi_LeftVertices.back() - m_vi_LeftVertices.front() + m_vi_RightVertices.back() - m_vi_RightVertices.front())*1.0/(row_count+col_count);
+
+            return (_TRUE);   
+        }// end funtion ReadMMGeneralGraphIntoPothenBipartiteGraphCpp11
+
+
+
 }// end namespace ColPack

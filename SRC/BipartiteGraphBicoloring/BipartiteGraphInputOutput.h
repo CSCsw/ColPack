@@ -149,6 +149,7 @@ namespace ColPack
 
                 /// xin cheng's new read matrix market using c++11 standard
                 int ReadMMBipartiteGraphCpp11(string s_InputFile);
+                int ReadMMGeneralGraphIntoPothenBipartiteGraphCpp11(string s_InputFile);
 
 
 	  // -----OUTPUT FUNCTIONS-----
