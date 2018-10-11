@@ -36,7 +36,8 @@ public: // user api
 protected: // developer api
     void global_natural_ordering(const int side);
     void global_random_ordering(const int side);
-    
+    void global_largest_degree_first_ordering(const int side);
+
     void local_natural_ordering(vector<int>&vtxs);
     void local_random_ordering(vector<int>&vtxs);
     void local_largest_degree_first_ordering(const int side, vector<int>& vtxs); 

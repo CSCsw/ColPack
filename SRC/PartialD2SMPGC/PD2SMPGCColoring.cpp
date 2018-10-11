@@ -17,19 +17,61 @@ using namespace ColPack;
 // ============================================================================
 int PD2SMPGCColoring::Coloring(const int side, int nT, const string& method){
     m_method = method;
-    if     (method.compare("PD2_OMP_GM3P")==0) return PD2_OMP_GM3P(side, nT, m_total_num_colors, m_vertex_color);
-    else if(method.compare("PD2_OMP_GMMP")==0) return PD2_OMP_GMMP(side, nT, m_total_num_colors, m_vertex_color);
-    else if(method.compare("PD2_OMP_GM3P_LOLF")==0) return PD2_OMP_GM3P(side, nT, m_total_num_colors, m_vertex_color, ORDER_LARGEST_FIRST);
-    else if(method.compare("PD2_OMP_GMMP_LOLF")==0) return PD2_OMP_GMMP(side, nT, m_total_num_colors, m_vertex_color, ORDER_LARGEST_FIRST);
-    else if(method.compare("PD2_OMP_GM3P_VBBIT_LOLF")==0) return PD2_OMP_GM3P_VBBIT_EF(side, nT, m_total_num_colors, m_vertex_color, ORDER_LARGEST_FIRST);
-    else if(method.compare("PD2_OMP_GMMP_VBBIT_LOLF")==0) return PD2_OMP_GMMP_VBBIT_EF(side, nT, m_total_num_colors, m_vertex_color, ORDER_LARGEST_FIRST);
-    else if(method.compare("PD2_OMP_GM3P_VBBIT")==0) return PD2_OMP_GM3P_VBBIT_EF(side, nT, m_total_num_colors, m_vertex_color, ORDER_NONE);
-    else if(method.compare("PD2_OMP_GMMP_VBBIT")==0) return PD2_OMP_GMMP_VBBIT_EF(side, nT, m_total_num_colors, m_vertex_color, ORDER_NONE);
-    else if(method.compare("PD2_OMP_SERIAL")==0) return PD2_serial(side, m_total_num_colors, m_vertex_color);
-    else if(method.compare("PD2_SERIAL")==0) return PD2_serial(side, m_total_num_colors, m_vertex_color);
     
+    if(method.substr(0,4)!="PD2_"){
+        printf("unkonw method %s\n", method.c_str()); exit(1); }
     
-    else { fprintf(stdout, "Unknow method %s\n",method.c_str()); exit(1); }   
+    int    i_method      = METHOD_SERIAL;
+    int    i_local_order = ORDER_NONE;
+    bool   b_bit         = false;
+
+    size_t l=4, r=3;
+    bool bQuit=false;
+    string option="";
+
+    while(!bQuit){
+        r=method.find_first_of("_", l);
+        if(r==std::string::npos){
+            option=method.substr(l);
+            bQuit=true;
+        }
+        else{
+            option=method.substr(l, r-l);
+        }
+        l=r+1;
+        if(option=="" || option=="OMP")
+            continue;
+        else if(option=="GM3P") 
+            i_method = METHOD_GM3P;
+        else if(option=="GMMP")
+            i_method = METHOD_GMMP;
+        else if(option=="SERIAL")
+            i_method = METHOD_SERIAL;
+        else if(option=="LOLF")
+            i_local_order = ORDER_LARGEST_FIRST;
+        else if(option=="LORD")
+            i_local_order = ORDER_RANDOM;
+        else if(option=="BIT")
+            b_bit = true;
+        else{
+            printf("unknow method %s\n", method.c_str()); exit(1); 
+        }
+
+    }
+
+    if     (i_method == METHOD_SERIAL) 
+        return PD2_serial(side, m_total_num_colors, m_vertex_color);
+    else if(i_method == METHOD_GM3P){
+        return (b_bit)?(PD2_OMP_GM3P_BIT(side, nT, m_total_num_colors, m_vertex_color, i_local_order))
+            :(PD2_OMP_GM3P(side, nT, m_total_num_colors, m_vertex_color, i_local_order));
+    }
+    else if(i_method == METHOD_GMMP){
+        return (b_bit)?(PD2_OMP_GMMP_BIT(side, nT, m_total_num_colors, m_vertex_color, i_local_order))
+            :(PD2_OMP_GMMP(side, nT, m_total_num_colors, m_vertex_color, i_local_order));
+    }
+    else{
+        printf("unknow method %s\n", method.c_str()); exit(1); 
+    }
     return _TRUE;
 }
 

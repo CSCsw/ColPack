@@ -43,6 +43,9 @@ void PD2SMPGCOrdering::global_ordering(const int side, const string& order, doub
         global_natural_ordering(side);
     else if(order == ORDER_STR_RANDOM) 
         global_random_ordering(side);
+    else if(order == ORDER_STR_LARGEST_FIRST){
+        global_largest_degree_first_ordering(side);
+    }
     else{
         fprintf(stderr, "Err! PD2SMPGCOrdering::Unknow order %s\n",order.c_str());
         exit(1);
@@ -75,6 +78,27 @@ void PD2SMPGCOrdering::global_random_ordering(const int side) {
         uniform_int_distribution<int> dist(i, N-1);
         swap(m_global_ordered_vertex[i], m_global_ordered_vertex[dist(m_mt)]);
     }
+}
+
+// ============================================================================
+// Largest Degree First
+// ============================================================================
+void PD2SMPGCOrdering::global_largest_degree_first_ordering(const int side){
+    m_global_ordered_side  = side;
+    m_global_ordered_method= ORDER_LARGEST_FIRST;
+    const int N               = (side==L)?GetLeftVertexCount():GetRightVertexCount();
+    const int MaxDegreeP1     = (side==L)?(GetMaximumLeftVertexDegree()+1):(GetMaximumRightVertexDegree()+1); //maxDegree
+    const vector<int>& verPtr = (side==L)?(GetLeftVertices()):(GetRightVertices());
+
+    vector<vector<int>> GroupedVertexDegree(MaxDegreeP1);
+    for(int v=0; v<N; v++) {
+        GroupedVertexDegree[-verPtr[v]+verPtr[v+1]].push_back(v);
+    }
+    m_global_ordered_vertex.clear();
+    for(int d=MaxDegreeP1-1, it=MaxDegreeP1; it!=0; it--, d--){
+        m_global_ordered_vertex.insert(m_global_ordered_vertex.end(), GroupedVertexDegree[d].begin(), GroupedVertexDegree[d].end());
+    }
+    GroupedVertexDegree.clear();
 }
 
 // ============================================================================

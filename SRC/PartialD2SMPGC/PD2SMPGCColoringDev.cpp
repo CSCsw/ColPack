@@ -22,7 +22,7 @@ using namespace ColPack;
 // GM3P   is GM's algorithm 3 phase: Color, Detect and Conflicts
 // VBBIT  is Vertice Based, Forbinden Array using Binary information, using EdegFiltering 
 // ============================================================================
-int PD2SMPGCColoring::PD2_OMP_GM3P_VBBIT_EF(const int side, int nT, int &colors, vector<int>&vtxColor, const int local_order){
+int PD2SMPGCColoring::PD2_OMP_GM3P_BIT(const int side, int nT, int &colors, vector<int>&vtxColor, const int local_order){
     if(nT<=0) { printf("Warning, number of threads changed from %d to 1\n",nT); nT=1; }
     omp_set_num_threads(nT);
 
@@ -219,7 +219,7 @@ int PD2SMPGCColoring::PD2_OMP_GM3P_VBBIT_EF(const int side, int nT, int &colors,
             printf("Error! PD2_OMP_GM3P tring to use local order %d. which is not supported.\n",local_order); 
             exit(1);
     }
-    printf("@PD2GM3PVBBIT(%d)LO(%s)_side_nT_c_T_Tcolor_Tdetect_Trecolor_TmaxC_Tlo_nCnf\t",PD2_MASKWIDE,lotag.c_str());
+    printf("@PD2GM3PBIT(%d)LO(%s)_side_nT_c_T_Tcolor_Tdetect_Trecolor_TmaxC_Tlo_nCnf\t",PD2_MASKWIDE,lotag.c_str());
     printf("%s ", (side==PD2SMPGC::L)?"L":"R");
     printf("%d\t",  nT);    
     printf("%d\t",  colors);    
@@ -244,7 +244,7 @@ int PD2SMPGCColoring::PD2_OMP_GM3P_VBBIT_EF(const int side, int nT, int &colors,
 // GMMP   is GM's algorithm multiple phase: Color, Detect ....
 // VBBIT  is Vertice Based, Forbinden Array using Binary information, using EdegFiltering 
 // ============================================================================
-int PD2SMPGCColoring::PD2_OMP_GMMP_VBBIT_EF(const int side, int nT, int &colors, vector<int>&vtxColor, const int local_order){
+int PD2SMPGCColoring::PD2_OMP_GMMP_BIT(const int side, int nT, int &colors, vector<int>&vtxColor, const int local_order){
     if(nT<=0) { printf("Warning, number of threads changed from %d to 1\n",nT); nT=1; }
     omp_set_num_threads(nT);
 
@@ -406,7 +406,7 @@ int PD2SMPGCColoring::PD2_OMP_GMMP_VBBIT_EF(const int side, int nT, int &colors,
             exit(1);
     }
     
-    printf("@PD2GMMPVBBIT(%d)LO(%s)_side_nT_c_T_Tcolor_Tdetect_Trecolor_TmaxC_Tlo_nCnf\t",PD2_MASKWIDE, lotag.c_str());
+    printf("@PD2GMMPBIT(%d)LO(%s)_side_nT_c_T_Tcolor_Tdetect_Trecolor_TmaxC_Tlo_nCnf\t",PD2_MASKWIDE, lotag.c_str());
     printf("%s ", (side==PD2SMPGC::L)?"L":"R");
     printf("%d\t",  nT);    
     printf("%d\t",  colors);    

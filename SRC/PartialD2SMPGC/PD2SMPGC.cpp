@@ -6,8 +6,9 @@
  ************************************************************************/
 
 #include "PD2SMPGC.h"
-const std::string ColPack::PD2SMPGC::FORMAT_POTHEN = "POTHEN";
+const std::string ColPack::PD2SMPGC::FORMAT_POTHEN = "SQRT";
 const std::string ColPack::PD2SMPGC::FORMAT_MM = "MM";
+
 const std::string ColPack::PD2SMPGC::ORDER_STR_NATURAL = "NATURAL";
 const std::string ColPack::PD2SMPGC::ORDER_STR_RANDOM  = "RANDOM";
 const std::string ColPack::PD2SMPGC::ORDER_STR_LARGEST_FIRST = "LARGEST_FIRST";

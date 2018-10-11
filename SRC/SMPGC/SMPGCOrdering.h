@@ -61,6 +61,7 @@ public: // API: global ordering
 protected:
     void global_natural_ordering();
     void global_random_ordering();
+    void global_largest_degree_first_ordering();
 
 protected: // API: local ordering
     void local_natural_ordering(vector<int>& vtxs);

@@ -53,7 +53,11 @@ public:
     static const string ORDER_STR_SMALLEST_LAST;// = "SMALLEST_LAST";
 public:
     static const int _TRUE = 1;
-
+public:
+    static const int METHOD_SERIAL = 1;
+    static const int METHOD_GM3P   = 2;
+    static const int METHOD_GMMP   = 3;
+    
 public:
     PD2SMPGC(){}
     virtual ~PD2SMPGC(){};

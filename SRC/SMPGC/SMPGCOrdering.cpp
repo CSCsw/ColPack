@@ -34,6 +34,8 @@ void SMPGCOrdering::global_ordering(const string& order="NATURAL", double * ordt
         global_natural_ordering();
     else if(order == "RANDOM") 
         global_random_ordering ();
+    else if(order == "LARGEST_FIRST")
+        global_largest_degree_first_ordering();
     else{
         fprintf(stderr, "Err! SMPGCOrdering::Unknow order %s\n",order.c_str());
         exit(1);
@@ -64,6 +66,31 @@ void SMPGCOrdering::global_random_ordering () {
         swap(m_global_ordered_vertex[i], m_global_ordered_vertex[dist(m_mt)]);
     }
     m_global_ordered_method = "RANDOM";
+}
+
+// ============================================================================
+// Largest Degree First
+// ============================================================================
+void SMPGCOrdering::global_largest_degree_first_ordering(){
+
+
+    const int N = num_nodes();
+    const vector<int>& verPtr = get_CSR_ia();
+    const int MaxDegreeP1 = max_degree()+1; //maxDegree
+    vector<vector<int>> GroupedVertexDegree(MaxDegreeP1);
+    
+    m_global_ordered_vertex.clear();
+    m_global_ordered_method = "LARGEST_FIRST"; 
+    for(int v=0; v<N; v++){
+        GroupedVertexDegree[-verPtr[v]+verPtr[v+1]].push_back(v);
+    }
+   
+
+    for(int d=MaxDegreeP1-1, it=MaxDegreeP1; it!=0; it--, d--){
+        m_global_ordered_vertex.insert(m_global_ordered_vertex.end(), GroupedVertexDegree[d].begin(), GroupedVertexDegree[d].end());
+    }
+
+    GroupedVertexDegree.clear();
 }
 
 

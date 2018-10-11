@@ -30,9 +30,9 @@ int SMPGCColoring::Coloring(int nT, const string& method, const int switch_iter=
     //  DISTANCE_ONE_HBMTJP_SERIAL
     //  DISTANCE_TWO_GM3P
     //
-    if     (method.substr(0,17).compare("DISTANCE_ONE_OMP_")==0) {
+    if     (method.substr(0,7).compare("D1_OMP_")==0) {
         // distance one coloring algorithms
-        const string mthd = method.substr(17);
+        const string mthd = method.substr(7);
         auto iter_under_line = mthd.find('_');
         if(iter_under_line==string::npos){
             if     (mthd.compare("GM3P")==0) return D1_OMP_GM3P(nT, m_total_num_colors, m_vertex_color, ORDER_NONE);
@@ -133,12 +133,12 @@ int SMPGCColoring::Coloring(int nT, const string& method, const int switch_iter=
            
             }
         }
-        printf("Error \"DISTNACE_ONE_OMP_%s\" is not supported.\n", mthd.c_str());
+        printf("Error \"D1_OMP_%s\" is not supported.\n", mthd.c_str());
         exit(1);
     }
-    else if(method.substr(0,17).compare("DISTANCE_TWO_OMP_")==0) {
+    else if(method.substr(0,7).compare("D2_OMP_")==0) {
         // distance two coloring algorithms
-        const string mthd = method.substr(17);
+        const string mthd = method.substr(7);
         const auto iter_under_line = mthd.find('_');
         if(iter_under_line==string::npos){
             if     (mthd.compare("GM3P")==0) return D2_OMP_GM3P(nT, m_total_num_colors, m_vertex_color, ORDER_NONE);
