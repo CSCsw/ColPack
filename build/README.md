@@ -2,11 +2,10 @@
     ./$
     |-Example_ColPackAll              # all colpack function tested
     |-Example_General                 # general graph coloring 
-    |-Example_Bicoloroing             # bipartite graph bi-coloring
-    |-Example_PD2                     # bipartite grpah partial coloring
     |-Example_SMPGC                   # shared memory parallel graph coloring
     |-Example_PD2SMPGC                # shared memory parallel partial distance two coloring on bipartite graph
-    |-Main                            # template for using
+    |-Example_Use_Library             # template demo project of using ColPack after install ColPack as an statistic library.
+    |-Main                            # template demo cpp 
 
 
 ### How to use
