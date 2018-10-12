@@ -72,7 +72,7 @@ int PD2SMPGCColoring::Coloring(const int side, int nT, const string& method){
     else{
         printf("unknow method %s\n", method.c_str()); exit(1); 
     }
-    return _TRUE;
+    return true;
 }
 
 
@@ -228,7 +228,7 @@ int PD2SMPGCColoring::PD2_serial(const int side, int&colors, vector<int>&vtxColo
     printf("%s", cnt_pd2conflict(side, vtxColor)?"Failed":"Varified");
 #endif
     printf("\n");
-    return _TRUE;   
+    return true;   
 }
 
 
@@ -414,7 +414,7 @@ int PD2SMPGCColoring::PD2_OMP_GM3P(const int side, int nT, int&colors, vector<in
     printf("%s", cnt_pd2conflict(side, vtxColor)?"Failed":"Varified");
 #endif
     printf("\n");
-    return _TRUE;   
+    return true;   
 }
 
 
@@ -587,7 +587,7 @@ int PD2SMPGCColoring::PD2_OMP_GMMP(const int side, int nT, int &colors, vector<i
     printf("%s", cnt_pd2conflict(side, vtxColor)?"Failed":"Varified");
 #endif
     printf("\n");
-    return _TRUE;   
+    return true;   
 }
 
 
