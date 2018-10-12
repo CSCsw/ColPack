@@ -204,7 +204,7 @@ list of commands
 Example:
 
      ./ColPack -f ../../Graphs/bcsstk01.mtx -low -v
-     ./ColPack 0f ../../Graphs/bcsstk01.mtx -m PD2_OMP_GMMP -o RANDOM -v -nT 1 2 4 8 
+     ./ColPack -f ../../Graphs/bcsstk01.mtx -m PD2_OMP_GMMP -o RANDOM -v -nT 1 2 4 8 
 
 
 
