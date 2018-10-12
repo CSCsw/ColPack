@@ -67,16 +67,16 @@ List of available methods
 | | EXPLICIT_COVERING__STAR_BICOLORING,|
 | | EXPLICIT_COVERING__MODIFIED_STAR_BICOLORING|
 | | IMPLICIT_COVERING__GREEDY_STAR_BICOLORING|
-|ParallelGeneralColoring|D1_OMP_GM3P    D1_OMP_GM3P_LF     D1_OMP_GM3P_..|  
-|| D1_OMP_GMMP    D1_OMP_GMMP_LF     D1_OMP_GMMP_..  |
-|| D1_OMP_SERIAL  D1_OMP_SERIAL_LF   D1_OMP_SERIAL_..|
-|| D1_OMP_JP      D1_OMP_JP_LF       D1_OMP_JP_..    |
-|| D1_OMP_MTJP    D1_OMP_MTJP_LF     D1_OMP_MTJP_..  |
-|| D1_OMP_HBJP_GM3P   D1_OMP_HBJP_GM3P_..   D1_OMP_HBJP_GMMP..   D1_OMP_HBJP_....  |
-|| D1_OMP_HBMTP_GM3P  D1_OMP_HBMTJP_GM3P_.. D1_OMP_HBMTJP_GMMP.. D1_OMP_HBMTJP_....|
-|| D2_OMP_GM3P    D2_OMP_GM3P_LF     D2_OMP_GM3P_..  |
-|| D2_OMP_GMMP    D2_OMP_GMMP_LF     D2_OMP_GMMP_..  |
-|| D2_OMP_SERIAL  D2_OMP_SERIAL_LF   D2_OMP_SERIAL_..|
+|ParallelGeneralColoring|D1_OMP_GM3P, D1_OMP_GM3P_LF|  
+|| D1_OMP_GMMP,    D1_OMP_GMMP_LF    |
+|| D1_OMP_SERIAL,  D1_OMP_SERIAL_LF  |
+|| D1_OMP_JP,      D1_OMP_JP_LF      |
+|| D1_OMP_MTJP,    D1_OMP_MTJP_LF    |
+|| D1_OMP_HBJP_GM3P,   D1_OMP_HBJP_GM3P_..,  D1_OMP_HBJP_GMMP..,   D1_OMP_HBJP_....  |
+|| D1_OMP_HBMTP_GM3P,  D1_OMP_HBMTJP_GM3P_.., D1_OMP_HBMTJP_GMMP.., D1_OMP_HBMTJP_....|
+|| D2_OMP_GM3P,    D2_OMP_GM3P_LF     |
+|| D2_OMP_GMMP,    D2_OMP_GMMP_LF     |
+|| D2_OMP_SERIAL,  D2_OMP_SERIAL_LF   |
 |ParallelPartialColoring|D2_OMP_SERIAL|
 | | PD2_OMP_GMMP, D2_OMP_GM3P |
 | | PD2_OMP_GMMP_LOLF, D2_OMP_GM3P_LOLF|
@@ -87,6 +87,9 @@ List of available methods
 
 ### general coloring on general graphs
 list of commands
+
+|cmds|possible options|
+|----|----|
 |-f|graph names|
 |-m|DISTANCE_ONE|
 | | ACYCLIC|
@@ -105,6 +108,9 @@ list of commands
 
 ### partial coloring on bipartite graphs
 list of commands
+
+|cmds|possible options|
+|----|----|
 |-f|graph names|
 |-m|COLUMN_PARTIAL_DISTANCE_TWO|
 | | ROW_PARTIAL_DISTANCE_TWO|
@@ -119,6 +125,9 @@ list of commands
 
 ### bicoloring on bipartite graphs
 list of commands
+
+|cmds|possible options|
+|----|----|
 |-f|graph names|
 |-m|IMPLICIT_COVERING__STAR_BICOLORING|
 | | EXPLICIT_COVERING__STAR_BICOLORING,|
@@ -130,12 +139,15 @@ list of commands
 ||SMALLEST_LAST|
 ||DYNAMIC_LARGEST_FIRST|
 ||INCIDENCE_DEGREE|
-|-v|
+|-v||
 
     
 
 ### Parallel graph coloring for distance one and distance two coloring
 list of commands
+
+|cmds|possible options|
+|----|----|
 |-f|graph names|
 |-m|D1_OMP_SERIAL,D2_OMP_SERIAL|
 | | D1_OMP_GMMP, D1_OMP_GM3P| 
@@ -147,11 +159,15 @@ list of commands
 ||RANDOM|
 ||LARGEST_FIRST|
 ||SMALLEST_LAST|
-|-v|
+|-v||
 |-nT| number of threads|
 
 ### Parallel graph coloring for partial distance two coloring
 list of commands
+
+|cmds|possible options|
+|----|----|
+|-f|grpah names|
 |-m|D2_OMP_SERIAL|
 | | PD2_OMP_GMMP, D2_OMP_GM3P |
 | | PD2_OMP_GMMP_LOLF, D2_OMP_GM3P_LOLF|
@@ -161,7 +177,7 @@ list of commands
 ||RANDOM|
 ||LARGEST_FIRST|
 ||SMALLEST_LAST|
-|-v|
+|-v||
 |-nT| number of threads|
 |-side|L,R|
 |-low|
