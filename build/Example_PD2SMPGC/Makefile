@@ -3,12 +3,12 @@
 # usage: change the following variable COLPACK_ROOT accordingly
 #        delete OMP_FLAG=-fopenmp in MAC OS system
 COLPACK_ROOT = ../..
-COLPACK_SRC = $(wildcard ${COLPACK_ROOT}/SRC/GeneralGraphColoring/*.cpp)
-COLPACK_SRC+= $(wildcard ${COLPACK_ROOT}/SRC/Utilities/*.cpp)
-COLPACK_SRC+= $(wildcard ${COLPACK_ROOT}/SRC/BipartiteGraphBicoloring/*.cpp)
-COLPACK_SRC+= $(wildcard ${COLPACK_ROOT}/SRC/BipartiteGraphPartialColoring/*.cpp)
-COLPACK_SRC+= $(wildcard ${COLPACK_ROOT}/SRC/SMPGC/*.cpp)
-COLPACK_SRC+= $(wildcard ${COLPACK_ROOT}/SRC/PartialD2SMPGC/*.cpp)
+COLPACK_SRC = $(wildcard ${COLPACK_ROOT}/src/GeneralGraphColoring/*.cpp)
+COLPACK_SRC+= $(wildcard ${COLPACK_ROOT}/src/Utilities/*.cpp)
+COLPACK_SRC+= $(wildcard ${COLPACK_ROOT}/src/BipartiteGraphBicoloring/*.cpp)
+COLPACK_SRC+= $(wildcard ${COLPACK_ROOT}/src/BipartiteGraphPartialColoring/*.cpp)
+COLPACK_SRC+= $(wildcard ${COLPACK_ROOT}/src/SMPGC/*.cpp)
+COLPACK_SRC+= $(wildcard ${COLPACK_ROOT}/src/PartialD2SMPGC/*.cpp)
 COLPACK_OBJ = $(COLPACK_SRC:%.cpp=%.o)
 SRC = $(wildcard *.cpp)
 OBJ = $(SRC:%.cpp=%.o) $(COLPACK_OBJ)
@@ -29,14 +29,14 @@ LDFLAGS = -Wall -std=c++11 $(OMP_FLAG)  -Ofast -m64 #-D PD2_VARIFY -D PD2_MASKWI
 
 
 INCLUDES = -I./
-INCLUDES = -I${COLPACK_ROOT}/INC
-INCLUDES+= -I${COLPACK_ROOT}/SRC/GeneralGraphColoring
-INCLUDES+= -I${COLPACK_ROOT}/SRC/BipartiteGraphBicoloring
-INCLUDES+= -I${COLPACK_ROOT}/SRC/BipartiteGraphPartialColoring
-INCLUDES+= -I${COLPACK_ROOT}/SRC/Utilities
-INCLUDES+= -I${COLPACK_ROOT}/SRC/Recovery
-INCLUDES+= -I${COLPACK_ROOT}/SRC/SMPGC
-INCLUDES+= -I${COLPACK_ROOT}/SRC/PartialD2SMPGC
+INCLUDES = -I${COLPACK_ROOT}/inc
+INCLUDES+= -I${COLPACK_ROOT}/src/GeneralGraphColoring
+INCLUDES+= -I${COLPACK_ROOT}/src/BipartiteGraphBicoloring
+INCLUDES+= -I${COLPACK_ROOT}/src/BipartiteGraphPartialColoring
+INCLUDES+= -I${COLPACK_ROOT}/src/Utilities
+INCLUDES+= -I${COLPACK_ROOT}/src/Recovery
+INCLUDES+= -I${COLPACK_ROOT}/src/SMPGC
+INCLUDES+= -I${COLPACK_ROOT}/src/PartialD2SMPGC
 
 
 all: $(EXE)

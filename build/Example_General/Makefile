@@ -24,9 +24,9 @@ OMP_FLAG = -fopenmp
 #OMP_FLAG = -openmp
 
 # compile flags
-CCFLAGS = -Wall -std=c++11 $(OMP_FLAG)  -Ofast -m64 # -D DEBUG_JP_PROFILE #-D PRINT_DETAILED_STATS_#-O3 
+CCFLAGS = -Wall -std=c++11 $(OMP_FLAG)  -Ofast #-O3 
 # link flags
-LDFLAGS = -Wall -std=c++11 $(OMP_FLAG)  -Ofast -m64 # -D DEBUG_JP_PROFILE #-O3
+LDFLAGS = -Wall -std=c++11 $(OMP_FLAG)  -Ofast #-O3
 
 
 INCLUDES = -I./
