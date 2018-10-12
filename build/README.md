@@ -175,7 +175,7 @@ list of commands
 
 Example:
 
-     ./ColPack -f ../../Graphs/bcsstk01.mtx -m D1_OMP_GMMP D2_OMP_GM3P_LF -o LARGEST_FIRST RANDOM -v -nT 1 2 4 8 
+     ./ColPack -f ../../Graphs/bcsstk01.mtx -m D1_OMP_GMMP D2_OMP_GM3P_LF -o RANDOM -v -nT 1 2 4 8 
 
 
 
@@ -203,7 +203,7 @@ list of commands
 
 Example:
 
-     ./ColPack -f ../../Graphs/bcsstk01.mtx -low -v
+     ./ColPack -f ../../Graphs/bcsstk01.mtx -m PD2_OMP_GMMP -low -v
      ./ColPack -f ../../Graphs/bcsstk01.mtx -m PD2_OMP_GMMP -o RANDOM -v -nT 1 2 4 8 
 
 
