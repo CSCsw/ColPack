@@ -104,6 +104,9 @@ list of commands
 ||INCIDENCE_DEGREE|
 |-v|
 
+Example:
+
+     ./ColPack -f ../../Graphs/bcsstk01.mtx -m DISTANCE_ONE -o LARGEST_FIRST RANDOM -v
 
 ### partial coloring on bipartite graphs
 list of commands
@@ -120,6 +123,11 @@ list of commands
 ||DYNAMIC_LARGEST_FIRST|
 ||INCIDENCE_DEGREE|
 |-v|
+
+Example:
+
+     ./ColPack -f ../../Graphs/bcsstk01.mtx -m COLUMN_PARTIAL_DISTANCE_TWO -o LARGEST_FIRST RANDOM -v
+
 
 
 ### bicoloring on bipartite graphs
@@ -139,6 +147,10 @@ list of commands
 ||DYNAMIC_LARGEST_FIRST|
 ||INCIDENCE_DEGREE|
 |-v||
+
+Example:
+
+     ./ColPack -f ../../Graphs/bcsstk01.mtx -m IMPLICIT_COVERING__STAR_BICOLORING -o LARGEST_FIRST RANDOM -v
 
     
 
@@ -161,6 +173,12 @@ list of commands
 |-v||
 |-nT| number of threads|
 
+Example:
+
+     ./ColPack -f ../../Graphs/bcsstk01.mtx -m D1_OMP_GMMP D2_OMP_GM3P_LF -o LARGEST_FIRST RANDOM -v -nT 1 2 4 8 
+
+
+
 ### Parallel graph coloring for partial distance two coloring
 list of commands
 
@@ -178,8 +196,15 @@ list of commands
 ||SMALLEST_LAST|
 |-v||
 |-nT| number of threads|
+|-fmt| MM, SQRT|
 |-side|L,R|
 |-low|
+
+
+Example:
+
+     ./ColPack -f ../../Graphs/bcsstk01.mtx -low -v
+     ./ColPack 0f ../../Graphs/bcsstk01.mtx -m PD2_OMP_GMMP -o RANDOM -v -nT 1 2 4 8 
 
 
 
