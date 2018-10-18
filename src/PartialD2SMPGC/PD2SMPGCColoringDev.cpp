@@ -234,7 +234,7 @@ int PD2SMPGCColoring::PD2_OMP_GM3P_BIT(const int side, int nT, int &colors, vect
     printf("%s", cnt_pd2conflict(side, vtxColor)?"Failed":"Varified");
 #endif
     printf("\n");
-    return _TRUE;
+    return true;
 
 }
 
@@ -421,7 +421,7 @@ int PD2SMPGCColoring::PD2_OMP_GMMP_BIT(const int side, int nT, int &colors, vect
     printf("%s", cnt_pd2conflict(side, vtxColor)?"Failed":"Varified");
 #endif
     printf("\n");
-    return _TRUE;
+    return true;
 
 }
 
