@@ -17,6 +17,9 @@ http://cscapes.cs.purdue.edu/coloringpage/
 3. [Usages](#usage) 
 4. [HowToCite](#the-best-source-for-citing-this-work)
   
+  &nbsp;  
+  &nbsp;  
+  &nbsp;   
   
  
 # ColPack 
@@ -80,45 +83,46 @@ ColPack is written in an object-oriented fashion in C++ heavily using the Standa
 
 Build and Compile ColPack Instructions
 ======================================
-There are two ways to use ColPack, _Try without Installiation_ and _Build and Install_. The former is fast and easy to use, but is vulnerable for various OS enviroments settings, thus it requires the user know how to modify the makefile if met some compiling issue.  The later one is more robust and it will also collect the ColPack into a shared library which makes ColPack easy to cooperate with other applications. But it requires to pre-install automake(or CMake) software. 
+There are two ways to use ColPack, _Try without Installiation_ and _Build and Install_. The former is fast and easy to use, but is vulnerable for various OS enviroments settings, thus it requires the user know how to modify the **makefile** if met some compiling issue.  The later one is more robust and it will also collect the ColPack into a shared library which makes ColPack easy to cooperate with other applications. But it requires to pre-install **automake**(or **CMake**) software. 
 
-Try ColPack by Compile and Run without Installation
+1.Try ColPack by Compile and Run without Installation
 ---------------------------------------------------
 You can just try ColPack by download, compile and run it. This is the fastest and simplest way to use ColPack. Do the following instructions in terminals.
 
     cd              
     git clone https://github.com/CSCsw/ColPack.git   #Download ColPack
-    cd ColPack      # go to ColPack Root Directory
-    cd Example_Try  # go to Try ColPack folder
-    make            # compile the code
+    cd ColPack                   # go to ColPack Root Directory
+    cd build/Example_ColPackAll  # go to ColPack Example folder
+    make                         # compile the code
 
 After all source codes been compiled, we will generate a executable file `ColPack` under current folder.  
 The above instruction are tested under Ubuntu system. You may need to modify the Makefile to fit the different OS environments and compilers.(delete `-fopenmp` for mac os. Replace `-fopenmp` to `-Qopenmp` )for intel compiler.) 
 
-Ubuntu Build Instructions
--------------------------
-Install ColPack makes ColPack easy to use and it can also decreases the size of the execuable file. To install ColPack using **autotools** (requires that have installed **automake** on your machine.), follows the instructions below.:
+2.Ubuntu Build and Install ColPack Instruction
+----------------------------------------------
+Install ColPack makes ColPack easy to use and it can also decreases the size of the execuable file. **GNU autotools** and **CMake** are supported. To install ColPack using **autotools** (requires that have installed **automake** on your machine.), follows the instructions below.:
 
     cd   
     git clone https://github.com/CSCsw/ColPack.git  #Download ColPack
     cd ColPack             # ColPack Root Directory
     autoreconf -vif                                
     fullpath=$(pwd)        # modify fullpath to your destination folder if need
-    ./configure --prefix=${fullpath}  
+    ./configure --prefix=$(fullpath)  
     make -j 4              # Where "4" is the number of cores on your machine
     make install           # install lib and include/ColPack to destination  
 
 Append `--disable-openmp` to `./configure` above if you need to disable OpenMP.(MAC user and some Windows user)  
 
-ColPack also has experimental support for building with CMake, which you can do
+ColPack also has support for building with CMake, which you can do
 via the following:
 
-    mkdir build
-    cd build
-    cmake ..
+    mkdir cmake
+    cd cmake
+    fullpath=$(pwd)
+    cmake -DCMAKE_INSTALL_PREFIX:PATH=$(install_path) ..
     make -j 4   #Where "4" is the number of cores on your machine
     ctest       #Run the examples in SampleDrivers/Basic folder
-    make install
+    make install 
 
 Use `cmake -LH .` or `ccmake .` in the build directory to see a list of
 options, such as `ENABLE_EXAMPLES` and `ENABLE_OPENMP`, which you can set by
@@ -126,8 +130,8 @@ running the following from the build directory:
 
     cmake .. -DENABLE_OPENMP=ON
     
-Windows Build Instructions
---------------------------
+Windows Build and Build and Install ColPack Instruction
+-------------------------------------------------------
 You can build ColPack's static library on Windows using Visual Studio 
 (tested with Visual Studio 2015) and CMake. Note, however, that you are not
 able to use OpenMP (Visual Studio supports only OpenMP 2.0), and cannot
@@ -167,7 +171,7 @@ Another recommend altinative way is to install an Ubuntu system on your MAC with
     
 After the Build, Use ColPack as Installed Library
 -------------------------------------------------
-After the build, we have already generate an executable file 'ColPack' under the colpack root directory. And you can use it.
+After the build, we have already generate an shared library under the `$fullpath` directory, and an executable file 'ColPack' under the colpack root directory. And you can use it.
 However if you want to write your own code and use ColPack as an shared library. Then follow the following ways:
 * export library's path to `LD_LIBRARY_PATH`
 * create your own code. 
