@@ -465,8 +465,8 @@ void usage(){
             "EXAMPLE\n"
             "./ColPack -f ../Graphs/bcsstk01.mtx -o LARGEST_FIRST RANDOM -m DISTANCE_ONE -v\n"
             "./ColPack -f ../Graphs/bcsstk01.mtx -o SMALLEST_LAST LARGEST_FIRST -m ACYCLIC -v\n"
-            "./ColPack -f ../Graphs/bcsstk01.mtx -o RANDOM -m D1_OMP_GMMP -v\n"
-            "./ColPack -f ../Graphs/bcsstk01.mtx -o RANDOM -m PD2_OMP_GMMP -v\n"
+            "./ColPack -f ../Graphs/bcsstk01.mtx -o RANDOM -m D1_OMP_GMMP -v -np 2\n"
+            "./ColPack -f ../Graphs/bcsstk01.mtx -o RANDOM -m PD2_OMP_GMMP -v -np 4\n"
             "\n"
            ); 
 }
