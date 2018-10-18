@@ -25,7 +25,7 @@ define([COLPACK_LVL], [10])
 
 AC_INIT([ColPack],[COLPACK_VER.COLPACK_SUB.COLPACK_LVL],[assefaw@eecs.wsu.edu],[ColPack],[http://cscapes.cs.purdue.edu/coloringpage/])
 AC_PREREQ([2.57])
-AC_CONFIG_SRCDIR([INC/ColPackHeaders.h])
+AC_CONFIG_SRCDIR([inc/ColPackHeaders.h])
 AC_CONFIG_MACRO_DIR([m4])
 AM_INIT_AUTOMAKE([foreign 1.10 no-define subdir-objects -Wall])
 AM_SILENT_RULES([yes])

@@ -23,11 +23,18 @@ AM_DEFAULT_SOURCE_EXT = .cpp
 noinst_PROGRAMS = ColPack
 lib_LTLIBRARIES = libColPack.la
 pkginclude_HEADERS = \
-			src/Utilities/CoutLock.h SRC/Utilities/command_line_parameter_processor.h  \
-			src/Utilities/File.h SRC/Utilities/DisjointSets.h \
-			src/Utilities/current_time.h SRC/Utilities/mmio.h SRC/Utilities/Pause.h  \
-			src/Utilities/MatrixDeallocation.h SRC/Utilities/Timer.h  \
-			src/Utilities/StringTokenizer.h SRC/Utilities/extra.h SRC/Utilities/stat.h  \
+			src/Utilities/CoutLock.h \
+			src/Utilities/command_line_parameter_processor.h  \
+			src/Utilities/File.h \
+			src/Utilities/DisjointSets.h \
+			src/Utilities/current_time.h \
+			src/Utilities/mmio.h \
+			src/Utilities/Pause.h  \
+			src/Utilities/MatrixDeallocation.h \
+			src/Utilities/Timer.h  \
+			src/Utilities/StringTokenizer.h \
+			src/Utilities/extra.h \
+			src/Utilities/stat.h  \
 			src/BipartiteGraphPartialColoring/BipartiteGraphPartialColoringInterface.h \
 			src/BipartiteGraphPartialColoring/BipartiteGraphPartialOrdering.h \
 			src/BipartiteGraphPartialColoring/BipartiteGraphPartialColoring.h \
@@ -48,16 +55,31 @@ pkginclude_HEADERS = \
 			src/Recovery/RecoveryCore.h \
 			inc/Definitions.h \
 			inc/ColPackHeaders.h
-pkginclude_HEADERS += $(wildcard src/SMPGC/*.h)
-pkginclude_HEADERS += $(wildcard src/PartialD2SMPGC/*.h)
+
+pkginclude_HEADERS += src/SMPGC/SMPGC.h \
+		      src/SMPGC/SMPGCGraph.h \
+		      src/SMPGC/SMPGCOrdering.h \
+		      src/SMPGC/SMPGCColoring.h
+
+pkginclude_HEADERS += src/PartialD2SMPGC/PD2SMPGC.h \
+		      src/PartialD2SMPGC/PD2SMPGCOrdering.h \
+		      src/PartialD2SMPGC/PD2SMPGCColoring.h 
+
 
 
 libColPack_la_SOURCES = \
-			src/Utilities/CoutLock.cpp SRC/Utilities/command_line_parameter_processor.cpp \
-			src/Utilities/File.cpp SRC/Utilities/DisjointSets.cpp \
-			src/Utilities/current_time.cpp SRC/Utilities/mmio.cpp SRC/Utilities/Pause.cpp \
-			src/Utilities/MatrixDeallocation.cpp SRC/Utilities/Timer.cpp \
-			src/Utilities/StringTokenizer.cpp SRC/Utilities/extra.cpp SRC/Utilities/stat.cpp \
+			src/Utilities/CoutLock.cpp \
+			src/Utilities/command_line_parameter_processor.cpp \
+			src/Utilities/File.cpp\
+			src/Utilities/DisjointSets.cpp \
+			src/Utilities/current_time.cpp \
+			src/Utilities/mmio.cpp \
+			src/Utilities/Pause.cpp \
+			src/Utilities/MatrixDeallocation.cpp \
+			src/Utilities/Timer.cpp \
+			src/Utilities/StringTokenizer.cpp \
+			src/Utilities/extra.cpp \
+			src/Utilities/stat.cpp \
 			src/BipartiteGraphPartialColoring/BipartiteGraphPartialOrdering.cpp \
 			src/BipartiteGraphPartialColoring/BipartiteGraphPartialColoring.cpp \
 			src/BipartiteGraphPartialColoring/BipartiteGraphPartialColoringInterface.cpp \
@@ -77,13 +99,24 @@ libColPack_la_SOURCES = \
 			src/Recovery/JacobianRecovery2D.cpp \
 			src/Recovery/HessianRecovery.cpp
 
-libColPack_la_SOURCES += $(wildcard src/SMPGC/*.cpp)
-libColPack_la_SOURCES += $(wildcard src/PartialD2SMPGC/*.cpp)
+libColPack_la_SOURCES += src/SMPGC/SMPGCColoring.cpp \
+			 src/SMPGC/SMPGCColoringD1.cpp \
+			 src/SMPGC/SMPGCColoringD2.cpp \
+			 src/SMPGC/SMPGCColoringHybrid.cpp \
+			 src/SMPGC/SMPGC.cpp \
+			 src/SMPGC/SMPGCGraph.cpp \
+			 src/SMPGC/SMPGCOrdering.cpp
+
+libColPack_la_SOURCES += src/PartialD2SMPGC/PD2SMPGCColoring.cpp \
+			 src/PartialD2SMPGC/PD2SMPGCColoringDev.cpp \
+			 src/PartialD2SMPGC/PD2SMPGC.cpp \
+			 src/PartialD2SMPGC/PD2SMPGCOrdering.cpp
+
 
 
 
 ColPack_SOURCES = \
-			build/Main/Main.cpp
+			build/Example_ColPackAll/Main.cpp
 
 
 

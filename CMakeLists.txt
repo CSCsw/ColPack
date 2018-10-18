@@ -73,27 +73,32 @@ else()
     set(COLPACK_INSTALL_CMAKEDIR ${CMAKE_INSTALL_LIBDIR}/cmake/ColPack)
     # To follow the UNIX Filsystem Hierarchy Standard, we should install
     # examples somewhere else:
-    #set(COLPACK_INSTALL_EXAMPLESBINDIR
-    #    ${CMAKE_INSTALL_LIBDIR}/ColPack/examples)
+    set(COLPACK_INSTALL_EXAMPLESBINDIR
+        ${CMAKE_INSTALL_LIBDIR}/ColPack/examples)
 endif()
 set(COLPACK_INSTALL_EXAMPLESBINDIR examples)
 
 # Lists of the source files.
 # -------------------------
 file(GLOB HEADERS
-    SRC/Utilities/*.h
-    SRC/BipartiteGraphBicoloring/*.h
-    SRC/BipartiteGraphPartialColoring/*.h
-    SRC/GeneralGraphColoring/*.h
-    SRC/Recovery/*.h
-    INC/ColPackHeaders.h
-    INC/Definitions.h)
+    src/Utilities/*.h
+    src/BipartiteGraphBicoloring/*.h
+    src/BipartiteGraphPartialColoring/*.h
+    src/GeneralGraphColoring/*.h
+    src/Recovery/*.h
+    inc/ColPackHeaders.h
+    inc/Definitions.h
+    src/SMPGC/*.h
+    inc/PartialD2SMPGC/*.h)
 file(GLOB SOURCES
-    SRC/Utilities/*.cpp
-    SRC/BipartiteGraphBicoloring/*.cpp
-    SRC/BipartiteGraphPartialColoring/*.cpp
-    SRC/GeneralGraphColoring/*.cpp
-    SRC/Recovery/*.cpp)
+    build/Example_ColPackAll
+    src/Utilities/*.cpp
+    src/BipartiteGraphBicoloring/*.cpp
+    src/BipartiteGraphPartialColoring/*.cpp
+    src/GeneralGraphColoring/*.cpp
+    src/Recovery/*.cpp
+    src/SMPGC/*.cpp
+    src/PartialD2SMPGC/*.cpp)
 
 # Static library.
 # ---------------
@@ -106,13 +111,14 @@ endif()
 
 # Use these include directories when building the ColPack library.
 set(COLPACK_SOURCE_INCLUDE_DIRS
-    "${CMAKE_SOURCE_DIR}/APP/Main"
-    "${CMAKE_SOURCE_DIR}/SRC/Utilities"
-    "${CMAKE_SOURCE_DIR}/INC"
-    "${CMAKE_SOURCE_DIR}/SRC/BipartiteGraphPartialColoring"
-    "${CMAKE_SOURCE_DIR}/SRC/BipartiteGraphBicoloring"
-    "${CMAKE_SOURCE_DIR}/SRC/GeneralGraphColoring"
-    "${CMAKE_SOURCE_DIR}/SRC/Recovery")
+    "${CMAKE_SOURCE_DIR}/inc"
+    "${CMAKE_SOURCE_DIR}/src/Utilities"
+    "${CMAKE_SOURCE_DIR}/src/BipartiteGraphPartialColoring"
+    "${CMAKE_SOURCE_DIR}/src/BipartiteGraphBicoloring"
+    "${CMAKE_SOURCE_DIR}/src/GeneralGraphColoring"
+    "${CMAKE_SOURCE_DIR}/src/SMPGC"
+    "${CMAKE_SOURCE_DIR}/src/PartialD2SMPGC"
+    "${CMAKE_SOURCE_DIR}/src/Recovery")
 target_include_directories(ColPack_static PRIVATE
     ${COLPACK_SOURCE_INCLUDE_DIRS})
 # For clients of the ColPack target within this project (e.g. examples).
@@ -171,7 +177,7 @@ install(TARGETS ColPack_shared EXPORT ColPackTargets
 # and not readily available when using Visual Studio.
 find_path(HAS_GETOPT getopt.h)
 if(HAS_GETOPT)
-    add_executable(ColPack APP/Main/Main.cpp)
+    add_executable(ColPack build/Example_ColPackAll/Main.cpp)
     target_link_libraries(ColPack ${ColPack_lib_to_use})
     # TODO install this executable?
 else()
@@ -186,15 +192,15 @@ enable_testing()
 # To replicate the behavior of autotools, we build and install the Basic
 # examples regardless of the setting for ENABLE_EXAMPLES.
 # First, gather up all the example files.
-file(GLOB SAMPLE_DRIVERS_BASIC RELATIVE "${CMAKE_SOURCE_DIR}/SRC/SampleDrivers"
-    SRC/SampleDrivers/Basic/*.cpp)
+file(GLOB SAMPLE_DRIVERS_BASIC RELATIVE "${CMAKE_SOURCE_DIR}/src/SampleDrivers"
+    src/SampleDrivers/Basic/*.cpp)
 set(EXAMPLES ${SAMPLE_DRIVERS_BASIC})
 if(ENABLE_EXAMPLES)
     file(GLOB SAMPLE_DRIVERS_MATRIX_COMPRESSION_AND_RECOVERY
-        RELATIVE "${CMAKE_SOURCE_DIR}/SRC/SampleDrivers"
-        SRC/SampleDrivers/Matrix_Compression_and_Recovery/ADIC/*.cpp
-        SRC/SampleDrivers/Matrix_Compression_and_Recovery/ADOL-C/*.cpp
-        SRC/SampleDrivers/Matrix_Compression_and_Recovery/CSR_input/*.cpp
+        RELATIVE "${CMAKE_SOURCE_DIR}/src/SampleDrivers"
+        src/SampleDrivers/Matrix_Compression_and_Recovery/ADIC/*.cpp
+        src/SampleDrivers/Matrix_Compression_and_Recovery/ADOL-C/*.cpp
+        src/SampleDrivers/Matrix_Compression_and_Recovery/CSR_input/*.cpp
         # Leaving out SMB because that depends on ADOL-C.
         )
     list(APPEND EXAMPLES ${SAMPLE_DRIVERS_MATRIX_COMPRESSION_AND_RECOVERY})
@@ -207,7 +213,7 @@ foreach(example_cpp ${EXAMPLES})
     # Get a directory relative to the SampleDrivers directory.
     get_filename_component(example_rel_dir ${example_cpp} DIRECTORY
         BASE_DIR SampleDrivers)
-    add_executable(${example} SRC/SampleDrivers/${example_cpp})
+    add_executable(${example} src/SampleDrivers/${example_cpp})
     target_link_libraries(${example} ${ColPack_lib_to_use})
     # Autools installs the examples in CSR_input into a dir. named CSR.
     string(REPLACE "CSR_input" "CSR" example_rel_dir ${example_rel_dir})
