@@ -2,12 +2,14 @@ ACLOCAL_AMFLAGS = ${ACLOCAL_FLAGS} -I m4
 COLPACK_COMMON_FLAGS = $(EXTRA_FLAGS)  -O3
 
 AM_CPPFLAGS =  $(COLPACK_COMMON_FLAGS) \
-		-I$(top_srcdir)/INC \
-		-I$(top_srcdir)/SRC/Utilities \
-		-I$(top_srcdir)/SRC/BipartiteGraphPartialColoring \
-		-I$(top_srcdir)/SRC/BipartiteGraphBicoloring \
-		-I$(top_srcdir)/SRC/GeneralGraphColoring \
-		-I$(top_srcdir)/SRC/Recovery
+		-I$(top_srcdir)/inc \
+		-I$(top_srcdir)/src/Utilities \
+		-I$(top_srcdir)/src/BipartiteGraphPartialColoring \
+		-I$(top_srcdir)/src/BipartiteGraphBicoloring \
+		-I$(top_srcdir)/src/GeneralGraphColoring \
+		-I$(top_srcdir)/src/SMPGC \
+		-I$(top_srcdir)/src/PartialD2SMPGC \
+		-I$(top_srcdir)/src/Recovery
 AM_LDFLAGS = $(COLPACK_COMMON_FLAGS)
 
 AM_CXXFLAGS = -std=c++11
@@ -21,94 +23,102 @@ AM_DEFAULT_SOURCE_EXT = .cpp
 noinst_PROGRAMS = ColPack
 lib_LTLIBRARIES = libColPack.la
 pkginclude_HEADERS = \
-			SRC/Utilities/CoutLock.h SRC/Utilities/command_line_parameter_processor.h  \
-			SRC/Utilities/File.h SRC/Utilities/DisjointSets.h \
-			SRC/Utilities/current_time.h SRC/Utilities/mmio.h SRC/Utilities/Pause.h  \
-			SRC/Utilities/MatrixDeallocation.h SRC/Utilities/Timer.h  \
-			SRC/Utilities/StringTokenizer.h SRC/Utilities/extra.h SRC/Utilities/stat.h  \
-			SRC/BipartiteGraphPartialColoring/BipartiteGraphPartialColoringInterface.h \
-			SRC/BipartiteGraphPartialColoring/BipartiteGraphPartialOrdering.h \
-			SRC/BipartiteGraphPartialColoring/BipartiteGraphPartialColoring.h \
-			SRC/BipartiteGraphBicoloring/BipartiteGraphBicoloringInterface.h \
-			SRC/BipartiteGraphBicoloring/BipartiteGraphVertexCover.h \
-			SRC/BipartiteGraphBicoloring/BipartiteGraphOrdering.h \
-			SRC/BipartiteGraphBicoloring/BipartiteGraphInputOutput.h \
-			SRC/BipartiteGraphBicoloring/BipartiteGraphBicoloring.h \
-			SRC/BipartiteGraphBicoloring/BipartiteGraphCore.h \
-			SRC/GeneralGraphColoring/GraphColoringInterface.h \
-			SRC/GeneralGraphColoring/GraphInputOutput.h \
-			SRC/GeneralGraphColoring/GraphColoring.h \
-			SRC/GeneralGraphColoring/GraphOrdering.h \
-			SRC/GeneralGraphColoring/GraphCore.h \
-			SRC/Recovery/JacobianRecovery2D.h \
-			SRC/Recovery/JacobianRecovery1D.h \
-			SRC/Recovery/HessianRecovery.h \
-			SRC/Recovery/RecoveryCore.h \
-			INC/Definitions.h \
-			INC/ColPackHeaders.h
+			src/Utilities/CoutLock.h SRC/Utilities/command_line_parameter_processor.h  \
+			src/Utilities/File.h SRC/Utilities/DisjointSets.h \
+			src/Utilities/current_time.h SRC/Utilities/mmio.h SRC/Utilities/Pause.h  \
+			src/Utilities/MatrixDeallocation.h SRC/Utilities/Timer.h  \
+			src/Utilities/StringTokenizer.h SRC/Utilities/extra.h SRC/Utilities/stat.h  \
+			src/BipartiteGraphPartialColoring/BipartiteGraphPartialColoringInterface.h \
+			src/BipartiteGraphPartialColoring/BipartiteGraphPartialOrdering.h \
+			src/BipartiteGraphPartialColoring/BipartiteGraphPartialColoring.h \
+			src/BipartiteGraphBicoloring/BipartiteGraphBicoloringInterface.h \
+			src/BipartiteGraphBicoloring/BipartiteGraphVertexCover.h \
+			src/BipartiteGraphBicoloring/BipartiteGraphOrdering.h \
+			src/BipartiteGraphBicoloring/BipartiteGraphInputOutput.h \
+			src/BipartiteGraphBicoloring/BipartiteGraphBicoloring.h \
+			src/BipartiteGraphBicoloring/BipartiteGraphCore.h \
+			src/GeneralGraphColoring/GraphColoringInterface.h \
+			src/GeneralGraphColoring/GraphInputOutput.h \
+			src/GeneralGraphColoring/GraphColoring.h \
+			src/GeneralGraphColoring/GraphOrdering.h \
+			src/GeneralGraphColoring/GraphCore.h \
+			src/Recovery/JacobianRecovery2D.h \
+			src/Recovery/JacobianRecovery1D.h \
+			src/Recovery/HessianRecovery.h \
+			src/Recovery/RecoveryCore.h \
+			inc/Definitions.h \
+			inc/ColPackHeaders.h
+pkginclude_HEADERS += $(wildcard src/SMPGC/*.h)
+pkginclude_HEADERS += $(wildcard src/PartialD2SMPGC/*.h)
+
 
 libColPack_la_SOURCES = \
-			SRC/Utilities/CoutLock.cpp SRC/Utilities/command_line_parameter_processor.cpp \
-			SRC/Utilities/File.cpp SRC/Utilities/DisjointSets.cpp \
-			SRC/Utilities/current_time.cpp SRC/Utilities/mmio.cpp SRC/Utilities/Pause.cpp \
-			SRC/Utilities/MatrixDeallocation.cpp SRC/Utilities/Timer.cpp \
-			SRC/Utilities/StringTokenizer.cpp SRC/Utilities/extra.cpp SRC/Utilities/stat.cpp \
-			SRC/BipartiteGraphPartialColoring/BipartiteGraphPartialOrdering.cpp \
-			SRC/BipartiteGraphPartialColoring/BipartiteGraphPartialColoring.cpp \
-			SRC/BipartiteGraphPartialColoring/BipartiteGraphPartialColoringInterface.cpp \
-			SRC/BipartiteGraphBicoloring/BipartiteGraphInputOutput.cpp \
-			SRC/BipartiteGraphBicoloring/BipartiteGraphBicoloring.cpp \
-			SRC/BipartiteGraphBicoloring/BipartiteGraphVertexCover.cpp \
-			SRC/BipartiteGraphBicoloring/BipartiteGraphCore.cpp \
-			SRC/BipartiteGraphBicoloring/BipartiteGraphBicoloringInterface.cpp \
-			SRC/BipartiteGraphBicoloring/BipartiteGraphOrdering.cpp \
-			SRC/GeneralGraphColoring/GraphCore.cpp \
-			SRC/GeneralGraphColoring/GraphColoringInterface.cpp \
-			SRC/GeneralGraphColoring/GraphInputOutput.cpp \
-			SRC/GeneralGraphColoring/GraphOrdering.cpp \
-			SRC/GeneralGraphColoring/GraphColoring.cpp \
-			SRC/Recovery/JacobianRecovery1D.cpp \
-			SRC/Recovery/RecoveryCore.cpp \
-			SRC/Recovery/JacobianRecovery2D.cpp \
-			SRC/Recovery/HessianRecovery.cpp
+			src/Utilities/CoutLock.cpp SRC/Utilities/command_line_parameter_processor.cpp \
+			src/Utilities/File.cpp SRC/Utilities/DisjointSets.cpp \
+			src/Utilities/current_time.cpp SRC/Utilities/mmio.cpp SRC/Utilities/Pause.cpp \
+			src/Utilities/MatrixDeallocation.cpp SRC/Utilities/Timer.cpp \
+			src/Utilities/StringTokenizer.cpp SRC/Utilities/extra.cpp SRC/Utilities/stat.cpp \
+			src/BipartiteGraphPartialColoring/BipartiteGraphPartialOrdering.cpp \
+			src/BipartiteGraphPartialColoring/BipartiteGraphPartialColoring.cpp \
+			src/BipartiteGraphPartialColoring/BipartiteGraphPartialColoringInterface.cpp \
+			src/BipartiteGraphBicoloring/BipartiteGraphInputOutput.cpp \
+			src/BipartiteGraphBicoloring/BipartiteGraphBicoloring.cpp \
+			src/BipartiteGraphBicoloring/BipartiteGraphVertexCover.cpp \
+			src/BipartiteGraphBicoloring/BipartiteGraphCore.cpp \
+			src/BipartiteGraphBicoloring/BipartiteGraphBicoloringInterface.cpp \
+			src/BipartiteGraphBicoloring/BipartiteGraphOrdering.cpp \
+			src/GeneralGraphColoring/GraphCore.cpp \
+			src/GeneralGraphColoring/GraphColoringInterface.cpp \
+			src/GeneralGraphColoring/GraphInputOutput.cpp \
+			src/GeneralGraphColoring/GraphOrdering.cpp \
+			src/GeneralGraphColoring/GraphColoring.cpp \
+			src/Recovery/JacobianRecovery1D.cpp \
+			src/Recovery/RecoveryCore.cpp \
+			src/Recovery/JacobianRecovery2D.cpp \
+			src/Recovery/HessianRecovery.cpp
+
+libColPack_la_SOURCES += $(wildcard src/SMPGC/*.cpp)
+libColPack_la_SOURCES += $(wildcard src/PartialD2SMPGC/*.cpp)
+
+
 
 ColPack_SOURCES = \
-			APP/Main/Main.cpp
+			build/Main/Main.cpp
 
 
 
 examplesdir = ${prefix}/examples
 basic_examplesdir = ${examplesdir}/Basic
 basic_examples_PROGRAMS = \
-			SRC/SampleDrivers/Basic/color_bipartite_graph_using_BipartiteGraphBicoloringInterface \
-			SRC/SampleDrivers/Basic/color_bipartite_graph_using_BipartiteGraphPartialColoringInterface \
-			SRC/SampleDrivers/Basic/color_graph_using_GraphColoringInterface \
-			SRC/SampleDrivers/Basic/Generate_seed_matrix_for_Hessian \
-			SRC/SampleDrivers/Basic/Generate_seed_matrix_for_Jacobian
+			src/SampleDrivers/Basic/color_bipartite_graph_using_BipartiteGraphBicoloringInterface \
+			src/SampleDrivers/Basic/color_bipartite_graph_using_BipartiteGraphPartialColoringInterface \
+			src/SampleDrivers/Basic/color_graph_using_GraphColoringInterface \
+			src/SampleDrivers/Basic/Generate_seed_matrix_for_Hessian \
+			src/SampleDrivers/Basic/Generate_seed_matrix_for_Jacobian
 
 TESTS = ${basic_examples_PROGRAMS}
 
 if EXAMPLES
 ADIC_examplesdir = ${examplesdir}/Matrix_Compression_and_Recovery/ADIC
 ADIC_examples_PROGRAMS = \
-			SRC/SampleDrivers/Matrix_Compression_and_Recovery/ADIC/01_Column_compression_and_recovery_for_Jacobian_return_ADIC_Format
+			src/SampleDrivers/Matrix_Compression_and_Recovery/ADIC/01_Column_compression_and_recovery_for_Jacobian_return_ADIC_Format
 
 ADOLC_examplesdir = ${examplesdir}/Matrix_Compression_and_Recovery/ADOL-C
 ADOLC_examples_PROGRAMS = \
-			SRC/SampleDrivers/Matrix_Compression_and_Recovery/ADOL-C/01_Column_compression_and_recovery_for_Jacobian_return_Row_Compressed_Format \
-			SRC/SampleDrivers/Matrix_Compression_and_Recovery/ADOL-C/02_Column_compression_and_recovery_for_Jacobian_return_Coordinate_Format \
-			SRC/SampleDrivers/Matrix_Compression_and_Recovery/ADOL-C/03_Column_compression_and_recovery_for_Jacobian_return_Sparse_Solvers_Format \
-			SRC/SampleDrivers/Matrix_Compression_and_Recovery/ADOL-C/04_Row_compression_and_recovery_for_Jacobian_return_Row_Compressed_Format \
-			SRC/SampleDrivers/Matrix_Compression_and_Recovery/ADOL-C/05_Compression_and_direct_recovery_for_Hessian_return_Row_Compressed_Format \
-			SRC/SampleDrivers/Matrix_Compression_and_Recovery/ADOL-C/06_Compression_and_direct_recovery_for_Hessian_return_Coordinate_Format \
-			SRC/SampleDrivers/Matrix_Compression_and_Recovery/ADOL-C/07_Compression_and_direct_recovery_for_Hessian_return_Sparse_Solvers_Format \
-			SRC/SampleDrivers/Matrix_Compression_and_Recovery/ADOL-C/08_Compression_and_indirect_recovery_for_Hessian_return_Row_Compressed_Format \
-			SRC/SampleDrivers/Matrix_Compression_and_Recovery/ADOL-C/09_Bidirectional_compression_and_recovery_for_Jacobian_return_Row_Compressed_Format \
-			SRC/SampleDrivers/Matrix_Compression_and_Recovery/ADOL-C/10_Column_compression_and_recovery_for_Jacobian_return_Row_Compressed_Format__unmanaged_usermem \
-			SRC/SampleDrivers/Matrix_Compression_and_Recovery/ADOL-C/11_Compression_and_direct_recovery_for_Hessian_return_Row_Compressed_Format__unmanaged_usermem \
-			SRC/SampleDrivers/Matrix_Compression_and_Recovery/ADOL-C/12_Bidirectional_compression_and_recovery_for_Jacobian_return_Row_Compressed_Format__unmanaged_usermem
+			src/SampleDrivers/Matrix_Compression_and_Recovery/ADOL-C/01_Column_compression_and_recovery_for_Jacobian_return_Row_Compressed_Format \
+			src/SampleDrivers/Matrix_Compression_and_Recovery/ADOL-C/02_Column_compression_and_recovery_for_Jacobian_return_Coordinate_Format \
+			src/SampleDrivers/Matrix_Compression_and_Recovery/ADOL-C/03_Column_compression_and_recovery_for_Jacobian_return_Sparse_Solvers_Format \
+			src/SampleDrivers/Matrix_Compression_and_Recovery/ADOL-C/04_Row_compression_and_recovery_for_Jacobian_return_Row_Compressed_Format \
+			src/SampleDrivers/Matrix_Compression_and_Recovery/ADOL-C/05_Compression_and_direct_recovery_for_Hessian_return_Row_Compressed_Format \
+			src/SampleDrivers/Matrix_Compression_and_Recovery/ADOL-C/06_Compression_and_direct_recovery_for_Hessian_return_Coordinate_Format \
+			src/SampleDrivers/Matrix_Compression_and_Recovery/ADOL-C/07_Compression_and_direct_recovery_for_Hessian_return_Sparse_Solvers_Format \
+			src/SampleDrivers/Matrix_Compression_and_Recovery/ADOL-C/08_Compression_and_indirect_recovery_for_Hessian_return_Row_Compressed_Format \
+			src/SampleDrivers/Matrix_Compression_and_Recovery/ADOL-C/09_Bidirectional_compression_and_recovery_for_Jacobian_return_Row_Compressed_Format \
+			src/SampleDrivers/Matrix_Compression_and_Recovery/ADOL-C/10_Column_compression_and_recovery_for_Jacobian_return_Row_Compressed_Format__unmanaged_usermem \
+			src/SampleDrivers/Matrix_Compression_and_Recovery/ADOL-C/11_Compression_and_direct_recovery_for_Hessian_return_Row_Compressed_Format__unmanaged_usermem \
+			src/SampleDrivers/Matrix_Compression_and_Recovery/ADOL-C/12_Bidirectional_compression_and_recovery_for_Jacobian_return_Row_Compressed_Format__unmanaged_usermem
 
 CSR_examplesdir = ${examplesdir}/Matrix_Compression_and_Recovery/CSR
 CSR_examples_PROGRAMS = \
-			SRC/SampleDrivers/Matrix_Compression_and_Recovery/CSR_input/01_Column_compression_and_recovery_for_Jacobian_CSR_input_return_Row_Compressed_Format
+			src/SampleDrivers/Matrix_Compression_and_Recovery/CSR_input/01_Column_compression_and_recovery_for_Jacobian_CSR_input_return_Row_Compressed_Format
 endif
