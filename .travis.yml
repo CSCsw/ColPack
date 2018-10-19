@@ -19,9 +19,10 @@ script:
   - ./configure && make && make check
 
   - # Now try building with CMake.
-  - mkdir build
-  - cd build
-  - cmake .. -DCMAKE_INSTALL_PREFIX=~/ColPack
+  - mkdir cmake
+  - cd cmake
+  - fullpath=$(pwd)
+  - cmake .. -DCMAKE_INSTALL_PREFIX:PATH=$(fullpath)
   - make
   - ctest
   - make install
