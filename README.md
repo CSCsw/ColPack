@@ -10,15 +10,16 @@ http://cscapes.cs.purdue.edu/coloringpage/
 1. [ColPack](#colpack)
 2. [Installation Guilds](#build-and-compile-colpack-instructions)  
 	2.1 [Compile ColPack Without Install](#try-colpack-by-compile-and-run-without-installation)  
-	2.2 [Ubuntu Install](#ubuntu-build-instructions)  
-	2.3 [Windows Install](#windows-build-instructions)  
-	2.4 [MacOS Install](#mac-os-build-instructions)  
+	2.2 [Ubuntu Install](#ubuntu-build-and-install-colpack-instructions)  
+	2.3 [Windows Install](#windows-build-and-install-colpack-instructions)  
+	2.4 [MacOS Install](#mac-os-build-and-install-colpack-instructions)  
 	2.5 [Utilize the Installed Library](#after-the-build-use-colpack-as-installed-library)
 3. [Usages](#usage) 
 4. [HowToCite](#the-best-source-for-citing-this-work)
   
   &nbsp;  
   &nbsp;  
+
   &nbsp;   
   
  
@@ -91,7 +92,7 @@ Build and Compile ColPack Instructions
 ======================================
 There are two ways to use ColPack, _Try without Installiation_ and _Build and Install_. The former is fast and easy to use, but is vulnerable for various OS enviroments settings, thus it requires the user know how to modify the **makefile** if met some compiling issue.  The later one is more robust and it will also collect the ColPack into a shared library which makes ColPack easy to cooperate with other applications. But it requires to pre-install **automake**(or **CMake**) software. 
 
-1.Try ColPack by Compile and Run without Installation
+Try ColPack by Compile and Run without Installation
 ---------------------------------------------------
 You can just try ColPack by download, compile and run it. This is the fastest and simplest way to use ColPack. Do the following instructions in terminals.
 
@@ -107,7 +108,7 @@ The above instruction are tested under Ubuntu system. You may need to modify the
 
 &nbsp;   
 
-2.Ubuntu Build and Install ColPack Instruction
+Ubuntu Build and Install ColPack Instruction
 ----------------------------------------------
 Install ColPack makes ColPack easy to use and it can also decreases the size of the execuable file. **GNU autotools** and **CMake** are supported. To install ColPack using **autotools** (requires that have installed **automake** on your machine.), follows the instructions below.:
 
@@ -141,7 +142,7 @@ running the following from the build directory:
    
 If not using`-DCMAKE_INSTALL_PREFIX:PATH`, the library files will be installed under `/usr/lib/` by default which may requires privilege.
     
-Windows Build and Build and Install ColPack Instruction
+Windows Build and Install ColPack Instruction
 -------------------------------------------------------
 You can build ColPack's static library on Windows using Visual Studio 
 (tested with Visual Studio 2015) and CMake. Note, however, that you are not
@@ -163,8 +164,8 @@ Finally, some of the examples do not compile, seemingly because their
 filenames are too long.
 
 
-MAC OS Build Instructions
--------------------------
+MAC OS Build and Install ColPack Instructions
+---------------------------------------------
 To install ColPack on Mac, you first need to install _Apple Xcode_ and _automake_. Since (it is well known that) Mac's default compiler clang doesn't support OpenMP well, you need either install _OpenMP_ and _gcc_ compiler or disable _OpenMP_ by `--disable-openmp` .(It's a well known problem, MAC's default compiler clang doesn't support OpenMP well.) 
 
     cd   
