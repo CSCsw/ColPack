@@ -9,7 +9,7 @@ matrix:
 
  # works on Precise and Trusty
     - env:
-        - MATRIX_EVAL="CC=gcc && CXX=g++"
+        - MATRIX_EVAL="CC=gcc && CXX=g++ && CXX_FLAG-fopenmp=libomp"
         
 
 before_script:
