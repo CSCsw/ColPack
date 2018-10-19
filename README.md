@@ -80,6 +80,12 @@ ColPack is written in an object-oriented fashion in C++ heavily using the Standa
 
 ![ColPack Organization](http://cscapes.cs.purdue.edu/coloringpage/software_files/ColPack_structure_2.png)  
 
+  
+ &nbsp;   
+ &nbsp;   
+ &nbsp;   
+      
+      
 
 Build and Compile ColPack Instructions
 ======================================
@@ -95,8 +101,11 @@ You can just try ColPack by download, compile and run it. This is the fastest an
     cd build/Example_ColPackAll  # go to ColPack Example folder
     make                         # compile the code
 
+
 After all source codes been compiled, we will generate a executable file `ColPack` under current folder.  
 The above instruction are tested under Ubuntu system. You may need to modify the Makefile to fit the different OS environments and compilers.(delete `-fopenmp` for mac os. Replace `-fopenmp` to `-Qopenmp` )for intel compiler.) 
+
+&nbsp;   
 
 2.Ubuntu Build and Install ColPack Instruction
 ----------------------------------------------
@@ -118,10 +127,10 @@ via the following:
 
     mkdir cmake
     cd cmake
-    fullpath=$(pwd)
-    cmake -DCMAKE_INSTALL_PREFIX:PATH=$(install_path) ..
-    make -j 4   #Where "4" is the number of cores on your machine
-    ctest       #Run the examples in SampleDrivers/Basic folder
+    fullpath=$(pwd)        # modify fullpath to your destination folder if need
+    cmake -DCMAKE_INSTALL_PREFIX:PATH=$(fullpath) .. 
+    make -j 4              # Where "4" is the number of cores on your machine
+    ctest                  # Run the examples in src/SampleDrivers/Basic folder
     make install 
 
 Use `cmake -LH .` or `ccmake .` in the build directory to see a list of
@@ -129,6 +138,8 @@ options, such as `ENABLE_EXAMPLES` and `ENABLE_OPENMP`, which you can set by
 running the following from the build directory:
 
     cmake .. -DENABLE_OPENMP=ON
+   
+If not using`-DCMAKE_INSTALL_PREFIX:PATH`, the library files will be installed under `/usr/lib/` by default which may requires privilege.
     
 Windows Build and Build and Install ColPack Instruction
 -------------------------------------------------------
@@ -168,6 +179,7 @@ To install ColPack on Mac, you first need to install _Apple Xcode_ and _automake
 
 Another recommend altinative way is to install an Ubuntu system on your MAC with *VirtualBox* (or any other virtual machine software), then install ColPack on your virtual machines.
     
+&nbsp;   
     
 After the Build, Use ColPack as Installed Library
 -------------------------------------------------
@@ -175,20 +187,22 @@ After the build, we have already generate an shared library under the `$fullpath
 However if you want to write your own code and use ColPack as an shared library. Then follow the following ways:
 * export library's path to `LD_LIBRARY_PATH`
 * create your own code. 
-* include the relative ColPack header files within your code.
+* include the relative ColPack header files within your code. `#include "ColPackHeaders.h"`
 * added `-ldl path/to/installed/library` and `-I /path/to/installed/include` to the compiler
 * compile the code
 
 We provide a template codes in `Example_Use_Library`
 
+&nbsp;   
+&nbsp;   
+&nbsp;   
 
 USAGE
 =====
 
-After building (or try), you can run the following commands (from ColPack root directory  if
-using autotools, or from the build directory if using CMake):
+After building (or compile), you can run the following commands from where the executable file `ColPack` generated (ColPack root directory if using autotools, from the cmake directory if using CMake, or current directory if directly compile):
 
-	$./ColPack -f <graph_file_name> -o <ordering> -m <methods> [-v]
+	$./ColPack -f <graph_file_name> -o <ordering> -m <methods> [-v] ...
 
 ### DISPLAY HELP 
 	$./ColPack
@@ -201,15 +215,14 @@ using autotools, or from the build directory if using CMake):
 	               DYNAMIC_LARGEST_FIRST,
 	               INCIDENCE_DEGREE,
 	               NATURAL,
-	               RANDOM
+	               RANDOM,
+		       ...
 	<methods>   :  DISTANCE_ONE
 	               ACYCLIC
 	               ACYCLIC_FOR_INDIRECT_RECOVERY
 	               STAR
 	               RESTRICTED_STAR
 	               DISTANCE_TWO
-	               --------------------
-	               DISTANCE_ONE_OMP    (automatic display: nThreads,num_colors,timall,conflicts,loops)
 	               --------------------
 	               IMPLICIT_COVERING__STAR_BICOLORING
 	               EXPLICIT_COVERING__STAR_BICOLORING
@@ -218,14 +231,36 @@ using autotools, or from the build directory if using CMake):
 	               --------------------
 	               COLUMN_PARTIAL_DISTANCE_TWO
 	               ROW_PARTIAL_DISTANCE_TWO
-	
-	-v          :  verbose for debug infomation
-
+		       --------------------
+		       D1_OMP_GMMP
+		       D1_OMP_GM3P
+		       D1_OMP_GMMP_LOLF
+		       D1_OMP_GM3P_LOLF
+		       D1_OMP_...
+		       ...
+		       --------------------
+		       D2_OMP_GMMP
+		       D2_OMP_GM3P
+		       D2_OMP_GMMP_LOLF
+		       D2_OMP_GM3P_LOLF
+		       --------------------
+		       PD2_OMP_GMMP
+		       PD2_OMP_GM3P
+		       PD2_OMP_GMMP_LOLF
+		       PD2_OMP_GM3P_LOLF
+		       ...
+		       
+	-v          :  # verbose for debug infomation
+	-fmt        :  MM/SQRT  # only used by Partial Distance Two Parallel graph coloring. SQRT will read sqrt of grahp.
+	-low        :  # only used by Partial Distance Two Parallel graph coloring. The lower bound of coloring information will be displayed.
 ### EXAMPLES:
 	
-	./ColPack -f Graphs/bcsstk01.mtx -o LARGEST_FIRST -m DISTANCE_ONE -v
-	./ColPack -f Graphs/bcsstk01.mtx -o SMALLEST_LAST -m ACYCLIC -v
-	./ColPack -f Graphs/bcsstk01.mtx -o DYNAMIC_LARGEST_FIRST -m DISTANCE_ONE_OMP -v
+	./ColPack -f ./Graphs/bcsstk01.mtx -o LARGEST_FIRST -m DISTANCE_ONE -v
+	./ColPack -f ./Graphs/bcsstk01.mtx -o SMALLEST_LAST -m ACYCLIC -v
+	./ColPack -f ./Graphs/bcsstk01.mtx -o DYNAMIC_LARGEST_FIRST -m DISTANCE_ONE_OMP -v
+	./ColPack -f ./Graphs/bcsstk01.mtx -o RANDOM -m D1_OMP_GMMP D2_OMP_GMMP -nT 1 2 4 -v
+	./ColPack -f ./Graphs/bcsstk01.mtx -o RANDOM -m PD2_OMP_GMMP PD2_OMP_GMMP_LOLF -nT 1 2 4 -v
+	
 	
 ### EXAMPLE OUTPUT
 
@@ -284,7 +319,9 @@ using autotools, or from the build directory if using CMake):
 
 
 
-
+&nbsp;  
+&nbsp;  
+&nbsp;  
 
 The best source for citing this work
 ====================================
