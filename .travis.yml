@@ -11,13 +11,23 @@ language: cpp
 #    - env:
 #        - MATRIX_EVAL="CC=gcc && CXX=g++ && CXX_FLAG-fopenmp=libomp"
         
-compiler: g++-4.9
+#compiler: g++-4.9
 
-before_script:
-  - autoreconf -fi
+
+addons:
+  apt:
+    sources:
+      - george-edison55-precise-backports
+    packages:
+      - cmake-data
+      - cmake
+
+
+#before_script:
+#  - autoreconf -fi
 
 script:
-  - ./configure && make && make check
+#  - ./configure && make && make check
 
   - # Now try building with CMake.
   - mkdir cmake
@@ -27,3 +37,5 @@ script:
   - make
   - ctest
   - make install
+
+
