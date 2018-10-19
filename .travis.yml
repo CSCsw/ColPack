@@ -11,7 +11,7 @@ language: cpp
 #    - env:
 #        - MATRIX_EVAL="CC=gcc && CXX=g++ && CXX_FLAG-fopenmp=libomp"
         
-compiler: gcc
+compiler: g++
 before_script:
   - autoreconf -fi
 
