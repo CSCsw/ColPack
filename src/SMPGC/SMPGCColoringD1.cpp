@@ -219,7 +219,7 @@ int SMPGCColoring::D1_OMP_GM3P(int nT, int&colors, vector<int>&vtxColors, const 
     }
     tim_recolor += omp_get_wtime();
 
-    // get number of colors
+    // get maximal colors
     tim_maxc = -omp_get_wtime();
     int max_color=0;
     #pragma omp parallel for reduction(max:max_color)
@@ -379,11 +379,12 @@ int SMPGCColoring::D1_OMP_GMMP(int nT, int&colors, vector<int>&vtxColors, const 
 
     // get number of colors
     tim_maxc = -omp_get_wtime();
-    #pragma omp parallel for reduction(max:colors)
+    int max_color=0;
+    #pragma omp parallel for reduction(max:max_color)
     for(int i=0; i<N; i++){
-        colors = max(colors, vtxColors[i]);
+        max_color = max(max_color, vtxColors[i]);
     }
-    colors++; //number of colors = largest color(0-based) + 1
+    colors=max_color+1; //number of colors = largest color(0-based) + 1
     tim_maxc += omp_get_wtime();
 
     tim_total = tim_color+tim_detect+tim_maxc;
@@ -690,12 +691,13 @@ int SMPGCColoring::D1_OMP_JP(int nT, int&colors, vector<int>&vtxColors, const in
     
 
     tim_MxC = -omp_get_wtime();
-    #pragma omp parallel for reduction(max:colors)
+    int max_color=0
+    #pragma omp parallel for reduction(max:max_color)
     for(int i=0; i<N; i++){
         auto c = vtxColors[i];
-        if(c>colors) colors=c;
+        if(c>max_color) max_color=c;
     }
-    colors++;
+    colors=max_color+1;
     tim_MxC += omp_get_wtime();
 
     tim_Tot = tim_Wgt + tim_MIS + tim_MxC;
@@ -844,13 +846,13 @@ int SMPGCColoring::D1_OMP_MTJP(int nT, int& colors, vector<int>&vtxColors, const
 
     tim_MIS += omp_get_wtime();
     tim_MxC = -omp_get_wtime();
-    colors=0;
-    #pragma omp parallel for reduction(max:colors)
+    int max_color=0;
+    #pragma omp parallel for reduction(max:max_color)
     for(int i=0; i<N; i++){
         auto c = vtxColors[i];
-        if(c>colors) colors=c;
+        if(c>max_color) max_color=c;
     }
-    colors++;
+    colors=max_color+1;
     tim_MxC += omp_get_wtime();
 
     tim_Tot = tim_Wgt + tim_MIS + tim_MxC;
