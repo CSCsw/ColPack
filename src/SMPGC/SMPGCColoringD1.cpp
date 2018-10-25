@@ -691,7 +691,7 @@ int SMPGCColoring::D1_OMP_JP(int nT, int&colors, vector<int>&vtxColors, const in
     
 
     tim_MxC = -omp_get_wtime();
-    int max_color=0
+    int max_color=0;
     #pragma omp parallel for reduction(max:max_color)
     for(int i=0; i<N; i++){
         auto c = vtxColors[i];
