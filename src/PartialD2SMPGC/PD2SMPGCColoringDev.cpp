@@ -10,6 +10,7 @@
 using namespace std;
 using namespace ColPack;
 
+// PD2_MASKWIDE marco are use to determin using 64 bits array / 32 bits array for 'forbiden array'. Only used in *_BIT_* functions.
 #ifdef PD2_MASKWIDE_64
         #define PD2_MASKWIDE 64
 #else
@@ -200,11 +201,12 @@ int PD2SMPGCColoring::PD2_OMP_GM3P_BIT(const int side, int nT, int &colors, vect
 
     // get number of colors
     tim_maxc = -omp_get_wtime();
-    #pragma omp parallel for reduction(max:colors)
+    int max_color=0;
+    #pragma omp parallel for reduction(max:max_color)
     for(int i=0; i<N; i++){
-        colors = max(colors, vtxColor[i]);
+        max_color = max(max_color, vtxColor[i]);
     }
-    colors++; //number of colors, 
+    colors=max_color+1; //number of colors, 
     tim_maxc += omp_get_wtime();
 
     tim_total = tim_color+tim_detect+tim_recolor+tim_maxc+tim_local_order;
@@ -386,11 +388,12 @@ int PD2SMPGCColoring::PD2_OMP_GMMP_BIT(const int side, int nT, int &colors, vect
     
     // get number of colors
     tim_maxc = -omp_get_wtime();
-    #pragma omp parallel for reduction(max:colors)
+    int max_color=0;
+    #pragma omp parallel for reduction(max:max_color)
     for(int i=0; i<N; i++){
-        colors = max(colors, vtxColor[i]);
+        max_color = max(max_color, vtxColor[i]);
     }
-    colors++; //number of colors, 
+    colors=max_color+1; //number of colors, 
     tim_maxc += omp_get_wtime();
 
     tim_total = tim_color+tim_detect+tim_maxc+tim_local_order;

@@ -147,12 +147,13 @@ int SMPGCColoring::D1_OMP_HBJP(int nT, int&colors, vector<int>& vtxColors, const
 
 
     tim_MxC = -omp_get_wtime();
-    #pragma omp parallel for reduction(max:colors)
+    int max_color=0;
+    #pragma omp parallel for reduction(max:max_color)
     for(int i=0; i<N; i++){
         auto c = vtxColors[i];
-        if(c>colors) colors=c;
+        if(c>max_color) max_color=c;
     }
-    colors++;
+    colors=max_color+1;
     tim_MxC += omp_get_wtime();
 
     tim_Tot = tim_Wgt + tim_MIS + tim_MxC+ tim_Alg2;
@@ -320,13 +321,13 @@ int SMPGCColoring::D1_OMP_HBMTJP(int nT, int&colors, vector<int>& vtxColors,  co
     tim_Alg2+= omp_get_wtime();
 
     tim_MxC = -omp_get_wtime();
-    colors=0;
-    #pragma omp parallel for reduction(max:colors)
+    int max_color=0;
+    #pragma omp parallel for reduction(max:max_color)
     for(int i=0; i<N; i++){
         auto c = vtxColors[i];
-        if(c>colors) colors=c;
+        if(c>max_color) max_color=c;
     }
-    colors++;
+    colors=max_color+1;
     tim_MxC += omp_get_wtime();
 
     tim_Tot = tim_Wgt + tim_MIS + tim_MxC+ tim_Alg2;

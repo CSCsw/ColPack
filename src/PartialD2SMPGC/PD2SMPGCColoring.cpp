@@ -380,11 +380,12 @@ int PD2SMPGCColoring::PD2_OMP_GM3P(const int side, int nT, int&colors, vector<in
 
     // get number of colors
     tim_maxc = -omp_get_wtime();
-    #pragma omp parallel for reduction(max:colors)
+    int max_color=0;
+    #pragma omp parallel for reduction(max:max_color)
     for(int i=0; i<N; i++){
-        colors = max(colors, vtxColor[i]);
+        max_color = max(max_color, vtxColor[i]);
     }
-    colors++; //number of colors, 
+    colors=max_color+1; //number of colors, 
     tim_maxc += omp_get_wtime();
 
     tim_total = tim_color+tim_detect+tim_recolor+tim_maxc+tim_local_order;
@@ -551,11 +552,12 @@ int PD2SMPGCColoring::PD2_OMP_GMMP(const int side, int nT, int &colors, vector<i
 
     // get number of colors
     tim_maxc = -omp_get_wtime();
-    #pragma omp parallel for reduction(max:colors)
+    int max_color=0;
+    #pragma omp parallel for reduction(max:max_color)
     for(int i=0; i<N; i++){
-        colors = max(colors, vtxColor[i]);
+        max_color = max(max_color, vtxColor[i]);
     }
-    colors++; //number of colors, 
+    colors=max_color+1; //number of colors, 
     tim_maxc += omp_get_wtime();
 
     tim_total = tim_color+tim_detect + tim_maxc+tim_local_order;
