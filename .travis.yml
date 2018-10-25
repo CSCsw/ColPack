@@ -45,6 +45,6 @@ script:
   - cmake .. -DCMAKE_INSTALL_PREFIX:PATH=$(fullpath)
   - make
   - ctest
-  - make install
+  - sudo make install
 
 
