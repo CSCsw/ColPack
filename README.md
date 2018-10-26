@@ -117,7 +117,7 @@ Install ColPack makes ColPack easy to use and it can also decreases the size of 
     cd ColPack             # ColPack Root Directory
     autoreconf -vif                                
     fullpath=$(pwd)        # modify fullpath to your destination folder if need
-    ./configure --prefix=$(fullpath)  
+    ./configure --prefix=${fullpath}  
     make -j 4              # Where "4" is the number of cores on your machine
     make install           # install lib and include/ColPack to destination  
 
@@ -129,7 +129,7 @@ via the following:
     mkdir cmake
     cd cmake
     fullpath=$(pwd)        # modify fullpath to your destination folder if need
-    cmake -DCMAKE_INSTALL_PREFIX:PATH=$(fullpath) .. 
+    cmake -DCMAKE_INSTALL_PREFIX:PATH=${fullpath} .. 
     make -j 4              # Where "4" is the number of cores on your machine
     ctest                  # Run the examples in src/SampleDrivers/Basic folder
     make install 

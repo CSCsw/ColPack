@@ -40,4 +40,4 @@ config.h.in~
 examples/
 lib/
 test-driver
-
+cmake
