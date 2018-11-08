@@ -99,7 +99,7 @@ You can just try ColPack by download, compile and run it. This is the fastest an
     cd              
     git clone https://github.com/CSCsw/ColPack.git   #Download ColPack
     cd ColPack                   # go to ColPack Root Directory
-    cd build/Example_ColPackAll  # go to ColPack Example folder
+    cd Examples/Example_ColPackAll  # go to ColPack Example folder
     make                         # compile the code
 
 
@@ -115,7 +115,10 @@ Install ColPack makes ColPack easy to use and it can also decreases the size of 
     cd   
     git clone https://github.com/CSCsw/ColPack.git  #Download ColPack
     cd ColPack             # ColPack Root Directory
-    autoreconf -vif                                
+    cd build/automake
+    autoreconf -vif  
+    mkdir mywork
+    cd mywork
     fullpath=$(pwd)        # modify fullpath to your destination folder if need
     ./configure --prefix=${fullpath}  
     make -j 4              # Where "4" is the number of cores on your machine
@@ -126,12 +129,13 @@ Append `--disable-openmp` to `./configure` above if you need to disable OpenMP.(
 ColPack also has support for building with CMake, which you can do
 via the following:
 
-    mkdir cmake
-    cd cmake
+    cd build/cmake
+    mkdir mywork
+    cd mywork
     fullpath=$(pwd)        # modify fullpath to your destination folder if need
     cmake -DCMAKE_INSTALL_PREFIX:PATH=${fullpath} .. 
     make -j 4              # Where "4" is the number of cores on your machine
-    ctest                  # Run the examples in src/SampleDrivers/Basic folder
+    ctest                  # Run the examples in Examples/SampleDrivers/Basic folder
     make install 
 
 Use `cmake -LH .` or `ccmake .` in the build directory to see a list of
@@ -171,7 +175,10 @@ To install ColPack on Mac, you first need to install _Apple Xcode_ and _automake
     cd   
     git clone https://github.com/CSCsw/ColPack.git  #Download ColPack
     cd ColPack             # ColPack Root Directory
-    autoreconf -vif                                
+    cd build/automake
+    autoreconf -vif  
+    mkdir mywork
+    cd mywork
     fullpath=$(pwd)        # modify fullpath to your destination folder if need
     ./configure --prefix=${fullpath} --disable-openmp
     make -j 4              # Where "4" is the number of cores on your machine

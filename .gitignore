@@ -37,7 +37,6 @@ ColPack
 /missing
 /stamp-h1
 config.h.in~
-examples/
 lib/
 test-driver
 cmake
