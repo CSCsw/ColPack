@@ -120,7 +120,7 @@ Install ColPack makes ColPack easy to use and it can also decreases the size of 
     mkdir mywork
     cd mywork
     fullpath=$(pwd)        # modify fullpath to your destination folder if need
-    ./configure --prefix=${fullpath}  
+    ../configure --prefix=${fullpath}  
     make -j 4              # Where "4" is the number of cores on your machine
     make install           # install lib and include/ColPack to destination  
 
@@ -129,14 +129,12 @@ Append `--disable-openmp` to `./configure` above if you need to disable OpenMP.(
 ColPack also has support for building with CMake, which you can do
 via the following:
 
-    cd build/cmake
-    mkdir mywork
-    cd mywork
+    mkdir build/cmake/mywork
+    cd build/cmake/mywork
     fullpath=$(pwd)        # modify fullpath to your destination folder if need
-    cmake -DCMAKE_INSTALL_PREFIX:PATH=${fullpath} .. 
+    cmake .. -DCMAKE_INSTALL_PREFIX:PATH=${fullpath} 
     make -j 4              # Where "4" is the number of cores on your machine
-    ctest                  # Run the examples in Examples/SampleDrivers/Basic folder
-    make install 
+    make install           # install the libararies
 
 Use `cmake -LH .` or `ccmake .` in the build directory to see a list of
 options, such as `ENABLE_EXAMPLES` and `ENABLE_OPENMP`, which you can set by
