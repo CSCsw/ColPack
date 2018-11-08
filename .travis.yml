@@ -32,7 +32,10 @@ matrix:
 
 script:
   - # try automake #./configure && make && make check
-  - autoreconf -vif                                
+  - cd build/automake
+  - autoreconf -vif  
+  - mkdir mywork 
+  - cd mywork
   - fullpath=$(pwd)        # modify fullpath to your destination folder if need
   - ./configure --prefix=${fullpath}  
   - make -j 4              # Where "4" is the number of cores on your machine
@@ -40,11 +43,11 @@ script:
 
 script:
   - # Now try building with CMake.
-  - mkdir cmake
-  - cd cmake
+  - cd build/cmake
+  - mkdir mywork
+  - cd mywork
   - fullpath=$(pwd)
   - cmake .. -DCMAKE_INSTALL_PREFIX:PATH=${fullpath}
-  - make
-  - ctest
+  - make #; ctest
   - make install
 

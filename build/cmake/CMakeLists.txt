@@ -3,7 +3,7 @@ project(ColPack)
 
 # Set the version number to the *next* release (not to the prevoius release).
 set(COLPACK_VERSION 1.0.11)
-
+set(COLPACK_ROOT_DIR "../..")   # modify as needed 
 # CMake support was added by chrisdembia in 2017 to support building ColPack on
 # Windows with Visual Studio and to supplement autotools. Various parts of the
 # code base, such as the comments in the SampleDrivers files, still expect use
@@ -30,6 +30,7 @@ option(ENABLE_EXAMPLES
     "Build the examples in SampleDrivers/Matrix_Compression_and_Recovery." OFF)
 option(ENABLE_OPENMP "Enable OpenMP." ON)
 set (CMAKE_CXX_STANDARD 11)
+
 # Configuring variables, etc.
 # ---------------------------
 if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
@@ -44,7 +45,9 @@ if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
     set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS
         "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
 endif()
-set(ColPack_lib_to_use ColPack_shared)
+
+set(ColPack_lib_to_use ColPack_shared)  # ColPack_lib_to_use is either ColPack_shared or ColPack_static
+
 if(WIN32)
     # Since we do not use __declspec(dllexport) etc, the shared library
     # does not export symbols and cannot be used in general. Use the the static
@@ -66,39 +69,52 @@ if(ENABLE_OPENMP)
 endif()
 
 # Define variables to use for organizing the installation.
-include(GNUInstallDirs)
+include(GNUInstallDirs) 
+
 if(WIN32)
-    set(COLPACK_INSTALL_CMAKEDIR cmake)
+    set(COLPACK_INSTALL_CMAKEDIR       ColPack_libs)
+    set(COLPACK_INSTALL_EXAMPLESBINDIR ColPack_examples)
 else()
-    set(COLPACK_INSTALL_CMAKEDIR ${CMAKE_INSTALL_LIBDIR}/cmake/ColPack)
+    set(COLPACK_INSTALL_CMAKEDIR       ${CMAKE_INSTALL_LIBDIR}/ColPack_libs)
     # To follow the UNIX Filsystem Hierarchy Standard, we should install
     # examples somewhere else:
-    set(COLPACK_INSTALL_EXAMPLESBINDIR
-        ${CMAKE_INSTALL_LIBDIR}/ColPack/examples)
+    set(COLPACK_INSTALL_EXAMPLESBINDIR ${CMAKE_INSTALL_LIBDIR}/ColPack_examples)
 endif()
-set(COLPACK_INSTALL_EXAMPLESBINDIR examples)
 
 # Lists of the source files.
 # -------------------------
 file(GLOB HEADERS
-    src/Utilities/*.h
-    src/BipartiteGraphBicoloring/*.h
-    src/BipartiteGraphPartialColoring/*.h
-    src/GeneralGraphColoring/*.h
-    src/Recovery/*.h
-    inc/ColPackHeaders.h
-    inc/Definitions.h
-    src/SMPGC/*.h
-    inc/PartialD2SMPGC/*.h)
+    ${COLPACK_ROOT_DIR}/inc/ColPackHeaders.h
+    ${COLPACK_ROOT_DIR}/inc/Definitions.h
+    ${COLPACK_ROOT_DIR}/src/Utilities/*.h
+    ${COLPACK_ROOT_DIR}/src/BipartiteGraphBicoloring/*.h
+    ${COLPACK_ROOT_DIR}/src/BipartiteGraphPartialColoring/*.h
+    ${COLPACK_ROOT_DIR}/src/GeneralGraphColoring/*.h
+    ${COLPACK_ROOT_DIR}/src/Recovery/*.h
+    ${COLPACK_ROOT_DIR}/src/SMPGC/*.h
+    ${COLPACK_ROOT_DIR}/src/PartialD2SMPGC/*.h)
 file(GLOB SOURCES
-    build/Example_ColPackAll
-    src/Utilities/*.cpp
-    src/BipartiteGraphBicoloring/*.cpp
-    src/BipartiteGraphPartialColoring/*.cpp
-    src/GeneralGraphColoring/*.cpp
-    src/Recovery/*.cpp
-    src/SMPGC/*.cpp
-    src/PartialD2SMPGC/*.cpp)
+    ${COLPACK_ROOT_DIR}/src/Utilities/*.cpp
+    ${COLPACK_ROOT_DIR}/src/BipartiteGraphBicoloring/*.cpp
+    ${COLPACK_ROOT_DIR}/src/BipartiteGraphPartialColoring/*.cpp
+    ${COLPACK_ROOT_DIR}/src/GeneralGraphColoring/*.cpp
+    ${COLPACK_ROOT_DIR}/src/Recovery/*.h
+    ${COLPACK_ROOT_DIR}/src/SMPGC/*.cpp
+    ${COLPACK_ROOT_DIR}/src/PartialD2SMPGC/*.cpp)
+
+
+# Use these include directories when building the ColPack library.
+set(COLPACK_SOURCE_INCLUDE_DIRS
+    "${COLPACK_ROOT_DIR}/inc"
+    "${COLPACK_ROOT_DIR}/src/Utilities"
+    "${COLPACK_ROOT_DIR}/src/BipartiteGraphPartialColoring"
+    "${COLPACK_ROOT_DIR}/src/BipartiteGraphBicoloring"
+    "${COLPACK_ROOT_DIR}/src/GeneralGraphColoring"
+    "${COLPACK_ROOT_DIR}/src/SMPGC"
+    "${COLPACK_ROOT_DIR}/src/PartialD2SMPGC"
+    "${COLPACK_ROOT_DIR}/src/Recovery")
+
+
 
 # Static library.
 # ---------------
@@ -109,22 +125,12 @@ if(NOT WIN32)
     set_target_properties(ColPack_static PROPERTIES OUTPUT_NAME ColPack)
 endif()
 
-# Use these include directories when building the ColPack library.
-set(COLPACK_SOURCE_INCLUDE_DIRS
-    "${CMAKE_SOURCE_DIR}/inc"
-    "${CMAKE_SOURCE_DIR}/src/Utilities"
-    "${CMAKE_SOURCE_DIR}/src/BipartiteGraphPartialColoring"
-    "${CMAKE_SOURCE_DIR}/src/BipartiteGraphBicoloring"
-    "${CMAKE_SOURCE_DIR}/src/GeneralGraphColoring"
-    "${CMAKE_SOURCE_DIR}/src/SMPGC"
-    "${CMAKE_SOURCE_DIR}/src/PartialD2SMPGC"
-    "${CMAKE_SOURCE_DIR}/src/Recovery")
 target_include_directories(ColPack_static PRIVATE
     ${COLPACK_SOURCE_INCLUDE_DIRS})
 # For clients of the ColPack target within this project (e.g. examples).
 # (Must use quotes because the variable is a list of paths.)
-target_include_directories(ColPack_static INTERFACE
-    "$<BUILD_INTERFACE:${COLPACK_SOURCE_INCLUDE_DIRS}>")
+#target_include_directories(ColPack_static INTERFACE
+#    "$<BUILD_INTERFACE:${COLPACK_SOURCE_INCLUDE_DIRS}>")
 # For clients of an installation of ColPack.
 target_include_directories(ColPack_static INTERFACE
     $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
@@ -137,9 +143,10 @@ endif()
 # "EXPORT" helps with creating a ColPackConfig.cmake file to place in the
 # installation, to help downstream projects use ColPack.
 install(TARGETS ColPack_static EXPORT ColPackTargets
-        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}/archive
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}/library
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}/runtime)
+
 
 # Shared library.
 # ---------------
@@ -152,8 +159,8 @@ set_target_properties(ColPack_shared PROPERTIES
 target_include_directories(ColPack_shared PRIVATE
     ${COLPACK_SOURCE_INCLUDE_DIRS})
 # For clients of the ColPack target within this project (e.g. examples).
-target_include_directories(ColPack_shared INTERFACE
-    "$<BUILD_INTERFACE:${COLPACK_SOURCE_INCLUDE_DIRS}>")
+#target_include_directories(ColPack_shared INTERFACE
+#    "$<BUILD_INTERFACE:${COLPACK_SOURCE_INCLUDE_DIRS}>")
 # For clients of an installation of ColPack.
 target_include_directories(ColPack_shared INTERFACE
     $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
@@ -164,43 +171,49 @@ if(ENABLE_OPENMP)
     target_link_libraries(ColPack_shared PRIVATE ${OpenMP_CXX_FLAGS})
 endif()
 
-install(FILES ${HEADERS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ColPack)
+install(FILES ${HEADERS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ColPack_headers)
 
 install(TARGETS ColPack_shared EXPORT ColPackTargets
-        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}/shared_archive
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}/shared_library
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}/shared_runtime)
 
-# ColPack executable.
+
+
 # -------------------
 # The ColPack executable depends on getopt.h, which is POSIX
 # and not readily available when using Visual Studio.
+# -------------------
+# xin cheng: on Oct 2018. It seems getopt.h havn't been used. So the following check getopt
+#            could be removed. For safety, still pop up a message.
 find_path(HAS_GETOPT getopt.h)
-if(HAS_GETOPT)
-    add_executable(ColPack build/Example_ColPackAll/Main.cpp)
-    target_link_libraries(ColPack ${ColPack_lib_to_use})
-    # TODO install this executable?
-else()
-    message(STATUS "Cannot find getopt.h; not building the ColPack executable.")
+if(NOT HAS_GETOPT)
+    message(STATUS "Cannot find getopt.h; ColPack may or may not build.")
 endif()
+
+# ColPack executable.
+add_executable(ColPack "${COLPACK_ROOT_DIR}/Examples/ColPackAll/Main.cpp")
+target_link_libraries(ColPack ${ColPack_lib_to_use})
+target_include_directories(ColPack PRIVATE ${COLPACK_SOURCE_INCLUDE_DIRS})
+
 # To facilitate running the ColPack executable from the build directory.
-file(COPY Graphs DESTINATION "${CMAKE_BINARY_DIR}")
+file(COPY "${COLPACK_ROOT_DIR}/Graphs" DESTINATION "${CMAKE_BINARY_DIR}")
 
 # Examples.
 # ---------
-enable_testing()
+#enable_testing()
 # To replicate the behavior of autotools, we build and install the Basic
 # examples regardless of the setting for ENABLE_EXAMPLES.
 # First, gather up all the example files.
-file(GLOB SAMPLE_DRIVERS_BASIC RELATIVE "${CMAKE_SOURCE_DIR}/src/SampleDrivers"
-    src/SampleDrivers/Basic/*.cpp)
+file(GLOB SAMPLE_DRIVERS_BASIC RELATIVE "${COLPACK_ROOT_DIR}/Examples/SampleDrivers"
+    ${COLPACK_ROOT_DIR}/Examples/SampleDrivers/Basic/*.cpp)
 set(EXAMPLES ${SAMPLE_DRIVERS_BASIC})
 if(ENABLE_EXAMPLES)
     file(GLOB SAMPLE_DRIVERS_MATRIX_COMPRESSION_AND_RECOVERY
-        RELATIVE "${CMAKE_SOURCE_DIR}/src/SampleDrivers"
-        src/SampleDrivers/Matrix_Compression_and_Recovery/ADIC/*.cpp
-        src/SampleDrivers/Matrix_Compression_and_Recovery/ADOL-C/*.cpp
-        src/SampleDrivers/Matrix_Compression_and_Recovery/CSR_input/*.cpp
+        RELATIVE "${COLPACK_ROOT_DIR}/Examples/SampleDrivers"
+        ${COLPACK_ROOT_DIR}/Examples/SampleDrivers/Matrix_Compression_and_Recovery/ADIC/*.cpp
+        ${COLPACK_ROOT_DIR}/Examples/SampleDrivers/Matrix_Compression_and_Recovery/ADOL-C/*.cpp
+        ${COLPACK_ROOT_DIR}/Examples/SampleDrivers/Matrix_Compression_and_Recovery/CSR_input/*.cpp
         # Leaving out SMB because that depends on ADOL-C.
         )
     list(APPEND EXAMPLES ${SAMPLE_DRIVERS_MATRIX_COMPRESSION_AND_RECOVERY})
@@ -213,7 +226,7 @@ foreach(example_cpp ${EXAMPLES})
     # Get a directory relative to the SampleDrivers directory.
     get_filename_component(example_rel_dir ${example_cpp} DIRECTORY
         BASE_DIR SampleDrivers)
-    add_executable(${example} src/SampleDrivers/${example_cpp})
+    add_executable(${example} Examples/SampleDrivers/${example_cpp})
     target_link_libraries(${example} ${ColPack_lib_to_use})
     # Autools installs the examples in CSR_input into a dir. named CSR.
     string(REPLACE "CSR_input" "CSR" example_rel_dir ${example_rel_dir})
