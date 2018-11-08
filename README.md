@@ -115,9 +115,9 @@ Install ColPack makes ColPack easy to use and it can also decreases the size of 
     cd   
     git clone https://github.com/CSCsw/ColPack.git  #Download ColPack
     cd ColPack             # ColPack Root Directory
-    cd build/automake
-    autoreconf -vif  
-    mkdir mywork
+    cd build/automake      # automake folder
+    autoreconf -vif        # generate configure files based on the machince
+    mkdir mywork           
     cd mywork
     fullpath=$(pwd)        # modify fullpath to your destination folder if need
     ../configure --prefix=${fullpath}  
