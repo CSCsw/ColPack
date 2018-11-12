@@ -1,9 +1,8 @@
-/*************************************************************************
-    > File Name: SMPGCColoring.cpp
-    > Author: xc
-    > Descriptions: 
-    > Created Time: Wed 13 Jun 2018 01:14:59 PM EDT
- ************************************************************************/
+/******************************************************************************
+    This file is part of ColPack, which is under its License protection.
+    You should have received a copy of the License. If not, see 
+    <https://github.com/CSCsw/ColPack>
+*******************************************************************************/
 
 #include "SMPGCColoring.h"
 #include <unordered_set>

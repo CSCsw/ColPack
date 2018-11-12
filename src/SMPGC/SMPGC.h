@@ -1,9 +1,9 @@
-/*************************************************************************
-    > File Name: SMPGCDefine.h
-    > Author: xc
-    > Descriptions: 
-    > Created Time: Fri 25 May 2018 04:34:23 PM EDT
- ************************************************************************/
+/******************************************************************************
+    This file is part of ColPack, which is under its License protection.
+    You should have received a copy of the License. If not, see 
+    <https://github.com/CSCsw/ColPack>
+******************************************************************************/
+
 
 #ifndef SMPGCDEFINE_H
 #define SMPGCDEFINE_H

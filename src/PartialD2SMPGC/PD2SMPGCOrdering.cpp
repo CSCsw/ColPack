@@ -1,9 +1,8 @@
-/*************************************************************************
-    File Name: SMPGCInterface.cpp
-    Author: Xin Cheng
-    Descriptions: 
-    Created Time: Tue 06 Mar 2018 10:46:58 AM EST
-*********************************************************************/
+/******************************************************************************
+    This file is part of ColPack, which is under its License protection.
+    You should have received a copy of the License. If not, see 
+    <https://github.com/CSCsw/ColPack>
+*******************************************************************************/
 
 #include "PD2SMPGCOrdering.h"
 #include <ctime>  //clock

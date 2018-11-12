@@ -1,9 +1,8 @@
-/*************************************************************************
-    > File Name: SMPGC.cpp
-    > Author: xc
-    > Descriptions: 
-    > Created Time: Sun 29 Jul 2018 06:15:13 PM EDT
- ************************************************************************/
+/******************************************************************************
+    This file is part of ColPack, which is under its License protection.
+    You should have received a copy of the License. If not, see 
+    <https://github.com/CSCsw/ColPack>
+*******************************************************************************/
 
 #include "SMPGC.h"
 

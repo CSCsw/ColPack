@@ -1,9 +1,8 @@
-/*************************************************************************
-    > File Name: PD2SMPGC.cpp
-    > Author: xc
-    > Descriptions: 
-    > Created Time: Thu 16 Aug 2018 12:10:17 PM EDT
- ************************************************************************/
+/******************************************************************************
+    This file is part of ColPack, which is under its License protection.
+    You should have received a copy of the License. If not, see 
+    <https://github.com/CSCsw/ColPack>
+*******************************************************************************/
 
 #include "PD2SMPGC.h"
 const std::string ColPack::PD2SMPGC::FORMAT_POTHEN = "SQRT";

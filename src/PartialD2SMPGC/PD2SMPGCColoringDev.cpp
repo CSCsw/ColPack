@@ -1,9 +1,8 @@
-/*************************************************************************
-    > File Name: PD2SMPGCColoringDev.cpp
-    > Author: xc
-    > Descriptions: 
-    > Created Time: Tue 28 Aug 2018 11:04:48 AM EDT
- ************************************************************************/
+/******************************************************************************
+    This file is part of ColPack, which is under its License protection.
+    You should have received a copy of the License. If not, see 
+    <https://github.com/CSCsw/ColPack>
+*******************************************************************************/
 #include"PD2SMPGCColoring.h"
 #include<iostream>
 #include <bits/stdc++.h>
