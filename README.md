@@ -6,6 +6,9 @@ http://cscapes.cs.purdue.edu/coloringpage/software.htm
 ColPack's project home page:
 http://cscapes.cs.purdue.edu/coloringpage/
 
+&nbsp;  
+&nbsp;   
+
 # Table of Contents
 1. [ColPack](#colpack)
 2. [Installation Guilds](#build-and-compile-colpack-instructions)  
@@ -16,18 +19,17 @@ http://cscapes.cs.purdue.edu/coloringpage/
 	2.5 [Utilize the Installed Library](#after-the-build-use-colpack-as-installed-library)
 3. [Usages](#usage) 
 4. [HowToCite](#the-best-source-for-citing-this-work)
-  
-  &nbsp;  
-  &nbsp;  
+&nbsp;
 
-  &nbsp;   
-  
- 
 # ColPack 
 
 ColPack is a package comprising of implementations of algorithms for the specialized vertex coloring problems discussed in the previous section as well as algorithms for a variety of related supporting tasks in derivative computation.
 
-### Coloring capabilities
+### Vertex Graph Coloring
+Vertex graph coloring problem is nothing but a way of labelling graph vertices under the constraints that no two adjacent vertices has the same lable (color). Here it is an example from wikipedia.  
+![ExampleFromWiki](https://commons.wikimedia.org/wiki/File:Petersen_graph_3-coloring.svg#/media/File:Petersen_graph_3-coloring.svg)
+
+### ColPack Coloring capabilities
 
 the table below gives a quick summary of all the coloring problems (on general and bipartite graphs) supported by ColPack.
 
