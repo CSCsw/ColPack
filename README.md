@@ -98,7 +98,7 @@ You can just try ColPack by download, compile and run it. This is the fastest an
     cd              
     git clone https://github.com/CSCsw/ColPack.git   #Download ColPack
     cd ColPack                   # go to ColPack Root Directory
-    cd Examples/Example_ColPackAll  # go to ColPack Example folder
+    cd Examples/ColPackAll       # go to ColPack Example folder
     make                         # compile the code
 
 
