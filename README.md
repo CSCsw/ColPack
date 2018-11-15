@@ -6,9 +6,7 @@ http://cscapes.cs.purdue.edu/coloringpage/software.htm
 ColPack's project home page:
 http://cscapes.cs.purdue.edu/coloringpage/
 
-&nbsp;  
 &nbsp;   
-
 # Table of Contents
 1. [ColPack](#colpack)
 2. [Installation Guilds](#build-and-compile-colpack-instructions)  
@@ -27,7 +25,8 @@ ColPack is a package comprising of implementations of algorithms for the special
 
 ### Vertex Graph Coloring
 Vertex graph coloring problem is nothing but a way of labelling graph vertices under the constraints that no two adjacent vertices has the same lable (color). Here it is an example from wikipedia.  
-![ExampleFromWiki](https://commons.wikimedia.org/wiki/File:Petersen_graph_3-coloring.svg#/media/File:Petersen_graph_3-coloring.svg)
+
+![ExampleFromWiki](https://en.wikipedia.org/wiki/Graph_coloring#/media/File:Petersen_graph_3-coloring.svg)
 
 ### ColPack Coloring capabilities
 
@@ -82,7 +81,6 @@ Finally, as a supporting functionality, ColPack has routines for constructing bi
 ColPack is written in an object-oriented fashion in C++ heavily using the Standard Template Library (STL).  It is designed to be simple, modular, extensible and efficient. Figure 1 below gives an overview of the structure of the major classes of ColPack. 
 
 ![ColPack Organization](http://cscapes.cs.purdue.edu/coloringpage/software_files/ColPack_structure_2.png)  
-
   
  &nbsp;   
  &nbsp;   
