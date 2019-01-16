@@ -18,16 +18,6 @@ SMPGCGraph::SMPGCGraph(const string& graph_name, const string& format, double* i
         do_read_MM_struct(m_graph_name, m_ia, m_ja, &m_max_degree, &m_min_degree, &m_avg_degree, iotime);
     else if(format=="metis" || format =="Metis" || format =="METIS"){
         do_read_Metis_struct(m_graph_name, m_ia, m_ja, &m_max_degree, &m_min_degree, &m_avg_degree, iotime);
-        printf("\n");
-        for(auto x:m_ia){
-            printf("%d ",x);
-        }
-        printf("\n");
-        for(auto x:m_ja){
-            printf("%d ",x);
-        }
-        printf("\n");
-
     }
     else{
         printf("Error! SMPGCCore() tried read graph \"%s\" with format \"%s\". But it is not supported\n", graph_name.c_str(), format.c_str());
