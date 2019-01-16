@@ -7,7 +7,7 @@ void usage();
 int main(int argc, char* argv[]) {
     vector<string> fnames;
     vector<string> orders(1,"RANDOM");
-    vector<string> methds(1,"DISTANCE_ONE_OMP_GM3P");
+    vector<string> methds(1,"D1_OMP_GM3P");
     bool   bVerbose(false);
     vector<int> nTs(1);
     vector<string> options(1,"GM3P");

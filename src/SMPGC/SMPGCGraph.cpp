@@ -16,6 +16,19 @@ SMPGCGraph::SMPGCGraph(const string& graph_name, const string& format, double* i
     m_graph_name = graph_name;
     if(format=="mm" || format == "MM")
         do_read_MM_struct(m_graph_name, m_ia, m_ja, &m_max_degree, &m_min_degree, &m_avg_degree, iotime);
+    else if(format=="metis" || format =="Metis" || format =="METIS"){
+        do_read_Metis_struct(m_graph_name, m_ia, m_ja, &m_max_degree, &m_min_degree, &m_avg_degree, iotime);
+        printf("\n");
+        for(auto x:m_ia){
+            printf("%d ",x);
+        }
+        printf("\n");
+        for(auto x:m_ja){
+            printf("%d ",x);
+        }
+        printf("\n");
+
+    }
     else{
         printf("Error! SMPGCCore() tried read graph \"%s\" with format \"%s\". But it is not supported\n", graph_name.c_str(), format.c_str());
         exit(1);
@@ -90,7 +103,7 @@ void SMPGCGraph::do_read_MM_struct(const string& graph_name, vector<int>&ia, vec
     // read graph into G
     unordered_map<int, vector<int>> G;
     int row, col;
-    ifstream fp(graph_name.c_str());
+    //ifstream fp(graph_name.c_str());  //unused variable, to be removed.
     while(in&&entry_encount<=entry_expect){
         getline(in,line);
         if(line=="" || line[0]=='%')
@@ -129,6 +142,95 @@ void SMPGCGraph::do_read_MM_struct(const string& graph_name, vector<int>&ia, vec
         int maxDeg=0, minDeg=ia.size()-1;
         for(auto it : G){
             int d = (it.second).size();
+            maxDeg = (maxDeg<d)?d:maxDeg;
+            minDeg = (minDeg>d)?d:minDeg;
+        }
+        if(pMaxDeg) *pMaxDeg = maxDeg;
+        if(pMinDeg) *pMinDeg = minDeg;
+    }
+    if(pAvgDeg) *pAvgDeg=1.0*(ja.size())/(ia.size()-1);
+
+    if(iotime) { *(clock_t*)iotime += clock(); *iotime = double(*((clock_t*)iotime))/CLOCKS_PER_SEC; }
+    return;
+}
+
+
+
+
+// ============================================================================
+// Read Metis no weight (structure) graph into memory as CSR format (ia,ja)
+// ----------------------------------------------------------------------------
+// Note: store as sparsed CSR format
+// ============================================================================
+void SMPGCGraph::do_read_Metis_struct(const string& graph_name, vector<int>&ia, vector<int>&ja, int* pMaxDeg, int* pMinDeg, double* pAvgDeg, double* iotime) {
+    if(graph_name.empty()) { printf("Error! SMPGCCore() tried to read a graph with empty name.\n"); exit(1); }
+    int  edges_expect  = 0;
+    int  nodes_expect  = 0;
+    int  entry_encount = 0;
+    int  row_encount   = 0;
+    int  entry         = 0;
+    string line;
+    istringstream iss;
+    
+    ia.clear(); { vector<int> tmp; tmp.swap(ia); } 
+    ja.clear(); { vector<int> tmp; tmp.swap(ja); }
+
+    if(iotime) { *iotime=0; *(clock_t *)iotime = -clock(); }
+    ifstream in(graph_name.c_str());
+    if(!in.is_open()) { printf("Error! SMPGCCore() cannot open \"%s\".\n", graph_name.c_str()); exit(1); }
+   
+    // parse the dimension
+    while(getline(in,line)){
+        if(line==""||line[0]=='%')
+            continue;
+        break;
+    }
+    if(!in){ 
+        printf("Error! SMPGCCore() cannot get metis graph \"%s\" dimension. \n", graph_name.c_str());
+        exit(1);
+    }
+    iss.clear(); iss.str(line);
+    if(!(iss>>nodes_expect>>edges_expect)){
+        printf("Error! SMPGCCore() cannot get metis graph \"%s\" dimension from the file.\n", graph_name.c_str());
+        exit(1);
+    }
+    
+    int num_head=2, fmt=0, ncon=0;
+    if(iss>>fmt){
+        num_head=3;
+        if(iss>>ncon)
+            num_head=4;
+    }
+    
+    if(num_head>2){
+        printf("Error! SMPGCCore() cannot read metis graph \"%s\", because the graph has weight. The programer is too lazy to handle such situation. Please contact the author to added the support of such format '%s'.",graph_name.c_str(), line.c_str());
+        exit(1);
+    }
+
+    // read the graph into csr format 
+    ia.push_back(0);
+    while(getline(in,line)&&row_encount<=nodes_expect){
+        if(line.size()>0 && line[0]=='%')
+            continue;
+        row_encount ++;
+        iss.clear(); iss.str(line);
+        while(iss>>entry){
+            ja.push_back(entry-1);
+            entry_encount++;
+        }
+        ia.push_back(ja.size());
+    }
+
+    if(row_encount!=nodes_expect || entry_encount!=2*edges_expect){
+        printf("Error! graph \"%s\" expected has %d vertices and entry of 2*%d neighbors, but we have only found %d vertices with %d neighbor entries. Check the file.\n", graph_name.c_str(), nodes_expect, edges_expect, row_encount, entry_encount);
+        exit(1);
+    }
+
+    // calc degrees if needed
+    if(pMaxDeg||pMinDeg){
+        int maxDeg=0, minDeg=ia.size()-1;
+        for(auto i=0; i<nodes_expect; i++){
+            int d = ja[i+1]-ja[i];
             maxDeg = (maxDeg<d)?d:maxDeg;
             minDeg = (minDeg>d)?d:minDeg;
         }

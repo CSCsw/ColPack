@@ -45,6 +45,7 @@ public: // APIs
     
 
 protected: // implements
+    virtual void do_read_Metis_struct(const string &fname, vector<int>&vi, vector<int>&vj, int*p_maxdeg, int*p_mindeg, double *p_avgdeg, double*iotime);
     virtual void do_read_MM_struct(const string& fname, vector<int>&vi, vector<int>&vj, int*p_maxdeg, int*p_mindeg, double *p_avgdeg, double*iotime);
     //virtual void do_read_Binary_struct(const string& fname, vector<int>&vi, vector<int>&vj, int *p_maxdeg, int*p_mindeg, double*p_avgdeg, double*iotime);
     //virtual void do_write_Binary_struct(const string& fname, vector<int>&vi, vector<int>&vj, double*iotime);
