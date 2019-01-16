@@ -185,12 +185,8 @@ void SMPGCGraph::do_read_Metis_struct(const string& graph_name, vector<int>&ia, 
         exit(1);
     }
     
-    int num_head=2, fmt=0, ncon=0;
-    if(iss>>fmt){
-        num_head=3;
-        if(iss>>ncon)
-            num_head=4;
-    }
+    int fmt=0, ncon=0;
+    iss>>fmt>>ncon;
     
     if(fmt!=0){
         printf("Error! SMPGCCore() cannot read metis graph \"%s\" with head '%s', because the graph has weight. The programer is too lazy to handle such situation. Please contact the author to added the support of such format.\n",graph_name.c_str(), line.c_str());
