@@ -26,14 +26,9 @@ set(COLPACK_ROOT_DIR "../..")   # modify as needed
 
 # User options.
 # -------------
-<<<<<<< HEAD:CMakeLists.txt
-option(ENABLE_EXAMPLES "Build the examples in SampleDrivers." OFF)
-option(ENABLE_OPENMP "Enable OpenMP." OFF)
-=======
 option(ENABLE_EXAMPLES
     "Build the examples in SampleDrivers/Matrix_Compression_and_Recovery." OFF)
-option(ENABLE_OPENMP "Enable OpenMP." ON)
->>>>>>> 37db93bc9cfb409db86dbc2e9d0a64114622304a:build/cmake/CMakeLists.txt
+    option(ENABLE_OPENMP "Enable OpenMP." ON)
 set (CMAKE_CXX_STANDARD 11)
 
 # Configuring variables, etc.
@@ -206,20 +201,16 @@ file(COPY "${COLPACK_ROOT_DIR}/Graphs" DESTINATION "${CMAKE_BINARY_DIR}")
 
 # Examples.
 # ---------
-<<<<<<< HEAD:CMakeLists.txt
-enable_testing()
+# enable_testing()
 # The behavior here is different from autotools, because ENABLE_EXAMPLES
 # also affects the Basic examples.
 # First, gather up all the example files.
-=======
-#enable_testing()
 # To replicate the behavior of autotools, we build and install the Basic
 # examples regardless of the setting for ENABLE_EXAMPLES.
 # First, gather up all the example files.
 file(GLOB SAMPLE_DRIVERS_BASIC RELATIVE "${COLPACK_ROOT_DIR}/Examples/SampleDrivers"
     ${COLPACK_ROOT_DIR}/Examples/SampleDrivers/Basic/*.cpp)
 set(EXAMPLES ${SAMPLE_DRIVERS_BASIC})
->>>>>>> 37db93bc9cfb409db86dbc2e9d0a64114622304a:build/cmake/CMakeLists.txt
 if(ENABLE_EXAMPLES)
     file(GLOB SAMPLE_DRIVERS_BASIC RELATIVE "${CMAKE_SOURCE_DIR}/SampleDrivers"
         SampleDrivers/Basic/*.cpp)
