@@ -1,3 +1,5 @@
+misc
+ColPack
 *.Plo
 *.Po
 *.a
@@ -34,3 +36,7 @@
 /m4/
 /missing
 /stamp-h1
+config.h.in~
+lib/
+test-driver
+cmake
