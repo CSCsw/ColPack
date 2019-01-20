@@ -28,7 +28,7 @@ set(COLPACK_ROOT_DIR "../..")   # modify as needed
 # -------------
 option(ENABLE_EXAMPLES
     "Build the examples in SampleDrivers/Matrix_Compression_and_Recovery." OFF)
-option(ENABLE_OPENMP "Enable OpenMP." ON)
+    option(ENABLE_OPENMP "Enable OpenMP." ON)
 set (CMAKE_CXX_STANDARD 11)
 
 # Configuring variables, etc.
@@ -201,7 +201,10 @@ file(COPY "${COLPACK_ROOT_DIR}/Graphs" DESTINATION "${CMAKE_BINARY_DIR}")
 
 # Examples.
 # ---------
-#enable_testing()
+# enable_testing()
+# The behavior here is different from autotools, because ENABLE_EXAMPLES
+# also affects the Basic examples.
+# First, gather up all the example files.
 # To replicate the behavior of autotools, we build and install the Basic
 # examples regardless of the setting for ENABLE_EXAMPLES.
 # First, gather up all the example files.
@@ -209,6 +212,9 @@ file(GLOB SAMPLE_DRIVERS_BASIC RELATIVE "${COLPACK_ROOT_DIR}/Examples/SampleDriv
     ${COLPACK_ROOT_DIR}/Examples/SampleDrivers/Basic/*.cpp)
 set(EXAMPLES ${SAMPLE_DRIVERS_BASIC})
 if(ENABLE_EXAMPLES)
+    file(GLOB SAMPLE_DRIVERS_BASIC RELATIVE "${CMAKE_SOURCE_DIR}/SampleDrivers"
+        SampleDrivers/Basic/*.cpp)
+    set(EXAMPLES ${SAMPLE_DRIVERS_BASIC})
     file(GLOB SAMPLE_DRIVERS_MATRIX_COMPRESSION_AND_RECOVERY
         RELATIVE "${COLPACK_ROOT_DIR}/Examples/SampleDrivers"
         ${COLPACK_ROOT_DIR}/Examples/SampleDrivers/Matrix_Compression_and_Recovery/ADIC/*.cpp
@@ -228,7 +234,11 @@ foreach(example_cpp ${EXAMPLES})
         BASE_DIR SampleDrivers)
     add_executable(${example} Examples/SampleDrivers/${example_cpp})
     target_link_libraries(${example} ${ColPack_lib_to_use})
-    # Autools installs the examples in CSR_input into a dir. named CSR.
+#<<<<<<< master
+#    # Autools installs the examples in CSR_input into a dir. named CSR.
+#=======
+    # Autotools installs the examples in CSR_input into a dir. named CSR.
+#>>>>>>> master
     string(REPLACE "CSR_input" "CSR" example_rel_dir ${example_rel_dir})
     install(TARGETS ${example} DESTINATION
         ${COLPACK_INSTALL_EXAMPLESBINDIR}/${example_rel_dir})
