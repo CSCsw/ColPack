@@ -529,13 +529,32 @@ void SMPGCColoring::hybrid_Serial(vector<int>&vtxColors, vector<vector<int>>&QQ,
         case ORDER_NONE:
             break;
         case ORDER_LARGEST_FIRST:
-            for(int i=0; i<nT; i++) local_largest_degree_first_ordering(QQ[i]); break;
+        {
+            for(int i=0; i<nT; i++) 
+                local_largest_degree_first_ordering(QQ[i]); 
+            break;
+        }
         case ORDER_SMALLEST_LAST:
-            for(int i=0; i<nT; i++) local_smallest_degree_last_ordering(QQ[i]); break;
+        {
+            for(int i=0; i<nT; i++) {
+                local_smallest_degree_last_ordering(QQ[i]); 
+            }
+            break;
+        }
         case ORDER_NATURAL:
-            for(int i=0; i<nT; i++) local_natural_ordering(QQ[i]); break;
+        {
+            for(int i=0; i<nT; i++) {
+                local_natural_ordering(QQ[i]);
+            }
+            break;
+        }
         case ORDER_RANDOM:
-            for(int i=0; i<nT; i++) local_random_ordering(QQ[i]); break;
+        {
+            for(int i=0; i<nT; i++) {
+                local_random_ordering(QQ[i]); 
+            }
+            break;
+        }
         case -1:
             break;
         default:

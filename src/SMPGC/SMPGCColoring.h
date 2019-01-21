@@ -65,6 +65,11 @@ public: // API
     int D1_OMP_HBJP  (int nT, int&color, vector<int>&vtxColors, const int option=HYBRID_SERIAL, const int swtich_iter=0, const int local_order=ORDER_NONE);
     int D1_OMP_HBMTJP(int nT, int&color, vector<int>&vtxColors, const int option=HYBRID_SERIAL, const int switch_iter=0, const int local_order=ORDER_NONE);
 
+    int D1_OMP_GM3P_BIT(int nT, int&color, vector<int>&vtxColors, const int local_order=ORDER_NONE);
+    int D1_OMP_GMMP_BIT(int nT, int&color, vector<int>&vtxColors, const int local_order=ORDER_NONE);
+   
+
+
     // Algorithm for distance two coloring
     int D2_serial(int &color, vector<int>&vtxColors, const int local_order=ORDER_NONE);
 
