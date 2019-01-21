@@ -216,7 +216,7 @@ void SMPGCGraph::do_read_Metis_struct(const string& graph_name, vector<int>&ia, 
     if(pMaxDeg||pMinDeg){
         int maxDeg=0, minDeg=ia.size()-1;
         for(auto i=0; i<nodes_expect; i++){
-            int d = ja[i+1]-ja[i];
+            int d = ia[i+1]-ia[i];
             maxDeg = (maxDeg<d)?d:maxDeg;
             minDeg = (minDeg>d)?d:minDeg;
         }
