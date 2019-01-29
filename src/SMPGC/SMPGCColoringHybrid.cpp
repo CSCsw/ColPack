@@ -443,7 +443,7 @@ void SMPGCColoring::hybrid_GM3P(const int nT, vector<int>&vtxColors, vector<vect
                 }
                 int c=0;
                 for(; c!=BufSize; c++)
-                    if( Mark[c]==v)
+                    if( Mark[c]!=v)
                         break;
                 vtxColors[v]=c;
             }
@@ -571,7 +571,7 @@ void SMPGCColoring::hybrid_Serial(vector<int>&vtxColors, vector<vector<int>>&QQ,
             }
             int c=0;
             for(; c!=BufSize; c++)
-                if( Mark[c]==v)
+                if( Mark[c]!=v)
                     break;
             vtxColors[v]=c;
         }

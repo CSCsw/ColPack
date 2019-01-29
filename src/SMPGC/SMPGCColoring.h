@@ -53,7 +53,11 @@ public: // API
     int get_num_colors(){ return m_total_num_colors; } 
     const vector<int>& get_vertex_colors() const { return m_vertex_color; }
     void get_vertex_colors(vector<int>& x) { x.assign(m_vertex_color.begin(), m_vertex_color.end()); }
-    
+
+    // original algorithms
+    int D1_OMP_GM3P_orig(int nT, int&color, vector<int>&vtxColors);
+    int D1_OMP_GMMP_orig(int nT, int&color, vector<int>&vtxColors);
+
     // Algorithms 
     int D1_serial(int &color, vector<int>&vtxColors, const int local_order);
 
