@@ -182,7 +182,6 @@ int SMPGCColoring::D1_OMP_GM3P(int nT, int&colors, vector<int>&vtxColors, const 
         int qsize = 0;
         const int tid=omp_get_thread_num();
         vector<int>& Q = QQ[tid];
-        printf("nT%d Qsize%d\n",tid, (signed)Q.size());
         for(int iv=0; iv<(signed)Q.size(); iv++) {
             const auto v  = Q[iv];
             const auto vc = vtxColors[v];
@@ -214,7 +213,6 @@ int SMPGCColoring::D1_OMP_GM3P(int nT, int&colors, vector<int>&vtxColors, const 
                     if( Mark[c]!=v)
                         break;
                 vtxColors[v]=c;
-                printf("%d get color %d\n",v,c);
             }
         }
     }

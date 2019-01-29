@@ -89,11 +89,11 @@ int SMPGCColoring::D1_OMP_GM3P_orig(int nT, int&colors, vector<int>&vtxColors) {
         for(const auto v : conflictQ){
             for(auto iw=vtxPtr[v]; iw!=vtxPtr[v+1]; iw++) {
                 const auto wc = vtxColors[vtxVal[iw]];
-                if(wc>0) Mark[wc]=v;
+                if(wc>=0) Mark[wc]=v;
             }
             int c=0;
             for(; c!=BufSize; c++)
-                if( Mark[c]==v)
+                if( Mark[c]!=v)
                     break;
             vtxColors[v]=c;
         }
