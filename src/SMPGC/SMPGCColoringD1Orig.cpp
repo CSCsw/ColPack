@@ -185,7 +185,6 @@ int SMPGCColoring::D1_OMP_GMMP_orig(int nT, int&colors, vector<int>&vtxColors) {
 
         //phase Detect Conflicts:
         tim_detect -= omp_get_wtime();
-        conflictQ.resize(0);
         uncolored_nodes=0;
         #pragma omp parallel for
         for(size_t i=0; i<Q.size(); i++){
@@ -201,10 +200,11 @@ int SMPGCColoring::D1_OMP_GMMP_orig(int nT, int&colors, vector<int>&vtxColors) {
                 }
             }
         }
+        conflictQ.resize(uncolored_nodes);
+        Q.resize(uncolored_nodes);
+        Q.swap(conflictQ);
         n_conflicts += uncolored_nodes;
         n_loops++;
-        Q.clear();
-        Q.swap(conflictQ);
         tim_detect += omp_get_wtime();
     }
 
