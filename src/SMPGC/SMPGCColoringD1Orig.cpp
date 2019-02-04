@@ -37,6 +37,7 @@ int SMPGCColoring::D1_OMP_GM3P_orig(int nT, int&colors, vector<int>&vtxColors) {
     
     const vector<int> &Q=const_ordered_vertex;
     vector<int> conflictQ;
+    
     // phase pseudo color
     tim_color = -omp_get_wtime();
     #pragma omp parallel
@@ -65,6 +66,7 @@ int SMPGCColoring::D1_OMP_GM3P_orig(int nT, int&colors, vector<int>&vtxColors) {
     auto qsize = 0;
     #pragma omp parallel
     {
+        #pragma omp for
         for(size_t i=0; i<Q.size(); i++) {
             const auto v  = Q[i];
             const auto vc = vtxColors[v];
