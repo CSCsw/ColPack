@@ -111,7 +111,6 @@ set(COLPACK_SOURCE_INCLUDE_DIRS
     "${COLPACK_ROOT_DIR}/src/BipartiteGraphBicoloring"
     "${COLPACK_ROOT_DIR}/src/GeneralGraphColoring"
     "${COLPACK_ROOT_DIR}/src/SMPGC"
-    #"${COLPACK_ROOT_DIR}/src/PartialD2SMPGC"
     "${COLPACK_ROOT_DIR}/src/Recovery")
 
 
