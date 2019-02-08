@@ -12,7 +12,7 @@ AM_CPPFLAGS =  $(COLPACK_COMMON_FLAGS) \
 		-I../../../src/BipartiteGraphBicoloring \
 		-I../../../src/GeneralGraphColoring \
 		-I../../../src/SMPGC \
-		-I../../../src/PartialD2SMPGC \
+		#-I../../../src/PartialD2SMPGC \
 		-I../../../src/Recovery
 AM_LDFLAGS = $(COLPACK_COMMON_FLAGS)
 
@@ -66,9 +66,9 @@ pkginclude_HEADERS += \
 			../../../src/SMPGC/SMPGCOrdering.h \
 			../../../src/SMPGC/SMPGCColoring.h
 
-pkginclude_HEADERS +=   ../../../src/PartialD2SMPGC/PD2SMPGC.h \
-			../../../src/PartialD2SMPGC/PD2SMPGCOrdering.h \
-			../../../src/PartialD2SMPGC/PD2SMPGCColoring.h 
+#pkginclude_HEADERS +=   ../../../src/PartialD2SMPGC/PD2SMPGC.h \
+#			../../../src/PartialD2SMPGC/PD2SMPGCOrdering.h \
+#			../../../src/PartialD2SMPGC/PD2SMPGCColoring.h 
 
 
 libColPack_la_SOURCES = \
@@ -111,10 +111,10 @@ libColPack_la_SOURCES += ../../../src/SMPGC/SMPGCColoring.cpp \
 			../../../src/SMPGC/SMPGCGraph.cpp \
 			../../../src/SMPGC/SMPGCOrdering.cpp
 
-libColPack_la_SOURCES += ../../../src/PartialD2SMPGC/PD2SMPGCColoring.cpp \
-			 ../../../src/PartialD2SMPGC/PD2SMPGCColoringDev.cpp \
-			 ../../../src/PartialD2SMPGC/PD2SMPGC.cpp \
-			 ../../../src/PartialD2SMPGC/PD2SMPGCOrdering.cpp
+#libColPack_la_SOURCES += ../../../src/PartialD2SMPGC/PD2SMPGCColoring.cpp \
+#			 ../../../src/PartialD2SMPGC/PD2SMPGCColoringDev.cpp \
+#			 ../../../src/PartialD2SMPGC/PD2SMPGC.cpp \
+#			 ../../../src/PartialD2SMPGC/PD2SMPGCOrdering.cpp
 
 
 ColPack_SOURCES = \

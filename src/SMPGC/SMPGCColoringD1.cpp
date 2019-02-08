@@ -123,7 +123,7 @@ int SMPGCColoring::D1_OMP_GM3P(int nT, int&colors, vector<int>&vtxColors, const 
     vector<vector<int>> QQ(nT); 
     for(int i=0; i<nT; i++)
         QQ[i].reserve(N/nT+1+16); //1-odd/even, 16-bus width
-    
+
     // pre-partition the graph
     tim_partition =- omp_get_wtime();
     {
@@ -134,6 +134,7 @@ int SMPGCColoring::D1_OMP_GM3P(int nT, int&colors, vector<int>&vtxColors, const 
                     const_ordered_vertex.begin()+disps[i+1]);
     }
     tim_partition += omp_get_wtime();
+    
 
     // phase pseudo color
     tim_color =- omp_get_wtime();
@@ -196,7 +197,7 @@ int SMPGCColoring::D1_OMP_GM3P(int nT, int&colors, vector<int>&vtxColors, const 
         Q.resize(qsize);
     } //end omp parallel
     tim_detect  += omp_get_wtime();
-    
+   
     // phase serial coloring remain part
     tim_recolor =- omp_get_wtime();
     {
@@ -205,11 +206,11 @@ int SMPGCColoring::D1_OMP_GM3P(int nT, int&colors, vector<int>&vtxColors, const 
             for(const auto v : QQ[tid]){
                 for(auto iw=vtxPtr[v]; iw!=vtxPtr[v+1]; iw++) {
                     const auto wc = vtxColors[vtxVal[iw]];
-                    if(wc>0) Mark[wc]=v;
+                    if(wc>=0) Mark[wc]=v;
                 }
                 int c=0;
                 for(; c!=BufSize; c++)
-                    if( Mark[c]==v)
+                    if( Mark[c]!=v)
                         break;
                 vtxColors[v]=c;
             }
@@ -245,6 +246,7 @@ int SMPGCColoring::D1_OMP_GM3P(int nT, int&colors, vector<int>&vtxColors, const 
             printf("unkonw local order %d\n", local_order);
     }
 
+  
     printf("@GM3P%s_nT_c_T_T(lo+color)_Tdetect_Trecolor_TmaxC_nCnf_Tpart", order_tag.c_str());
     printf("\t%d",  nT);    
     printf("\t%d",  colors);    
@@ -258,9 +260,10 @@ int SMPGCColoring::D1_OMP_GM3P(int nT, int&colors, vector<int>&vtxColors, const 
     printf("\t%d", n_conflicts);
     printf("\t%lf", tim_partition);
 #ifdef SMPGC_VARIFY
-    printf("\t%s", (cnt_d1conflict(vtxColors)==0)?("Success"):("Failed"));
+    printf("\t%s", (cnt_d1conflict(vtxColors, true)==0)?("Success"):("Failed"));
 #endif
     printf("\n");
+  
     return true;   
 }
 
