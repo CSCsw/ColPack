@@ -12,13 +12,13 @@ AM_CPPFLAGS =  $(COLPACK_COMMON_FLAGS) \
 		-I../../../src/BipartiteGraphBicoloring \
 		-I../../../src/GeneralGraphColoring \
 		-I../../../src/SMPGC \
-		#-I../../../src/PartialD2SMPGC \
+		-I../../../src/PartialD2SMPGC \
 		-I../../../src/Recovery
 AM_LDFLAGS = $(COLPACK_COMMON_FLAGS)
 
-AM_CXXFLAGS = -std=c++11 
+AM_CXXFLAGS = -std=c++11
 if ENABLE_OPENMP
-AM_CXXFLAGS += -fopenmp 
+AM_CXXFLAGS += -fopenmp
 endif
 
 LDADD = libColPack.la
@@ -68,7 +68,7 @@ pkginclude_HEADERS += \
 
 #pkginclude_HEADERS +=   ../../../src/PartialD2SMPGC/PD2SMPGC.h \
 #			../../../src/PartialD2SMPGC/PD2SMPGCOrdering.h \
-#			../../../src/PartialD2SMPGC/PD2SMPGCColoring.h 
+#			../../../src/PartialD2SMPGC/PD2SMPGCColoring.h
 
 
 libColPack_la_SOURCES = \
