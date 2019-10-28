@@ -69,13 +69,13 @@ if(ENABLE_OPENMP)
 endif()
 
 # Define variables to use for organizing the installation.
-include(GNUInstallDirs) 
+include(GNUInstallDirs)
 
 if(WIN32)
     set(COLPACK_INSTALL_CMAKEDIR       ColPack_libs)
     set(COLPACK_INSTALL_EXAMPLESBINDIR ColPack_examples)
 else()
-    set(COLPACK_INSTALL_CMAKEDIR       ${CMAKE_INSTALL_LIBDIR}/ColPack_libs)
+    set(COLPACK_INSTALL_CMAKEDIR       "lib/cmake/ColPack")
     # To follow the UNIX Filsystem Hierarchy Standard, we should install
     # examples somewhere else:
     set(COLPACK_INSTALL_EXAMPLESBINDIR ${CMAKE_INSTALL_LIBDIR}/ColPack_examples)
@@ -141,10 +141,7 @@ endif()
 
 # "EXPORT" helps with creating a ColPackConfig.cmake file to place in the
 # installation, to help downstream projects use ColPack.
-install(TARGETS ColPack_static EXPORT ColPackTargets
-        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}/archive
-        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}/library
-        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}/runtime)
+install(TARGETS ColPack_static EXPORT ColPackTargets)
 
 
 # Shared library.
@@ -170,12 +167,9 @@ if(ENABLE_OPENMP)
     target_link_libraries(ColPack_shared PRIVATE ${OpenMP_CXX_FLAGS})
 endif()
 
-install(FILES ${HEADERS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ColPack_headers)
+install(FILES ${HEADERS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ColPack)
 
-install(TARGETS ColPack_shared EXPORT ColPackTargets
-        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}/shared_archive
-        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}/shared_library
-        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}/shared_runtime)
+install(TARGETS ColPack_shared EXPORT ColPackTargets)
 
 
 
