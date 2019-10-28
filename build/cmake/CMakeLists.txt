@@ -75,7 +75,7 @@ if(WIN32)
     set(COLPACK_INSTALL_CMAKEDIR       ColPack_libs)
     set(COLPACK_INSTALL_EXAMPLESBINDIR ColPack_examples)
 else()
-    set(COLPACK_INSTALL_CMAKEDIR       "lib/cmake/ColPack")
+    set(COLPACK_INSTALL_CMAKEDIR       "${CMAKE_INSTALL_LIBDIR}/cmake/ColPack")
     # To follow the UNIX Filsystem Hierarchy Standard, we should install
     # examples somewhere else:
     set(COLPACK_INSTALL_EXAMPLESBINDIR ${CMAKE_INSTALL_LIBDIR}/ColPack_examples)
@@ -132,7 +132,7 @@ target_include_directories(ColPack_static PRIVATE
 #    "$<BUILD_INTERFACE:${COLPACK_SOURCE_INCLUDE_DIRS}>")
 # For clients of an installation of ColPack.
 target_include_directories(ColPack_static INTERFACE
-    $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
+    $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/ColPack>)
 
 if(ENABLE_OPENMP)
     set_target_properties(ColPack_static PROPERTIES COMPILE_FLAGS
@@ -141,7 +141,8 @@ endif()
 
 # "EXPORT" helps with creating a ColPackConfig.cmake file to place in the
 # installation, to help downstream projects use ColPack.
-install(TARGETS ColPack_static EXPORT ColPackTargets)
+install(TARGETS ColPack_static EXPORT ColPackTargets
+  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
 
 # Shared library.
@@ -159,7 +160,7 @@ target_include_directories(ColPack_shared PRIVATE
 #    "$<BUILD_INTERFACE:${COLPACK_SOURCE_INCLUDE_DIRS}>")
 # For clients of an installation of ColPack.
 target_include_directories(ColPack_shared INTERFACE
-    $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
+    $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/ColPack>)
 
 if(ENABLE_OPENMP)
     set_target_properties(ColPack_shared PROPERTIES COMPILE_FLAGS
@@ -248,23 +249,30 @@ endforeach()
 
 # Create files that define the ColPack targets to import into other projects.
 # https://cmake.org/cmake/help/v3.1/manual/cmake-packages.7.html
-install(EXPORT ColPackTargets DESTINATION ${COLPACK_INSTALL_CMAKEDIR})
+
+install(EXPORT ColPackTargets
+  DESTINATION ${COLPACK_INSTALL_CMAKEDIR}
+  NAMESPACE "ColPack::")
 
 # CMake Config file., and version file, which CMake will look for when
 # downstream projects use find_package(ColPack).
 include(CMakePackageConfigHelpers)
 # The ConfigVersion file determines if an installed copy of ColPack is
 # compatible with a user's requested version for ColPack.
+
 write_basic_package_version_file(
     "${CMAKE_BINARY_DIR}/ColPackConfigVersion.cmake"
     VERSION ${COLPACK_VERSION}
     COMPATIBILITY AnyNewerVersion)
+
 configure_package_config_file(ColPackConfig.cmake.in
     "${CMAKE_BINARY_DIR}/ColPackConfigToInstall.cmake"
     INSTALL_DESTINATION ${COLPACK_INSTALL_CMAKEDIR}
     PATH_VARS CMAKE_INSTALL_PREFIX)
+
 install(FILES "${CMAKE_BINARY_DIR}/ColPackConfigToInstall.cmake"
     DESTINATION ${COLPACK_INSTALL_CMAKEDIR}
     RENAME ColPackConfig.cmake)
+
 install(FILES "${CMAKE_BINARY_DIR}/ColPackConfigVersion.cmake"
     DESTINATION ${COLPACK_INSTALL_CMAKEDIR})
