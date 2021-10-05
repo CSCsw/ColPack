@@ -221,7 +221,7 @@ namespace ColPack
 
 	  if (TokenStringLength == 0)
 	  {
-		return(NULL);
+		return string();
 	  }
 
 	  if (DelimiterStringLength == 0)
