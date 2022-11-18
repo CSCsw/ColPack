@@ -98,7 +98,7 @@ file(GLOB SOURCES
     ${COLPACK_ROOT_DIR}/src/BipartiteGraphBicoloring/*.cpp
     ${COLPACK_ROOT_DIR}/src/BipartiteGraphPartialColoring/*.cpp
     ${COLPACK_ROOT_DIR}/src/GeneralGraphColoring/*.cpp
-    ${COLPACK_ROOT_DIR}/src/Recovery/*.h
+    ${COLPACK_ROOT_DIR}/src/Recovery/*.cpp
     ${COLPACK_ROOT_DIR}/src/SMPGC/*.cpp)
     #${COLPACK_ROOT_DIR}/src/PartialD2SMPGC/*.cpp)
 
