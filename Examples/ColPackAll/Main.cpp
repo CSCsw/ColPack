@@ -244,7 +244,7 @@ void usage(){
             "       -o orders   Indicates the orderings. Could be 'RANDOM','NATURAL','LARGEST_FIRST','SMALLEST_LAST','DYNAMIC_LARGEST_FIRST','INCIDENCE_DEGREE'... . There could be some specific ordering for specific methods\n"
             "       -m methods  Indicates the methods. Could be 'DISTANCE_ONE','ACYCLIC','STAR','DISTNACE_TWO','ROW_PARTIAL_DISTANCE_TWO','D1_OMP_GMMP','PD2_OMP_GMMP',...\n"
             "       -nT         Indicates number of threads used of parallel graph coloring\n"
-            "       -side       Indiecate Row (L) or Column (R) side of coloring for parallel partial colroing.\n"
+            "       -side       Indicates Row (L) or Column (R) side of coloring for parallel partial colroing.\n"
             "\n"
             "DESCRIPTION\n"
             "       if the method is one of 'DISTANCE_ONE','ACYCLIC','STAR','DISTANCE_TWO','ROW_PARTIAL_DISTANCE_TWO' The method belongs to gereral coloring on general graphs.\n" 
