@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.1.3)
+cmake_minimum_required(VERSION 3.10)
 project(ColPack)
 
 # Set the version number to the *next* release (not to the prevoius release).
